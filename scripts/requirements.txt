@@ -1,0 +1,2 @@
+tdqm==4.64.0
+azure-storage-blob==12.14.1
