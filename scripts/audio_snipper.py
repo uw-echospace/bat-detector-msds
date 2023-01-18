@@ -38,7 +38,7 @@ def generateSnippetsForTSV(wavPath: Path, destDir: Path, tsvInfo: dict, windowSi
 
         # Write the snipped data to destination directory
         wavfile.write(
-                filename=destDir / f"{tsvInfo['prefix']}{row['Selection']}.wav", 
+                filename=destDir / f"{tsvInfo['prefix']}{tsvInfo['wavname']}{row['Selection']}.wav", 
                 rate=sample_rate, 
                 data=snipped_wav) 
 
