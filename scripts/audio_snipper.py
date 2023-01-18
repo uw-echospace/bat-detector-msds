@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.io import wavfile
 
 
-def generateAllSnippets(wavDir: Path, tsvDir: Path, destDir: Path, windowSize: int = None, tsvExt: str = "txt"):
+def generateAllSnippets(wavDir: Path, tsvDir: Path, destDir: Path, windowSize: float = None, tsvExt: str = "txt"):
     """
     Takes path to a folder of wav files and a folder of RavenPro tsv files, and generates snippets of audio from the wav files
     """
@@ -21,7 +21,7 @@ def generateAllSnippets(wavDir: Path, tsvDir: Path, destDir: Path, windowSize: i
         generateSnippetsForTSV(wavPath, destDir, tsvInfo, windowSize)
 
 
-def generateSnippetsForTSV(wavPath: Path, destDir: Path, tsvInfo: dict, windowSize: int):
+def generateSnippetsForTSV(wavPath: Path, destDir: Path, tsvInfo: dict, windowSize: float):
     """
     Generate all snippets for a single RavenPro tsv file
     """
