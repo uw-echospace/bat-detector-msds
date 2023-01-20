@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 from scipy.io import wavfile
-
+import torchaudio
 
 def generateAllSnippets(wavDir: Path, tsvDir: Path, destDir: Path, windowSize: float = None, tsvExt: str = "txt"):
     """
@@ -43,12 +43,19 @@ def generateSnippetsForTSV(wavPath: Path, destDir: Path, tsvInfo: dict, windowSi
                 data=snipped_wav) 
 
 
-def _singleSnippet(sample_rate, wav, start, end, windowSize):
+def _singleSnippet(sample_rate, wav, start, end, windowSize, expansion_ratio=10):
     """
     Actually snip the audio
     """
     start = int(start * sample_rate)
     end = int(end * sample_rate)
+
+    # TODO: Time expand .wav file by target sr
+    target_sample_rate = sample_rate / expansion_ratio
+    resample = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=target_sample_rate)
+    resampled_wav = resample(wav)
+
+    # TODO: include melfilter bank here? or during graph plotting?
 
     # TODO: there will beproblems if window crosses the beginning of end of the wav file.
     #       this is not likely to happen, however.
@@ -58,7 +65,7 @@ def _singleSnippet(sample_rate, wav, start, end, windowSize):
         start = midpoint - halfWindowSize
         end = midpoint + halfWindowSize
     
-    return wav[start:end]
+    return resampled_wav[start:end]
 
 # TODO: - write tests that pair snipper with blob downloader.
 #       - remove this test code
