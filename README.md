@@ -9,9 +9,15 @@ pyenv local 3.9  # Activate Python 3.9 for the current project
 # You might need to also run: poetry env use 3.9
 
 poetry install
+
+# If this fails and you see a complaint about llvmlite, remove llvm light from Poetry
+#  pyproject.toml and run
+#  > poetry add llvmlite
+#  > poetry install
+
+# Airflow officially only supports installation via pip. Do not try to add to Poetry. (as of 2023-2-4)
+pip install apache-airflow
 ```
-
-
 
 ### Raw data storage
 [Azure blob storage](https://portal.azure.com/#view/Microsoft_Azure_Storage/ContainerMenuBlade/~/overview/storageAccountId/%2Fsubscriptions%2F875b6f94-2db7-46a3-8ecc-1dd2549c188d%2FresourceGroups%2FCapstone_project%2Fproviders%2FMicrosoft.Storage%2FstorageAccounts%2Fkirstngcapstone/path/annotated-data/etag/%220x8DAEFA5F2564873%22/defaultEncryptionScope/%24account-encryption-key/denyEncryptionScopeOverride~/false/defaultId//publicAccessVal/Container)
