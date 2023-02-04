@@ -18,8 +18,6 @@ The training pipeline will replace the classification step with a training step,
     review the segmenter's output and correct any errors.
 """
 
-
-
 ### Define the actual pipeline 
 def pipeline_full(input_wav: str):
     # 1: segment
