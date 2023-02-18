@@ -1,4 +1,0 @@
-[submodule "submodules/batdetect2"]
-	path = submodules/batdetect2
-	url = https://github.com/macaodha/batdetect2.git
-	ignore = all
