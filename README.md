@@ -2,7 +2,7 @@
 ## MSDS Capstone Project: Bats!!!
 
 ### Setup
-Setup local (to this directory) Python 3.9 environment
+Setup local (to this directory) Python 3.10 environment
 ```
 # TODO
 ```
