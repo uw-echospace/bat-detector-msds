@@ -4,19 +4,7 @@
 ### Setup
 Setup local (to this directory) Python 3.9 environment
 ```
-pyenv install 3.9
-pyenv local 3.9  # Activate Python 3.9 for the current project
-# You might need to also run: poetry env use 3.9
-
-poetry install
-
-# If this fails and you see a complaint about llvmlite, remove llvm light from Poetry
-#  pyproject.toml and run
-#  > poetry add llvmlite
-#  > poetry install
-
-# Airflow officially only supports installation via pip. Do not try to add to Poetry. (as of 2023-2-4)
-pip install apache-airflow
+# TODO
 ```
 
 ### Raw data storage
