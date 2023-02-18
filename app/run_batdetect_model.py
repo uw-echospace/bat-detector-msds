@@ -1,11 +1,8 @@
 import os
 import argparse
-#from batdetect2 import bat_detect.utils.detector_utils as du
 
-
-
-import bat_detect.utils.detector_utils as du
-
+# CSC: TODO: can we import from bat_detect directly? 
+import submodules.batdetect2.bat_detect.utils.detector_utils as du
 
 def main(args):
 

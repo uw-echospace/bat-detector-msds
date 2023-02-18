@@ -13,8 +13,9 @@ from pathlib import Path
 
 import numpy as np
 
-import batdetect2.bat_detect.utils.audio_utils as au
-import batdetect2.bat_detect.utils.wavfile as wavfile
+# TODO: CSC: can we import from bat_detect directly?
+import submodules.batdetect2.bat_detect.utils.audio_utils as au
+import submodules.batdetect2.bat_detect.utils.wavfile as wavfile
 
 
 def parse_args():
