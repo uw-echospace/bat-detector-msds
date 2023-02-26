@@ -13,9 +13,8 @@ from pathlib import Path
 
 import numpy as np
 
-# TODO: CSC: can we import from bat_detect directly?
-import submodule.batdetect2.bat_detect.utils.audio_utils as au
-import submodule.batdetect2.bat_detect.utils.wavfile as wavfile
+import bat_detect.utils.audio_utils as au
+import bat_detect.utils.wavfile as wavfile
 
 
 def parse_args():
@@ -92,7 +91,6 @@ def main():
        
         # for the length of the duration, process the audio into duration length clips
         for sub_sample_index in np.arange(st_time,end_time,duration):
-            
             en_time = sub_sample_index + duration
             st_samp = int(sub_sample_index * sampling_rate)
             en_samp = np.minimum(int(en_time * sampling_rate), ip_audio.shape[0])
