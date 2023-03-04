@@ -3,7 +3,7 @@ import argparse
 
 from models.detection_interface import DetectionInterface
 
-import models.bat_detect2.batdetect2.bat_detect.utils.detector_utils as du
+import bat_detect.utils.detector_utils as du
 
 class BatDetect2(DetectionInterface):
 
