@@ -7,6 +7,8 @@ import numpy as np
 import bat_detect.utils.audio_utils as au
 import bat_detect.utils.wavfile as wavfile
 
+from config import config as cfg 
+
 import pipeline
 
 # TODO: add models to CLI, but for now, just use all of the by default
@@ -25,9 +27,9 @@ def parse_args():
         help="Input directory containing the audio files",
     )
     parser.add_argument(
-        "--output_file",
+        "--output_dir",
         type=str,
-        default="./labels.txt",
+        default="./output",
         help="Output TSV containing all the labels"
     )
     parser.add_argument(
@@ -61,13 +63,11 @@ def main():
 
     models = []
 
-    labels = pipeline.run(
-        models,
-        Path(args["input_audio"]), 
-        args["segment_duration"], 
-        args["segment_start_time"], 
-        args["time_expansion_factor"])
 
+
+    output_files = pipeline.run(
+
+    print("Output files: {}".format(output_files))
     
     # TODO: write labels to args["output_file"]
 

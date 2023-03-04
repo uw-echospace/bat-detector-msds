@@ -4,7 +4,9 @@
 ### Setup
 Setup local (to this directory) Python 3.10 environment
 ```
-# TODO
+# TODO CSC
+* Get project into running state
+* Figure out dependency management stuff to make everything work. 
 ```
 
 ### Raw data storage
@@ -18,3 +20,4 @@ Setup local (to this directory) Python 3.10 environment
 |Data cleaning and pre-processing | Generate individual spectrogram from snipping tool output  | Convert individual .wav file from snippet tool to spectrogram and save as .png file. | individual .wav output from snipping tool to .png images | .png images that contains bat calls. | https://github.com/uw-echospace/bat-detector-msds/issues/16 | In progress |
 |Data cleaning and pre-processing | Identify false positive and generate negative sample  | Based on the images snipped from the spectrogram, we will determine the false positive from the generated images. | .png images generated from snipping tool. | .png images that contains bat calls. | https://github.com/uw-echospace/bat-detector-msds/issues/5 | Pending upstream |
 |Image clustering | Implement KNN- clustering   | Referring to this [tutorial](https://towardsdatascience.com/how-to-cluster-images-based-on-visual-similarity-cd6e7209fe34) to implement KNN clustering based on visual similarity| filtered .png images containing bat calls. Based on our hypothesis, there should be two distinct bat calls, ie feeding buzz and non-feeding buzz. | Images that are in each group. | TBD| Pending upstream |
+
