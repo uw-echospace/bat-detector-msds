@@ -1,10 +1,9 @@
 import os
 import argparse
 
-from detection_interface import DetectionInterface
+from models.detection_interface import DetectionInterface
 
-# TODO: get bat_detect2 imports working
-import batdetec2_bat_detect.utils.detector_utils as du
+import models.bat_detect2.batdetect2.bat_detect.utils.detector_utils as du
 
 class BatDetect2(DetectionInterface):
 
@@ -25,7 +24,7 @@ class BatDetect2(DetectionInterface):
         model, params = du.load_model(self.model_path)
 
         model_output = du.process_file(
-            audiofile=audio_file, 
+            audio_file=audio_file, 
             model=model, 
             params=params, 
             args= {

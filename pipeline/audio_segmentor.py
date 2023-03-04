@@ -13,7 +13,7 @@ import soundfile
 # TODO: annotate types
 
     #segment_file_paths = generate_segments(audio_file_path, seg_output_path, time_expansion_factor)
-def generate_segments(audio_file: Path, output_dir: Path, st_time, duration):
+def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
 
     ip_audio, sampling_rate = librosa.load(audio_file, sr=None)
 
@@ -23,9 +23,9 @@ def generate_segments(audio_file: Path, output_dir: Path, st_time, duration):
     #       how to preprocess their own audio
     end_time = len(ip_audio) # * args["time_expansion_factor"] # cut the whole audio file 
     
-    audio_segments = []
+    output_files = []
     # for the length of the duration, process the audio into duration length clips
-    for sub_sample_index in np.arange(st_time, end_time, duration):
+    for sub_sample_index in np.arange(start_time, end_time, duration):
         en_time = sub_sample_index + duration
         st_samp = int(sub_sample_index * sampling_rate)
         en_samp = np.minimum(int(en_time * sampling_rate), ip_audio.shape[0])
@@ -36,11 +36,11 @@ def generate_segments(audio_file: Path, output_dir: Path, st_time, duration):
 
 
             op_file = os.path.basename(audio_file.name).replace(" ", "_")
-            op_file_en = "__{:.2f}".format(st_time) + "_" + "{:.2f}".format(sub_sample_index)
+            op_file_en = "__{:.2f}".format(start_time) + "_" + "{:.2f}".format(sub_sample_index)
             op_file = op_file[:-4] + op_file_en + ".wav"
 
-            op_path = os.path.join(output_dir, op_file)
-
+            output_files.append(op_path := os.path.join(output_dir, op_file))
+            
             # Write wave file using librosa 
             soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') # TODO: ensure 16 bitdepth is correct
 
@@ -50,4 +50,4 @@ def generate_segments(audio_file: Path, output_dir: Path, st_time, duration):
             print("There is an error.")
             break
 
-    return audio_segments
+    return output_files 

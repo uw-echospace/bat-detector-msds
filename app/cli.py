@@ -4,9 +4,15 @@ from pathlib import Path
 
 import numpy as np
 
-from ..config import config as cfg 
+# set ython path
+import sys
+sys.path.append(os.getcwd())
 
-import pipeline
+
+from pipeline import pipeline as pipeline
+from app.cfg import get_config  
+
+
 
 # TODO: add models to CLI, but for now, just use all of the by default
 
@@ -61,7 +67,7 @@ def main():
     # TODO: add CLI args to config
     
 
-    output_files = pipeline.run(cfg)
+    output_files = pipeline.run(get_config())
 
     print("Output files: {}".format(output_files))
     
