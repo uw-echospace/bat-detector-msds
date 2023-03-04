@@ -4,10 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-import bat_detect.utils.audio_utils as au
-import bat_detect.utils.wavfile as wavfile
-
-from config import config as cfg 
+from ..config import config as cfg 
 
 import pipeline
 
@@ -61,11 +58,10 @@ def main():
     #print("Output duration   : {}".format(args["output_duration"]))
     #print("Audio files found : {}".format(len(ip_files)))
 
-    models = []
+    # TODO: add CLI args to config
+    
 
-
-
-    output_files = pipeline.run(
+    output_files = pipeline.run(cfg)
 
     print("Output files: {}".format(output_files))
     
