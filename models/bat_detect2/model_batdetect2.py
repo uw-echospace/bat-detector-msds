@@ -21,6 +21,7 @@ class BatDetect2(DetectionInterface):
         return "batdetect2"
 
     def run(self, audio_file):
+        print('Loading model: ' + self.model_path)
         model, params = du.load_model(self.model_path)
 
         model_output = du.process_file(
@@ -32,6 +33,7 @@ class BatDetect2(DetectionInterface):
                 'spec_slices': self.spec_slices,
                 'chunk_size': self.chunk_size,
                 'quiet': self.quiet,
+                'spec_features' : False,
                 'cnn_features': self.cnn_features,
             },
             time_exp=self.time_expansion_factor,

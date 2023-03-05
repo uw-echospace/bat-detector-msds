@@ -18,10 +18,10 @@ def _generate_csv(annotation_df, model_name, audio_file_name, output_path):
 
 def _segment_input_audio(cfg):
     segment_file_paths = generate_segments(
-        audio_file=cfg['audio_file_path'], 
-        output_dir =cfg['tmp_output_path'],
-        start_time=cfg['start_time'],
-        duration=cfg['segment_duration'],
+        audio_file = cfg['audio_file_path'], 
+        output_dir = cfg['tmp_output_path'],
+        start_time = cfg['start_time'],
+        duration   = cfg['segment_duration'],
     )
     return segment_file_paths
 
@@ -56,8 +56,17 @@ def _process_output(cfg, csv_names):
     # full_list.sort_values(by = ['start_time'],inplace = True, ascending = True)
     # full_list.to_csv(cfg['csv_output_path'])
 
+def prepare_output_dirs(cfg):
+    # TODO: do we need to clearn tmp dir before each run?
+    cfg['csv_output_path'].mkdir(parents=True, exist_ok=True)
+    cfg['tmp_output_path'].mkdir(parents=True, exist_ok=True)
+
+
+
 # TODO: annotate types
 def run(cfg: dict):
+    prepare_output_dirs(cfg)
     segmented_file_paths = _segment_input_audio(cfg)
     csv_names = _apply_models(cfg, segmented_file_paths)
-    return _process_output(cfg, csv_names)
+
+    _process_output(cfg, csv_names) # TODO: does this also write csv output? 
