@@ -1,7 +1,3 @@
-# invoked by app CLI
-
-# takes single audio file
-
 from pathlib import Path
 
 import pandas as pd
@@ -25,17 +21,25 @@ def _segment_input_audio(cfg):
     )
     return segment_file_paths
 
+def _correct_annotation_offsets(annotations_df, actual_start_time):
+    annotations_df['start_time'] = annotations_df['start_time'] + actual_start_time
+    annotations_df['end_time'] = annotations_df['end_time'] + actual_start_time
+    return annotations_df
+
 def _apply_models(cfg, segment_file_paths):
     csv_names = []
 
     for mcfg in cfg['models']:
         agg_df = None
+
         for seg_path in segment_file_paths:
-            annotation_df = mcfg['model'].run(seg_path)
-            if agg_df is None:
-                agg_df = annotation_df
-            else:
-                agg_df = pd.concat([agg_df, annotation_df], ignore_index=True)
+            annotations_df = mcfg['model'].run(seg_path['audio_file'])
+            corrected_annotations_df = _correct_annotation_offsets(
+                annotations_df, 
+                seg_path['start_time']
+            ) 
+
+            agg_df = pd.concat([agg_df, corrected_annotations_df], ignore_index=True)
 
         csv_name = _generate_csv(agg_df, mcfg['model'].get_name(),
             cfg['audio_file_path'].name,

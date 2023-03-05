@@ -6,13 +6,7 @@ from pathlib import Path
 import librosa
 import soundfile
 
-# TODO: figure out weird dependency on bat_detect.audio_utils
 
-# TODO: write to output directory
-# TODO: ONLY do segmentation here, not preprocessing (e.g. no time expansion)
-# TODO: annotate types
-
-    #segment_file_paths = generate_segments(audio_file_path, seg_output_path, time_expansion_factor)
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
 
     ip_audio, sampling_rate = librosa.load(audio_file, sr=None)
@@ -38,10 +32,10 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
             op_file = os.path.basename(audio_file.name).replace(" ", "_")
             op_file_en = "__{:.2f}".format(start_time) + "_" + "{:.2f}".format(sub_sample_index)
             op_file = op_file[:-4] + op_file_en + ".wav"
-
-            output_files.append(op_path := os.path.join(output_dir, op_file))
             
-            # Write wave file using librosa 
+            op_path = os.path.join(output_dir, op_file)
+            output_files.append({"audio_file": op_path, "offset": start_time + sub_sample_index})
+            
             soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') # TODO: ensure 16 bitdepth is correct
 
             #print("\n{}\tIP: ".format(ii) + os.path.basename(ip_path))
