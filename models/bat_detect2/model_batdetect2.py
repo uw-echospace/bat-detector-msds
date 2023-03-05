@@ -4,6 +4,8 @@ import pandas as pd
 
 from models.detection_interface import DetectionInterface
 
+from utils.utils import gen_empty_df
+
 import bat_detect.utils.detector_utils as du
 
 class BatDetect2(DetectionInterface):
@@ -41,12 +43,7 @@ class BatDetect2(DetectionInterface):
         )
 
         # TODO: what else needs to go in here?
-        out_df = pd.DataFrame({
-            "start_time": [],
-            "end_time": [],
-            "low_freq": [],
-            "high_freq": [],
-        })
+        out_df = gen_empty_df()
 
         # TODO: move to base class
         annotations = model_output['pred_dict']['annotation']
@@ -56,6 +53,7 @@ class BatDetect2(DetectionInterface):
                 "end_time": annotation['end_time'],
                 "low_freq": annotation['low_freq'],
                 "high_freq": annotation['high_freq'],
+                "event": annotation['event'],
             }, ignore_index=True)
 
         return out_df 
