@@ -41,6 +41,7 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
             #print("\n{}\tIP: ".format(ii) + os.path.basename(ip_path))
             #print("\tOP: " + os.path.basename(op_path))
         except:
+            # TODO: investigate why this occurs once during segmentation of an audio 
             print("There is an error.")
             break
 

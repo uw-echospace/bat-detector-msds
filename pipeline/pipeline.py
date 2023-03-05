@@ -37,14 +37,14 @@ def _apply_models(cfg, segment_file_paths):
             corrected_annotations_df = _correct_annotation_offsets(
                 annotations_df, 
                 cfg['audio_file_path'].name,
-                seg_path['start_time']
+                seg_path['offset']
             ) 
 
             agg_df = pd.concat([agg_df, corrected_annotations_df], ignore_index=True)
 
         csv_name = _generate_csv(agg_df, mcfg['model'].get_name(),
             cfg['audio_file_path'].name,
-            cfg['output_path'],
+            cfg['csv_output_path'],
         )
         csv_names.append(csv_name)
 
