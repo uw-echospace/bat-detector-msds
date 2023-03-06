@@ -12,7 +12,7 @@ sys.path.append(os.path.join(os.getcwd(), "models/bat_detect2/batdetect2/"))
 from pipeline import pipeline as pipeline
 
 # TODO: make MODELS config?
-from cli.cfg import get_config  
+from src.cfg import get_config  
 
 # TODO: add models to CLI, but for now, just use all of the by default
 
