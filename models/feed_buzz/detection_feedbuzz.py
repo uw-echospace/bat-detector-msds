@@ -31,4 +31,4 @@ class FeedBuzz(DetectionInterface):
         
 
     def get_name(self): # TODO: do we really need this? config passes in the name
-        return "model_interface"
+        return "feed_buzz_detector"

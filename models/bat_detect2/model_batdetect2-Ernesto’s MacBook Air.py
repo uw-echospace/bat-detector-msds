@@ -47,13 +47,16 @@ class BatDetect2(DetectionInterface):
 
         # TODO: move to base class
         annotations = model_output['pred_dict']['annotation']
-        for annotation in annotations:
-            out_df = out_df.append({
-                "start_time": annotation['start_time'],
-                "end_time": annotation['end_time'],
-                "low_freq": annotation['low_freq'],
-                "high_freq": annotation['high_freq'],
-                "event": annotation['event'],
-            }, ignore_index=True)
+        if annotations:
+            out_df = pd.DataFrame.from_records(annotations)
+        # TODO: change column name to ravenpro friendly
+        # for annotation in annotations:
+        #     out_df = out_df.append({
+        #         "start_time": annotation['start_time'],
+        #         "end_time": annotation['end_time'],
+        #         "low_freq": annotation['low_freq'],
+        #         "high_freq": annotation['high_freq'],
+        #         "event": annotation['event'],
+        #     }, ignore_index=True)
 
         return out_df 

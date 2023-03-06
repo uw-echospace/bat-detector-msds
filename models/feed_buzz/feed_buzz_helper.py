@@ -141,29 +141,7 @@ def match_rois(rois: pd.DataFrame, num_matches_threshold: int, buzz_feed_range: 
     
     return match_df
 
-"""
-Remove collision between feeding buzz false positive and bat calls true positive values.
 
-Return: a boolean
-"""
-def removing_collision(curr_row:tuple, compare_df:pd.DataFrame):
-    XB1 = curr_row.min_t
-    XB2 = curr_row.max_t
-    YB1 = curr_row.min_f
-    YB2 = curr_row.max_f
-    SB = (XB2 - XB1) * (YB2 - YB1)
-   
-    #print('Looping compare df to find collision')
-    for i in compare_df.itertuples():
-        print(i)
-        XA1 = i[1] #min_t
-        XA2 = i[2] #max_t
-        YA1 = i[3] #min_f
-        YA2 = i[4] #max_f
-
-        if (XB2 >= XA2 and XA1 >= XB1 and YB2 >= YA2 and YA1 >= YB1 ):
-            return 1
-    return 0
 
 """
 Run template matching across all templates in template dict for each 1 minute audio file
@@ -175,7 +153,6 @@ def run_multiple_template_matching(PATH_AUDIO: Path,peak_th: float, peak_distanc
 
     # Load sound and initiate variables
     s, fs = sound.load(PATH_AUDIO)
-    start_point = float(PATH_AUDIO.stem[22:])
     rois_df = pd.DataFrame() 
 
     for template in template_dict.keys():
@@ -190,25 +167,6 @@ def run_multiple_template_matching(PATH_AUDIO: Path,peak_th: float, peak_distanc
         rois_df = pd.concat([rois_df,curr_df], ignore_index=True)
     
     rois_df = match_rois(rois_df, num_matches_threshold, buzz_feed_range, alpha)
-    
-    rois_df['min_t'] = rois_df['min_t'] + start_point
-    rois_df['max_t'] = rois_df['max_t'] + start_point
-    
-    compare_df = pd.read_excel(COMPARE_TP)
-    collide = np.zeros(len(rois_df))
 
-    for curr in tqdm(rois_df.itertuples()):
-        collide[curr.Index] = removing_collision(curr,compare_df)
-    
-    rois_df['Collide'] = collide
-    print('Total detection: {}'.format(len(rois_df)))
-
-    # Formating df
-    rois_df.rename(columns={'min_t':'Begin Time (s)', 'max_t':'End Time (s)',
-                             'min_f':'Low Freq (Hz)','max_f':'High Freq (Hz)'},inplace=True)
-
-    rois_df_filtered = rois_df[rois_df['Collide']== 0] 
-    print('Total filtered df: {}'.format(len(rois_df_filtered)))
-
-    return rois_df_filtered
+    return rois_df
 
