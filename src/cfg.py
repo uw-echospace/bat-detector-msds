@@ -2,7 +2,7 @@ from pathlib import Path
 
 #from models.bat_detect2.model_batdetect2 import BatDetect2 
 
-from models.bat_detect2.model_batdetect2 import BatDetect2
+from models.bat_call_detector import model_detector
 
 def get_config():
     return {
@@ -30,7 +30,12 @@ def get_config():
             },
             {
                 "name": "feed-buzz-detector",
-                "model": "TODO" # TODO FeedBuzzDetector()
+                "model": FeedBuzzDetector(
+        
+
+
+
+                ) # TODO 
             }
         ]
     } 
