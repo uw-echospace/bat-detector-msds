@@ -49,7 +49,6 @@ class BatCallDetector(DetectionInterface):
 
         # TODO: move to base class
         annotations = model_output['pred_dict']['annotation']
-        # TODO!!! Add columns "detection_confidence":[] and "event" 
         if annotations:
             out_df = pd.DataFrame.from_records(annotations) 
             out_df['detection_confidence'] = out_df['det_prob']
@@ -114,8 +113,8 @@ class BatCallDetector(DetectionInterface):
         return fb_df_filtered
     
     def run(self, audio_file):
-        bd_output = run_batdetect(self,audio_file)
-        fb_output = run_feedbuzz(self,audio_file)
+        bd_output = _run_batdetect(self,audio_file)
+        fb_output = _run_feedbuzz(self,audio_file)
         fb_final_output = _buzzfeed_fp_removal(bd_output, fb_output)
         
         return pd.concat([bd_output,fb_final_output])
