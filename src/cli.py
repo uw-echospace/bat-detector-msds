@@ -7,7 +7,7 @@ import numpy as np
 # set ython path
 import sys
 sys.path.append(os.getcwd())
-sys.path.append(os.path.join(os.getcwd(), "models/bat_detect2/batdetect2/"))
+sys.path.append(os.path.join(os.getcwd(), "models/bat_call_detector/batdetect2/"))
 
 from pipeline import pipeline as pipeline
 

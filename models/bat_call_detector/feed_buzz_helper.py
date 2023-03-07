@@ -113,7 +113,7 @@ Select one region of interest from a group of similar regions of interest of dif
 
 Return: a pd.Dataframe 
 """
-def match_rois(rois: pd.DataFrame, num_matches_threshold: int, buzz_feed_range: float, alpha:float):
+def match_rois(rois: pd.DataFrame, out_df:pd.DataFrame, num_matches_threshold: int, buzz_feed_range: float, alpha:float):
     match_dict = dict()
     match_range = alpha*buzz_feed_range/2
     # get a random rois from the df, find all matching rois
@@ -135,11 +135,9 @@ def match_rois(rois: pd.DataFrame, num_matches_threshold: int, buzz_feed_range: 
     match_dict_cut = dict(sorted(match_dict_cut.items()))    
 
     # we convert dict 
-    match_df = pd.DataFrame(columns = ['min_t','max_t','min_f','max_f','detection confidence'])
     for i, value in enumerate(match_dict_cut.values()):
-        match_df.loc[i] = [value[1][0],value[1][1],value[2][0],value[2][1],value[3]]
-    
-    return match_df
+        out_df.loc[i] = [value[1][0],value[1][1],value[2][0],value[2][1],value[3],'feeding buzz']
+    return out_df
 
 
 
@@ -149,7 +147,7 @@ Run template matching across all templates in template dict for each 1 minute au
 Return: a pd.Dataframe combining results using all templates,
         columns = ['Begin Time (s)', 'End Time (s)','Low Freq (Hz', 'High Freq (Hz)', 'Collide'].
 """
-def run_multiple_template_matching(PATH_AUDIO: Path,peak_th: float, peak_distance: float, template_dict:dict, num_matches_threshold:int, buzz_feed_range: float, alpha: float,COMPARE_TP:Path):
+def run_multiple_template_matching(PATH_AUDIO: Path, out_df:pd.DataFrame, peak_th: float, peak_distance: float, template_dict:dict, num_matches_threshold:int, buzz_feed_range: float, alpha: float,COMPARE_TP:Path):
 
     # Load sound and initiate variables
     s, fs = sound.load(PATH_AUDIO)
@@ -166,7 +164,7 @@ def run_multiple_template_matching(PATH_AUDIO: Path,peak_th: float, peak_distanc
                                         peak_distance=peak_distance)
         rois_df = pd.concat([rois_df,curr_df], ignore_index=True)
     
-    rois_df = match_rois(rois_df, num_matches_threshold, buzz_feed_range, alpha)
+    out_df = match_rois(rois_df, out_df, num_matches_threshold, buzz_feed_range, alpha)
 
-    return rois_df
+    return out_df
 
