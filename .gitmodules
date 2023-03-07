@@ -1,3 +1,0 @@
-[submodule "models/bat_detect2/batdetect2"]
-	path = models/bat_detect2/batdetect2
-	url = https://github.com/macaodha/batdetect2.git
