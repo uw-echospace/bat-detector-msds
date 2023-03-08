@@ -3,6 +3,9 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
+from torch import multiprocessing
+from tqdm import tqdm
+
 from pipeline.audio_segmentor import generate_segments 
 from utils.utils import gen_empty_df
 
@@ -28,27 +31,30 @@ def _correct_annotation_offsets(annotations_df, input_file, actual_start_time):
     annotations_df['input_file'] = input_file
     return annotations_df
 
-def _apply_models(cfg, segment_file_paths):
+def _apply_model(item):
+    annotations_df = item['model'].run(item['audio_seg']['audio_file'])
+    return _correct_annotation_offsets(
+        annotations_df,
+        item['original_file_name'],
+        item['audio_seg']['offset']
+    )
+
+def _apply_models(cfg, audio_segments):
     csv_names = []
-    num_file=0
+
+    # TODO: make number of processes configurable
+    process_pool = multiprocessing.Pool(8)
+
     for mcfg in cfg['models']:
         agg_df = gen_empty_df() 
 
-        for seg_path in segment_file_paths:
-            print('Running file number: {}'.format(num_file))
-            num_file += 1
-            annotations_df = mcfg['model'].run(seg_path['audio_file'])
-            corrected_annotations_df = _correct_annotation_offsets(
-                annotations_df, 
-                cfg['audio_file_path'].name,
-                seg_path['offset']
-            ) 
-
-            agg_df = pd.concat([agg_df, corrected_annotations_df], ignore_index=True)
-        
-        # if mcfg['model'].get_name() == 'feed_buzz_detector':
-        #     # remove FP before saving results
-        #     agg_df = _process_output(cfg, agg_df)
+        l_for_mapping = [{
+            'audio_seg': audio_seg, 
+            'model': mcfg['model'],
+            'original_file_name': cfg['audio_file_path'],
+            } for audio_seg in audio_segments]
+        pred_dfs = process_pool.imap(_apply_model, l_for_mapping, chunksize=1)
+        agg_df = pd.concat(pred_dfs, ignore_index=True)
 
         csv_name = _generate_csv(agg_df, mcfg['model'].get_name(),
             cfg['audio_file_path'].name,
