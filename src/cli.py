@@ -38,6 +38,5 @@ if __name__ == "__main__":
 
     cfg = get_config()
     cfg["audio_file_path"] = Path(args["input_audio"])
-
     pipeline.run(cfg) # TODO: return value?
     

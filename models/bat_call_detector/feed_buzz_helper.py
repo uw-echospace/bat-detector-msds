@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from maad import sound, util, rois
-from maad.rois import template_matching
+#from maad.rois import template_matching
+from models.scimaad.maad.rois import template_matching #delete before pushing
 from pathlib import Path
 import pickle
 from tqdm import tqdm
@@ -82,6 +83,7 @@ def load_templates(template_path:Path):
             template_dict = pickle.load(handle)
     except:
         # if it's the first time creating template dict
+        print('Template path is empty!')
         template_dict = dict()
     return template_dict
 
@@ -115,6 +117,7 @@ Return: a pd.Dataframe
 """
 def match_rois(rois: pd.DataFrame, out_df:pd.DataFrame, num_matches_threshold: int, buzz_feed_range: float, alpha:float):
     match_dict = dict()
+
     match_range = alpha*buzz_feed_range/2
     # get a random rois from the df, find all matching rois
     rois_matching = rois.copy()
@@ -147,7 +150,7 @@ Run template matching across all templates in template dict for each 1 minute au
 Return: a pd.Dataframe combining results using all templates,
         columns = ['Begin Time (s)', 'End Time (s)','Low Freq (Hz', 'High Freq (Hz)', 'Collide'].
 """
-def run_multiple_template_matching(PATH_AUDIO: Path, out_df:pd.DataFrame, peak_th: float, peak_distance: float, template_dict:dict, num_matches_threshold:int, buzz_feed_range: float, alpha: float,COMPARE_TP:Path):
+def run_multiple_template_matching(PATH_AUDIO: Path, out_df:pd.DataFrame, peak_th: float, peak_distance: float, template_dict:dict, num_matches_threshold:int, buzz_feed_range: float, alpha: float):
 
     # Load sound and initiate variables
     s, fs = sound.load(PATH_AUDIO)

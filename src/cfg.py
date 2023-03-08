@@ -25,6 +25,12 @@ def get_config():
                     time_expansion_factor=1.0, # TODO: what did Kirsteen use?
                     quiet=False,
                     cnn_features=True,
+                    peak_distance=0.05,
+                    peak_threshold=0.25,
+                    template_dict_path="/Users/kirsteenng/Desktop/UW/DATA 590/bat-detector-msds/pipeline/template_dict.pickle", #TODO: is this the right place to put?
+                    num_matches_threshold=2,
+                    buzz_feed_range=0.15,
+                    alpha=1,
                     # TODO: might need to update model path to be relative to repo root
                 ),
             },
