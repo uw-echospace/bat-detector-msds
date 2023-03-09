@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from maad import sound, util, rois
-#from maad.rois import template_matching
-from models.scimaad.maad.rois import template_matching #delete before pushing
+from maad.rois import template_matching
+
 from pathlib import Path
 import pickle
 from tqdm import tqdm

@@ -13,7 +13,7 @@ def get_config():
         "tmp_output_path": Path("output/tmp"),
         "time_expansion_factor": 1.0,
         "start_time": 0.0,
-        "segment_duration": 30.0,
+        "segment_duration": 30.0, #units in seconds
         "models": [
             {
                 "name": "batdetect2",
