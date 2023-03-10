@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from maad import sound, util, rois
-from maad.rois import template_matching
+import models.bat_call_detector.template_matching_func as tm
 
 from pathlib import Path
 import pickle
@@ -103,7 +103,7 @@ Run template matching process for one specific template across target audio file
 Return: a pd.DataFrame containing identified feeding buzzes with correlation coefficient.
 """
 def run_template_matching(Sxx_audio: np.ndarray,  tn: any, ext: any, template: tuple, template_name:str, peak_th: float, peak_distance: float):
-    xcorrcoef, rois = template_matching(Sxx_audio, template[0], tn, ext, peak_th, peak_distance)
+    xcorrcoef, rois = tm.template_matching(Sxx_audio, template[0], tn, ext, peak_th, peak_distance)
     rois['min_f'] = template[2][0]
     rois['max_f'] = template[2][1]
     rois['template_name'] = template_name

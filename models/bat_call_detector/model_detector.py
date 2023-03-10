@@ -12,6 +12,7 @@ import bat_detect.utils.detector_utils as du
 import models.bat_call_detector.feed_buzz_helper as fbh
 
 
+
 class BatCallDetector(DetectionInterface):
 
     # TODO: what constructor params are needed?
