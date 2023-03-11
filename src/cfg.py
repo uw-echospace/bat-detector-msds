@@ -1,23 +1,21 @@
 from pathlib import Path
 
-#from models.bat_detect2.model_batdetect2 import BatDetect2 
-
 from models.bat_call_detector.model_detector import BatCallDetector
 
+# TODO: consider converting this to JSON or YAML file and putting in root of repo
+
+# Contrains configurable paramters for ML portion of the pipeline. Anything that is not a CLI 
+# argument (stuff that doesn't interact with the host OS) should be in here.
 def get_config():
     return {
-        # TODO: decide what should be CLI args to the application and what should remain in configuration
-        # TODO: gets input file from CLI right now...
-        #"audio_file_path": Path("data/audio/2020-08-01_21-00-00.wav"), 
-        "csv_output_path": Path("output"),
-        "tmp_output_path": Path("output/tmp"),
+        # TODO: comment on what all these parameters are
         "time_expansion_factor": 1.0,
         "start_time": 0.0,
         "segment_duration": 30.0, #units in seconds
-        "models": [
+        "models": [ 
+            # TODO: can we just make this a list of objects instead of list of dicts?
             {
-                "name": "batdetect2",
-                "model": BatCallDetector( # TODO: comment on what all these parameters are
+                "model": BatCallDetector( 
                     detection_threshold=0.5,
                     spec_slices=False,
                     chunk_size=2, 
@@ -35,8 +33,10 @@ def get_config():
                 ),
             },
             # {
-            #     "name": "feed-buzz-detector",
-            #     "model": #FeedBuzzDetector() # TODO 
+            #     "model": AnotherDetector(
+            #         param1="param1",
+            #         param2="param2",  
+            #     )
             # }
         ]
     } 

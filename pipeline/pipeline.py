@@ -18,8 +18,8 @@ def _generate_csv(annotation_df, model_name, audio_file_name, output_path):
 def _segment_input_audio(cfg):
     print('Creating {} seconds audio segments.'.format(cfg['segment_duration']))
     segment_file_paths = generate_segments(
-        audio_file = cfg['audio_file_path'], 
-        output_dir = cfg['tmp_output_path'],
+        audio_file = cfg['audio_file'], 
+        output_dir = cfg['tmp_dir'],
         start_time = cfg['start_time'],
         duration   = cfg['segment_duration'],
     )
@@ -42,40 +42,40 @@ def _apply_model(item):
 def _apply_models(cfg, audio_segments):
     csv_names = []
 
-    # TODO: make number of processes configurable
-    process_pool = multiprocessing.Pool(8)
+    audio_file_path = cfg['audio_file']
 
-    for mcfg in cfg['models']:
+    # TODO: make number of processes configurable
+    process_pool = multiprocessing.Pool(cfg['num_processes'])
+
+    for model_cfg in cfg['models']:
+        model = model_cfg['model']
+
         agg_df = gen_empty_df() 
 
+        # TODO: make class instead of dict
         l_for_mapping = [{
             'audio_seg': audio_seg, 
-            'model': mcfg['model'],
-            'original_file_name': cfg['audio_file_path'],
+            'model': model,
+            'original_file_name': audio_file_path,
             } for audio_seg in audio_segments]
+
         pred_dfs = process_pool.imap(_apply_model, l_for_mapping, chunksize=1)
         agg_df = pd.concat(pred_dfs, ignore_index=True)
 
-        csv_name = _generate_csv(agg_df, mcfg['model'].get_name(),
-            cfg['audio_file_path'].name,
-            cfg['csv_output_path'],
+        csv_name = _generate_csv(agg_df, model.get_name(),
+            audio_file_path.name,
+            cfg['output_dir'],
         )
         csv_names.append(csv_name)
 
     return csv_names
-    # full_list = pd.DataFrame()
 
-    # for csv_name in csv_names:
-    #     curr = pd.read_csv(csv_name)
-    #     full_list = pd.concat([full_list,curr],ignore_index = True)
-
-    # full_list.sort_values(by = ['start_time'],inplace = True, ascending = True)
-    # full_list.to_csv(cfg['csv_output_path'])
 
 def _prepare_output_dirs(cfg):
     # TODO: do we need to clearn tmp dir before each run?
-    cfg['csv_output_path'].mkdir(parents=True, exist_ok=True)
-    cfg['tmp_output_path'].mkdir(parents=True, exist_ok=True)
+    # TODO: make sure works if and if not they exist
+    cfg['output_dir'].mkdir(parents=True, exist_ok=True)
+    cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
 
 def run(cfg: dict):

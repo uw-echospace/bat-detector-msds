@@ -21,7 +21,31 @@ def parse_args():
     parser.add_argument(
         "input_audio",
         type=str,
-        help="Input directory containing the audio files",
+        help="the WAV file to process",
+    )
+    parser.add_argument(
+        "output_directory",
+        type=str,
+        help="the directory to write the output to",
+        default="output",
+    )
+    parser.add_argument(
+        "--tmp_directory",
+        type=str,
+        help="the directory to write the temporary files to",
+        default="output/tmp",
+    )
+    # add output type argument, defaulting to tsv
+    parser.add_argument(
+        "--output_type",
+        type=str,
+        help="the type of output to write",
+        default="tsv",
+    )
+    parser.add_argument(
+        "--num_processes",
+        type=int,
+        default=2,
     )
 
     return vars(parser.parse_args())
@@ -30,13 +54,11 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
 
-    #print("Input directory   : " + args["input_directory"])
-    #print("Output directory  : " + args["output_directory"])
-    #print("Start time        : {}".format(args["start_time"]))
-    #print("Output duration   : {}".format(args["output_duration"]))
-    #print("Audio files found : {}".format(len(ip_files)))
-
     cfg = get_config()
-    cfg["audio_file_path"] = Path(args["input_audio"])
+    cfg["output_dir"] = Path(args["output_directory"])
+    cfg["tmp_dir"] = Path(args["tmp_directory"])
+    cfg["audio_file"] = Path(args["input_audio"])
+    cfg["num_processes"] = args["num_processes"]
+
     pipeline.run(cfg) # TODO: return value?
     
