@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from maad import sound, util, rois
+from maad import sound, util
 import models.bat_call_detector.template_matching_func as tm
 
 from pathlib import Path
