@@ -11,38 +11,40 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
 
     ip_audio, sampling_rate = librosa.load(audio_file, sr=None)
 
-    #audio_length = ip_audio.shape[0]/sampling_rate
+    # Convert to sampled units
+    ip_start = int(start_time * sampling_rate)
+    ip_duration = int(duration * sampling_rate)
+    ip_end = len(ip_audio)
 
-    # TODO: is it right to excplude time_expansion_factor here? We leave it to the modles to decide 
-    #       how to preprocess their own audio
-    end_time = len(ip_audio) # * args["time_expansion_factor"] # cut the whole audio file 
-    
     output_files = []
+
     # for the length of the duration, process the audio into duration length clips
-    for sub_sample_index in np.arange(start_time, end_time, duration):
-        en_time = sub_sample_index + duration
-        st_samp = int(sub_sample_index * sampling_rate)
-        en_samp = np.minimum(int(en_time * sampling_rate), ip_audio.shape[0])
+    for sub_start in range(ip_start, ip_end, ip_duration):
+        sub_end = np.minimum(sub_start + ip_duration, ip_end)
 
         try: 
-            op_audio = np.zeros(int(sampling_rate * duration), dtype=ip_audio.dtype)
-            op_audio[: en_samp - st_samp] = ip_audio[st_samp:en_samp]
+            sub_length = sub_end - sub_start
+            op_audio = np.zeros(int(sub_length), dtype=ip_audio.dtype)
+            op_audio[:sub_length] = ip_audio[sub_start:sub_end]
 
 
             op_file = os.path.basename(audio_file.name).replace(" ", "_")
-            op_file_en = "__{:.2f}".format(start_time) + "_" + "{:.2f}".format(sub_sample_index)
+            
+            # For file names, convert back to seconds 
+            start_seconds = start_time / sampling_rate
+            end_seconds = sub_start / sampling_rate
+            op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
             op_file = op_file[:-4] + op_file_en + ".wav"
             
             op_path = os.path.join(output_dir, op_file)
-            output_files.append({"audio_file": op_path, "offset": start_time + sub_sample_index})
+            output_files.append({"audio_file": op_path, "offset": start_time + sub_start})
             
-            soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') # TODO: ensure 16 bitdepth is correct
+            # TODO: ensure 16 bitdepth is correct
+            soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') 
 
-            #print("\n{}\tIP: ".format(ii) + os.path.basename(ip_path))
-            #print("\tOP: " + os.path.basename(op_path))
-        except:
-            # TODO: investigate why this occurs once during segmentation of an audio 
-            print("There is an error.")
+        except Exception as e:
+            print(f"There is an error: {e}")
             break
 
+    print("Done")
     return output_files 
