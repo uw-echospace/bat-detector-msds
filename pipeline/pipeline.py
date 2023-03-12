@@ -7,16 +7,23 @@ from torch import multiprocessing
 from tqdm import tqdm
 
 from pipeline.audio_segmentor import generate_segments 
-from utils.utils import gen_empty_df
+from utils.utils import gen_empty_df, convert_df_ravenpro
 
-def _generate_csv(annotation_df, model_name, audio_file_name, output_path):
-    csv_name = f"{model_name}-{audio_file_name}.csv"
-    csv_path = output_path / csv_name
-    annotation_df.to_csv(csv_path)
+def _generate_csv(annotation_df, model_name, audio_file_name, output_path, should_csv):
+    file_name = f"{model_name}-{audio_file_name}"
+    extension = ".csv"
+    sep = ","
+
+    if not should_csv:
+        extension = ".txt"
+        sep = "\t"
+        annotation_df = convert_df_ravenpro(annotation_df)
+
+    csv_path = output_path / f"{file_name}{extension}"
+    annotation_df.to_csv(csv_path, sep=sep, index=False)
     return csv_path
 
 def _segment_input_audio(cfg):
-    print('Creating {} seconds audio segments.'.format(cfg['segment_duration']))
     segment_file_paths = generate_segments(
         audio_file = cfg['audio_file'], 
         output_dir = cfg['tmp_dir'],
@@ -41,12 +48,10 @@ def _apply_model(item):
 
 def _apply_models(cfg, audio_segments):
     csv_names = []
-
     audio_file_path = cfg['audio_file']
-
-    # TODO: make number of processes configurable
     process_pool = multiprocessing.Pool(cfg['num_processes'])
 
+    # TODO: TQDM! 
     for model_cfg in cfg['models']:
         model = model_cfg['model']
 
@@ -65,6 +70,7 @@ def _apply_models(cfg, audio_segments):
         csv_name = _generate_csv(agg_df, model.get_name(),
             audio_file_path.name,
             cfg['output_dir'],
+            cfg['should_csv']
         )
         csv_names.append(csv_name)
 
@@ -82,6 +88,5 @@ def run(cfg: dict):
     _prepare_output_dirs(cfg)
     segmented_file_paths = _segment_input_audio(cfg)
     csv_names = _apply_models(cfg, segmented_file_paths)
-    print('Run complete')
 
     #_process_output(cfg, csv_names) # TODO: should this also write csv output? We are currently doing this inside apply models, is that ok?

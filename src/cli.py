@@ -37,15 +37,14 @@ def parse_args():
     )
     # add output type argument, defaulting to tsv
     parser.add_argument(
-        "--output_type",
-        type=str,
-        help="the type of output to write",
-        default="tsv",
+        "--csv",
+        action="store_true",
+        help="Generate CSV instead of TSV",
     )
     parser.add_argument(
         "--num_processes",
         type=int,
-        default=2,
+        default=4,
     )
 
     return vars(parser.parse_args())
@@ -55,6 +54,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     cfg = get_config()
+    cfg["should_csv"] = args["csv"]
     cfg["output_dir"] = Path(args["output_directory"])
     cfg["tmp_dir"] = Path(args["tmp_directory"])
     cfg["audio_file"] = Path(args["input_audio"])
