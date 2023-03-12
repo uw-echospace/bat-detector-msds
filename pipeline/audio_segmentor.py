@@ -22,29 +22,23 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
     for sub_start in range(ip_start, ip_end, ip_duration):
         sub_end = np.minimum(sub_start + ip_duration, ip_end)
 
-        try: 
-            sub_length = sub_end - sub_start
-            op_audio = np.zeros(int(sub_length), dtype=ip_audio.dtype)
-            op_audio[:sub_length] = ip_audio[sub_start:sub_end]
+        sub_length = sub_end - sub_start
+        op_audio = np.zeros(int(sub_length), dtype=ip_audio.dtype)
+        op_audio[:sub_length] = ip_audio[sub_start:sub_end]
 
+        # For file names, convert back to seconds 
+        op_file = os.path.basename(audio_file.name).replace(" ", "_")
+        start_seconds = start_time / sampling_rate
+        end_seconds = sub_start / sampling_rate
+        op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
+        op_file = op_file[:-4] + op_file_en + ".wav"
+        
+        op_path = os.path.join(output_dir, op_file)
+        output_files.append({"audio_file": op_path, "offset": start_time + sub_start})
+        
+        # TODO: ensure 16 bitdepth is correct
+        soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') 
 
-            op_file = os.path.basename(audio_file.name).replace(" ", "_")
-            
-            # For file names, convert back to seconds 
-            start_seconds = start_time / sampling_rate
-            end_seconds = sub_start / sampling_rate
-            op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
-            op_file = op_file[:-4] + op_file_en + ".wav"
-            
-            op_path = os.path.join(output_dir, op_file)
-            output_files.append({"audio_file": op_path, "offset": start_time + sub_start})
-            
-            # TODO: ensure 16 bitdepth is correct
-            soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') 
-
-        except Exception as e:
-            print(f"There is an error: {e}")
-            break
 
     print("Done")
     return output_files 
