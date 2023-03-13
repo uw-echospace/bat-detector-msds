@@ -53,7 +53,6 @@ def _apply_models(cfg, audio_segments):
 
     for model in cfg['models']:
 
-        # TODO: make class instead of dict
         l_for_mapping = [{
             'audio_seg': audio_seg, 
             'model': model,
@@ -85,6 +84,14 @@ def _prepare_output_dirs(cfg):
 
 
 def run(cfg: dict):
+    """
+    Runs the pipeline for a given configuration. THis is the public interface for 
+    the pipeline. 
+
+    For convenience, we take a dictioanry as input. See `src/cli.py` for parameters 
+    that should be passed in. In the future, `run` should just take a bunch of arguments,
+    one for each KVP in the dictionary.
+    """
     _prepare_output_dirs(cfg)
     segmented_file_paths = _segment_input_audio(cfg)
-    _ = _apply_models(cfg, segmented_file_paths)
+    return _apply_models(cfg, segmented_file_paths)

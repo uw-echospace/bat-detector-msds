@@ -8,6 +8,9 @@ import soundfile
 
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
+    """
+    Segments audio_file into clips of duration length and saves them to output_dir.
+    """
 
     ip_audio, sampling_rate = librosa.load(audio_file, sr=None)
 
@@ -37,6 +40,7 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         output_files.append({"audio_file": op_path, "offset": start_time + sub_start})
         
         # TODO: ensure 16 bitdepth is correct
+        # TODO: maybe make this configurable parameter?
         soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') 
 
     return output_files 

@@ -1,7 +1,11 @@
 import pandas as pd
 
-# TODO: document
+# Publically accessible dumping ground for stuff that doesn't fit anywhere else
+
 def gen_empty_df():
+    """
+    Generates an empty dataframe with the correct columns for the output csv
+    """
     return pd.DataFrame({
             "start_time": [],
             "end_time": [],
@@ -11,7 +15,11 @@ def gen_empty_df():
             "event": [],
         })
 
-def convert_df_ravenpro(df):
+def convert_df_ravenpro(df: pd.DataFrame):
+    """
+    Converts a dataframe to the format used by RavenPro
+    """
+
     ravenpro_df = df.copy()
 
     ravenpro_df.rename(columns={
