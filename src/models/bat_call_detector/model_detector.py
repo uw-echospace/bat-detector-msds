@@ -14,7 +14,6 @@ import models.bat_call_detector.feed_buzz_helper as fbh
 
 
 class BatCallDetector(DetectionInterface):
-
     def __init__(self, detection_threshold, spec_slices, chunk_size, model_path, time_expansion_factor, quiet, cnn_features,
                  peak_distance,peak_threshold,template_dict_path,num_matches_threshold,buzz_feed_range,alpha):
         self.detection_threshold = detection_threshold
