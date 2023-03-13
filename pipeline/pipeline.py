@@ -51,7 +51,6 @@ def _apply_models(cfg, audio_segments):
     audio_file_path = cfg['audio_file']
     process_pool = multiprocessing.Pool(cfg['num_processes'])
 
-    # TODO: TQDM! 
     for model_cfg in cfg['models']:
         model = model_cfg['model']
 
@@ -64,7 +63,11 @@ def _apply_models(cfg, audio_segments):
             'original_file_name': audio_file_path,
             } for audio_seg in audio_segments]
 
-        pred_dfs = process_pool.imap(_apply_model, l_for_mapping, chunksize=1)
+        pred_dfs = tqdm(
+            process_pool.imap(_apply_model, l_for_mapping, chunksize=1), 
+            desc=f"Applying {model.get_name()}",
+            total=len(l_for_mapping),
+        )
         agg_df = pd.concat(pred_dfs, ignore_index=True)
 
         csv_name = _generate_csv(agg_df, model.get_name(),
