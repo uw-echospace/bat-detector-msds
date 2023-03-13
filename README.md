@@ -1,32 +1,63 @@
 
-## MSDS Capstone Project: Bats!!!
+# MSDS Capstone Project: Bats!!!
 
-### Setup
-Setup local (to this directory) Python 3.9 environment
+## Overview
+This repository offers the following features:
+* Detection of bat search, social, and feedbuzz calls
+* A fast, customizable pipeline for automating application of the aforementioned detectors
+
+# Usage
+## Setup
+We recommend using Python 3.9.x. Other versions may work, but they're not tested. We also recommend creating a Python [virtual environment](https://docs.python.org/3/library/venv.html).
+
+From repository root, run the following commands:
 ```
-pyenv install 3.9
-pyenv local 3.9  # Activate Python 3.9 for the current project
-# You might need to also run: poetry env use 3.9
-
-poetry install
-
-# If this fails and you see a complaint about llvmlite, remove llvm light from Poetry
-#  pyproject.toml and run
-#  > poetry add llvmlite
-#  > poetry install
-
-# Airflow officially only supports installation via pip. Do not try to add to Poetry. (as of 2023-2-4)
-pip install apache-airflow
+git submodule --init --recursive
+```
+```
+pip install -r requirements.txt
 ```
 
-### Raw data storage
-[Azure blob storage](https://portal.azure.com/#view/Microsoft_Azure_Storage/ContainerMenuBlade/~/overview/storageAccountId/%2Fsubscriptions%2F875b6f94-2db7-46a3-8ecc-1dd2549c188d%2FresourceGroups%2FCapstone_project%2Fproviders%2FMicrosoft.Storage%2FstorageAccounts%2Fkirstngcapstone/path/annotated-data/etag/%220x8DAEFA5F2564873%22/defaultEncryptionScope/%24account-encryption-key/denyEncryptionScopeOverride~/false/defaultId//publicAccessVal/Container)
+## Usage
+The following invokation generates a TSV in `output_dir` containing all detections:
+```
+python src/cli.py audio.wav output_dir/
+```
 
-### Progress status
+Additionally, you can specific the number of processes used to process the audio and generate a CSV instead of TSV:
+```
+python src/cli.py --csv --num_processes=4 audio.wav output_dir/
+```
 
-|Stage |Task |Details  |Input |Desired Output |Github Issue |Status |
-| --- |:---| :---| :---- |:--- |:---|:---|
-|Data cleaning and pre-processing | Develop snipping tool | Developing a snipping tool that allows us to generate .wav  that contains bat calls based on the timestamp and frequency parameters from Raven Pro. | 1. Audio files in .wav format.   2.Detection file from Raven Pro in .txt format. | individual .wav files | https://github.com/uw-echospace/bat-detector-msds/issues/9 | Completed |
-|Data cleaning and pre-processing | Generate individual spectrogram from snipping tool output  | Convert individual .wav file from snippet tool to spectrogram and save as .png file. | individual .wav output from snipping tool to .png images | .png images that contains bat calls. | https://github.com/uw-echospace/bat-detector-msds/issues/16 | In progress |
-|Data cleaning and pre-processing | Identify false positive and generate negative sample  | Based on the images snipped from the spectrogram, we will determine the false positive from the generated images. | .png images generated from snipping tool. | .png images that contains bat calls. | https://github.com/uw-echospace/bat-detector-msds/issues/5 | Pending upstream |
-|Image clustering | Implement KNN- clustering   | Referring to this [tutorial](https://towardsdatascience.com/how-to-cluster-images-based-on-visual-similarity-cd6e7209fe34) to implement KNN clustering based on visual similarity| filtered .png images containing bat calls. Based on our hypothesis, there should be two distinct bat calls, ie feeding buzz and non-feeding buzz. | Images that are in each group. | TBD| Pending upstream |
+## Analytics Configuration
+All of the analytical parameters are accessible in `src/cfg.py`. Have a look! 
+## Adding custom detectors
+`src/cfg.py` is also where new, custom detectors can be added. To add your own detector to the pipeline:
+1. Create a new class in `src/models/` that inherits from `src/models/detection_interface.py`
+2. Override `DetectionInterface`'s `run()` and `get_name()` methods
+3. Add your model's constructer to `src/cfg.py` in the `models` list, passing in any parameters needed in the constructor. 
+
+The pipeline executres the `run()` method of every model present in that aforementioned `models` list in `src/cfg.py`.
+
+
+## Update feedbuzz detection templates
+To identify feedbuzzes, this repository uses a technique called [tempalte matching](https://en.wikipedia.org/wiki/Template_matching). We offer an initial set of templates that perform decently for feedbuzz detection in Seattle, WA. To update these templates:
+1. TODO: 1
+2. TODO: 2
+
+## Help
+```
+python src/cli.py --help
+```
+
+# Analysis
+TODO
+## Detectors and Results
+TODO
+
+
+# Acknowledgements
+Dr. Wu-Jung Lee -- Univeristy of Washington [EchoSpace](https://uw-echospace.github.io) \
+Aditya Krishna -- University of Washington [EchoSpace](https://uw-echospace.github.io) \
+Maad person TODO \
+Oisin Mac Aodha -- [Bat Detect 2](https://github.com/macaodha/batdetect2) \

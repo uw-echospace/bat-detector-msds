@@ -1,7 +1,13 @@
+output
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+data/*
+.devcontainer
+**/.DS_STORE
 
 # C extensions
 *.so
