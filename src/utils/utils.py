@@ -28,7 +28,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
         "low_freq": "Low Freq (Hz)",
         "high_freq": "High Freq (Hz)",
         "event": "Annotation",
-    })
+    }, inplace=True)
 
     ravenpro_df["Selection"] = "Waveform 1"
     ravenpro_df["View"] = "1"

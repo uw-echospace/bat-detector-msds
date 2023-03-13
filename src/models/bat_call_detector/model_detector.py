@@ -14,6 +14,9 @@ import models.bat_call_detector.feed_buzz_helper as fbh
 
 
 class BatCallDetector(DetectionInterface):
+    """
+    
+    """
     def __init__(self, detection_threshold, spec_slices, chunk_size, model_path, time_expansion_factor, quiet, cnn_features,
                  peak_distance,peak_threshold,template_dict_path,num_matches_threshold,buzz_feed_range,alpha):
         self.detection_threshold = detection_threshold
@@ -23,12 +26,13 @@ class BatCallDetector(DetectionInterface):
         self.time_expansion_factor = time_expansion_factor
         self.quiet = quiet
         self.cnn_features = cnn_features
-        self.peak_distance = peak_distance,
-        self.peak_th = peak_threshold,
-        self.template_dict_path = template_dict_path,
-        self.num_matches_threshold = num_matches_threshold, 
-        self.buzz_feed_range = buzz_feed_range, 
+        self.peak_distance = peak_distance
+        self.peak_th = peak_threshold
+        self.template_dict_path = template_dict_path
+        self.num_matches_threshold = num_matches_threshold
+        self.buzz_feed_range = buzz_feed_range
         self.alpha = alpha
+        
 
     def get_name(self):
         return "BatDetectorMSDS"
@@ -68,15 +72,15 @@ class BatCallDetector(DetectionInterface):
     
     def _run_feedbuzz(self, audio_file) -> pd.DataFrame: # TODO: type annotations
         out_df = gen_empty_df()
-        template_dict = fbh.load_templates(self.template_dict_path[0])
+        template_dict = fbh.load_templates(self.template_dict_path)
         out_df = fbh.run_multiple_template_matching(
                                             PATH_AUDIO=audio_file,
                                             out_df=out_df,
-                                            peak_distance=self.peak_distance[0], #self.peak_distance is a tuple for some reason.
-                                            peak_th=self.peak_th[0],
+                                            peak_distance=self.peak_distance, #self.peak_distance is a tuple for some reason.
+                                            peak_th=self.peak_th,
                                             template_dict=template_dict,
-                                            num_matches_threshold=self.num_matches_threshold[0], 
-                                            buzz_feed_range=self.buzz_feed_range[0], 
+                                            num_matches_threshold=self.num_matches_threshold, 
+                                            buzz_feed_range=self.buzz_feed_range, 
                                             alpha=self.alpha)
         
         # A flag for end user to differentiate between feeding buzz and bat calls.
