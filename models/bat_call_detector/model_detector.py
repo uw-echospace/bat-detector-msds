@@ -2,7 +2,8 @@ import os
 import argparse
 import pandas as pd
 import numpy as np
-
+import io
+import sys
 
 
 from models.detection_interface import DetectionInterface
@@ -38,6 +39,10 @@ class BatCallDetector(DetectionInterface):
     def _run_batdetect(self, audio_file): #
         model, params = du.load_model(self.model_path)
 
+        # Suppress output from this call
+        text_trap = io.StringIO()
+        sys.stdout = text_trap
+
         model_output = du.process_file(
             audio_file=audio_file, 
             model=model, 
@@ -52,6 +57,9 @@ class BatCallDetector(DetectionInterface):
             },
             time_exp=self.time_expansion_factor,
         )
+
+        # Restore stdout
+        sys.stdout = sys.__stdout__
 
         # TODO: what else needs to go in here?
         out_df = gen_empty_df()

@@ -39,6 +39,4 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         # TODO: ensure 16 bitdepth is correct
         soundfile.write(op_path, op_audio, sampling_rate, subtype='PCM_16') 
 
-
-    print("Done")
     return output_files 
