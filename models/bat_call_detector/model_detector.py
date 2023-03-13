@@ -13,10 +13,8 @@ import bat_detect.utils.detector_utils as du
 import models.bat_call_detector.feed_buzz_helper as fbh
 
 
-
 class BatCallDetector(DetectionInterface):
 
-    # TODO: what constructor params are needed?
     def __init__(self, detection_threshold, spec_slices, chunk_size, model_path, time_expansion_factor, quiet, cnn_features,
                  peak_distance,peak_threshold,template_dict_path,num_matches_threshold,buzz_feed_range,alpha):
         self.detection_threshold = detection_threshold
@@ -33,8 +31,8 @@ class BatCallDetector(DetectionInterface):
         self.buzz_feed_range = buzz_feed_range, 
         self.alpha = alpha
 
-    def _get_name(self):
-        return "batdetect2"
+    def get_name(self):
+        return "BatDetectorMSDS"
 
     def _run_batdetect(self, audio_file): #
         model, params = du.load_model(self.model_path)
@@ -57,16 +55,12 @@ class BatCallDetector(DetectionInterface):
             },
             time_exp=self.time_expansion_factor,
         )
-
         # Restore stdout
         sys.stdout = sys.__stdout__
 
-        # TODO: what else needs to go in here?
-        out_df = gen_empty_df()
-
-        # TODO: move to base class
         annotations = model_output['pred_dict']['annotation']
 
+        out_df = gen_empty_df()
         if annotations:
             out_df = pd.DataFrame.from_records(annotations) 
             out_df['detection_confidence'] = out_df['det_prob']

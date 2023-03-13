@@ -51,10 +51,7 @@ def _apply_models(cfg, audio_segments):
     audio_file_path = cfg['audio_file']
     process_pool = multiprocessing.Pool(cfg['num_processes'])
 
-    for model_cfg in cfg['models']:
-        model = model_cfg['model']
-
-        agg_df = gen_empty_df() 
+    for model in cfg['models']:
 
         # TODO: make class instead of dict
         l_for_mapping = [{
@@ -68,6 +65,8 @@ def _apply_models(cfg, audio_segments):
             desc=f"Applying {model.get_name()}",
             total=len(l_for_mapping),
         )
+
+        agg_df = gen_empty_df() 
         agg_df = pd.concat(pred_dfs, ignore_index=True)
 
         csv_name = _generate_csv(agg_df, model.get_name(),
@@ -81,8 +80,6 @@ def _apply_models(cfg, audio_segments):
 
 
 def _prepare_output_dirs(cfg):
-    # TODO: do we need to clearn tmp dir before each run?
-    # TODO: make sure works if and if not they exist
     cfg['output_dir'].mkdir(parents=True, exist_ok=True)
     cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
@@ -90,6 +87,4 @@ def _prepare_output_dirs(cfg):
 def run(cfg: dict):
     _prepare_output_dirs(cfg)
     segmented_file_paths = _segment_input_audio(cfg)
-    csv_names = _apply_models(cfg, segmented_file_paths)
-
-    #_process_output(cfg, csv_names) # TODO: should this also write csv output? We are currently doing this inside apply models, is that ok?
+    _ = _apply_models(cfg, segmented_file_paths)
