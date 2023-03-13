@@ -36,7 +36,6 @@ class BatCallDetector(DetectionInterface):
         return "batdetect2"
 
     def _run_batdetect(self, audio_file): #
-        print('Loading model: ' + self.model_path)
         model, params = du.load_model(self.model_path)
 
         model_output = du.process_file(
@@ -67,7 +66,6 @@ class BatCallDetector(DetectionInterface):
         return out_df
     
     def _run_feedbuzz(self, audio_file) -> pd.DataFrame: # TODO: type annotations
-        print('Running feeding buzz template matching.')
         out_df = gen_empty_df()
         template_dict = fbh.load_templates(self.template_dict_path[0])
         out_df = fbh.run_multiple_template_matching(
@@ -97,7 +95,6 @@ class BatCallDetector(DetectionInterface):
         YB2 = curr_row.high_freq
         SB = (XB2 - XB1) * (YB2 - YB1)
     
-        #print('Looping compare df to find collision')
         for i in compare_df.itertuples():
             XA1 = i.start_time #min_t
             XA2 = i.end_time #max_t
@@ -115,8 +112,6 @@ class BatCallDetector(DetectionInterface):
     Return: pd.DataFrame
     """
     def _buzzfeed_fp_removal(self,bd_output, fb_output):
-        print('Entering FP removal.')
-
         collide = np.zeros(len(fb_output))
         for curr in fb_output.itertuples():
             collide[curr.Index] = self._removing_collision(curr,bd_output)
@@ -130,8 +125,6 @@ class BatCallDetector(DetectionInterface):
     def run(self, audio_file):
         bd_output = self._run_batdetect(audio_file)
         fb_output = self._run_feedbuzz(audio_file)
-        print('FB output:')
-        print(fb_output)
         fb_final_output = self._buzzfeed_fp_removal(bd_output, fb_output)
 
         return pd.concat([bd_output,fb_final_output])

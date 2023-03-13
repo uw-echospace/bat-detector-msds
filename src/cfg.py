@@ -25,7 +25,7 @@ def get_config():
                     cnn_features=True,
                     peak_distance=0.05,
                     peak_threshold=0.25,
-                    template_dict_path="/Users/kirsteenng/Desktop/UW/DATA 590/bat-detector-msds/pipeline/template_dict.pickle", #TODO: is this the right place to put?
+                    template_dict_path="models/bat_call_detector/templates/template_dict.pickle",
                     num_matches_threshold=2,
                     buzz_feed_range=0.15,
                     alpha=1,
