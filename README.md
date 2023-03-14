@@ -55,25 +55,25 @@ We have created a software combining BatDetect2 and scikit-maad to increase the 
 
 BatDetect2 is a convolutional neural network based open-source pipeline for detecting ultrasonic, full-spectrum, search-phase calls produced by echolocating bats. The model first converts a raw audio file into a spectrogram and uses a sliding window method to identify the pieces of spectrogram that contains bat calls. 
 
-![BatDetect2_example](https://github.com/uw-echospace/bat-detector-msds/ims/BatDetect2_example.png?raw=true)
+![BatDetect2_example](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/BatDetect2_example.png?raw=true)
 
 Example output of BatDetect2.
 
 Scikit-maad is a Python package that specializes in quantitative analysis of environmental audio recording. Given that feeding buzzes and ordinary bat calls have different shapes in the spectrogram and leveraging the stereotypical shape of feeding buzzes, we use multiple feed buzz templates and a template matching function provided in the package, proving to be effective in identifying feeding buzzes amongst bat calls.
 
-![BatCall_example](https://github.com/uw-echospace/bat-detector-msds/ims/bat_call_example.png?raw=true)
+![BatCall_example](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/bat_call_example.png?raw=true)
 
 (a) A group of bat calls have consistent frequency between each call
 
-![FeedingBuzz_example](https://github.com/uw-echospace/bat-detector-msds/ims/feeding_buzz_example.png?raw=true)
+![FeedingBuzz_example](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/feeding_buzz_example.png?raw=true)
 
 (b) A feeding buzz is identified as a sudden dip in calls.
 
-![TemplateMatching_example](https://github.com/uw-echospace/bat-detector-msds/ims/template_matching_example.png?raw=true)
+![TemplateMatching_example](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/template_matching_example.png?raw=true)
 
 ## Pipeline Workflow 
 
-![PipelineWorkflow](https://github.com/uw-echospace/bat-detector-msds/ims/workflow.jpg?raw=true)
+![PipelineWorkflow](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/workflow.jpg?raw=true)
 
 # Analysis
 ## Model Evaluation
@@ -82,17 +82,17 @@ We evaluate our model based on calculating Recall and Precision metrics using on
 ### Bat calls
 One tunable parameter in this bat call model is the probability threshold, which refers to the detection probability computed by the model. The higher the probability, the more confident the model is in identifying the target as a bat call. We found that the Recall-Precision for bat calls is most optimized around threshold=0.44, with both recall and precision rate around 0.85. 
 
-![PRCurve_BatCalls](https://github.com/uw-echospace/bat-detector-msds/ims/PRCurve_BatCalls.png?raw=true)
+![PRCurve_BatCalls](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/PRCurve_BatCalls.png?raw=true)
 
 ### Feeding buzzes
 We created a method of combining threshold tuning and filtering false positives using the result from the bat call pipeline to improve our recall and precision rate from 0.25 to 0.6 using two templates (number of templates=2). The threshold that provides the most balanced outcome is 0.26. This threshold represents the correlation coefficient between the target and template. 
 
-![PRCurve_FeedingBuzzes](https://github.com/uw-echospace/bat-detector-msds/ims/PRCurve_FeedingBuzz.png?raw=true)
+![PRCurve_FeedingBuzzes](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/PRCurve_FeedingBuzz.png?raw=true)
 
 ## Results
 Based on the table below, our pipeline has increased the Precision by 73%, Recall by 140% for bat call detection and the Computation time by 10% for a 30-minute audio wav file.
 
-![ResultsTable](https://github.com/uw-echospace/bat-detector-msds/ims/ResultsTable.png?raw=true)
+![ResultsTable](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/ResultsTable.png?raw=true)
 
 *The value for precision is not available for feeding buzzes because there is no labelled data in the manual process
 
