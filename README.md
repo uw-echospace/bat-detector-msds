@@ -50,14 +50,60 @@ To identify feedbuzzes, this repository uses a technique called [tempalte matchi
 python src/cli.py --help
 ```
 
+# Deeper dive into the models inside the library
+We have created a software combining BatDetect2 and scikit-maad to increase the accuracy and efficiency in bat calls and feeding buzz detection. The pipeline will then be programmed to run in parallel processes to increase efficiency.
+
+BatDetect2 is a convolutional neural network based open-source pipeline for detecting ultrasonic, full-spectrum, search-phase calls produced by echolocating bats. The model first converts a raw audio file into a spectrogram and uses a sliding window method to identify the pieces of spectrogram that contains bat calls. 
+
+![BatDetect2_example](https://github.com/uw-echospace/bat-detector-msds/ims/BatDetect2_example.png?raw=true)
+
+Example output of BatDetect2.
+
+Scikit-maad is a Python package that specializes in quantitative analysis of environmental audio recording. Given that feeding buzzes and ordinary bat calls have different shapes in the spectrogram and leveraging the stereotypical shape of feeding buzzes, we use multiple feed buzz templates and a template matching function provided in the package, proving to be effective in identifying feeding buzzes amongst bat calls.
+
+![BatCall_example](https://github.com/uw-echospace/bat-detector-msds/ims/bat_call_example.png?raw=true)
+
+(a) A group of bat calls have consistent frequency between each call
+
+![FeedingBuzz_example](https://github.com/uw-echospace/bat-detector-msds/ims/feeding_buzz_example.png?raw=true)
+
+(b) A feeding buzz is identified as a sudden dip in calls.
+
+![TemplateMatching_example](https://github.com/uw-echospace/bat-detector-msds/ims/template_matching_example.png?raw=true)
+
+## Pipeline Workflow 
+
+![PipelineWorkflow](https://github.com/uw-echospace/bat-detector-msds/ims/workflow.jpg?raw=true)
+
 # Analysis
-TODO
-## Detectors and Results
-TODO
+## Model Evaluation
+We evaluate our model based on calculating Recall and Precision metrics using one audio wav file: 20210910_030000.wav that contains more than 3000 bat calls.
+ 
+### Bat calls
+One tunable parameter in this bat call model is the probability threshold, which refers to the detection probability computed by the model. The higher the probability, the more confident the model is in identifying the target as a bat call. We found that the Recall-Precision for bat calls is most optimized around threshold=0.44, with both recall and precision rate around 0.85. 
+
+![PRCurve_BatCalls](https://github.com/uw-echospace/bat-detector-msds/ims/PRCurve_BatCalls.png?raw=true)
+
+### Feeding buzzes
+We created a method of combining threshold tuning and filtering false positives using the result from the bat call pipeline to improve our recall and precision rate from 0.25 to 0.6 using two templates (number of templates=2). The threshold that provides the most balanced outcome is 0.26. This threshold represents the correlation coefficient between the target and template. 
+
+![PRCurve_FeedingBuzzes](https://github.com/uw-echospace/bat-detector-msds/ims/PRCurve_FeedingBuzz.png?raw=true)
+
+## Results
+Based on the table below, our pipeline has increased the Precision by 73%, Recall by 140% for bat call detection and the Computation time by 10% for a 30-minute audio wav file.
+
+![ResultsTable](https://github.com/uw-echospace/bat-detector-msds/ims/ResultsTable.png?raw=true)
+
+*The value for precision is not available for feeding buzzes because there is no labelled data in the manual process
+
+Computation times gains are calculated on the specific improvement that our sponsor will observe, so it has to be taken with care. We explain why:
+1. Our sponsor currently uses RavenPro. For batch processing on Mac the software limits batch processing to no more than approximately 16 files for 16GB RAM and 8 files for 8GB files, hence, they were forced to use a slower Linux machine to be able to batch process the amount of files they require. This machine is what the currently use and it's the baseline we use of 2 minutes 36 seconds per file.
+
+2. Our library can be run on any OS, specifically in the faster Mac machine they have available, we know that for a similar Mac Book Pro M1 (TODO) it takes 2 minutes 12 seconds to run. This will be the processing time they will observe per file. 
 
 
 # Acknowledgements
 Dr. Wu-Jung Lee -- Univeristy of Washington [EchoSpace](https://uw-echospace.github.io) \
 Aditya Krishna -- University of Washington [EchoSpace](https://uw-echospace.github.io) \
-Maad person TODO \
-Oisin Mac Aodha -- [Bat Detect 2](https://github.com/macaodha/batdetect2) \
+Juan Sebastian Ulloa -- Author of [scikit-maad](https://github.com/macaodha/batdetect2) \
+Oisin Mac Aodha -- Author of [Bat Detect 2](https://github.com/macaodha/batdetect2)
