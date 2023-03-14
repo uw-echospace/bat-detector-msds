@@ -51,16 +51,16 @@ python src/cli.py --help
 ```
 
 # Deeper dive into the models inside the library
-We have created a software combining BatDetect2 and scikit-maad to increase the accuracy and efficiency in bat calls and feeding buzz detection. The pipeline will then be programmed to run in parallel processes to increase efficiency.
+We have created a software combining **BatDetect2** and **scikit-maad** to increase the accuracy and efficiency in bat calls and feeding buzz detection. The pipeline will then be programmed to run in parallel processes to increase efficiency.
 ## BatDetect 2 
-BatDetect2 is a convolutional neural network based open-source pipeline for detecting ultrasonic, full-spectrum, search-phase calls produced by echolocating bats. The model first converts a raw audio file into a spectrogram and uses a sliding window method to identify the pieces of spectrogram that contains bat calls. 
+**BatDetect2** is a convolutional neural network based open-source pipeline for detecting ultrasonic, full-spectrum, search-phase calls produced by echolocating bats. The model first converts a raw audio file into a spectrogram and uses a sliding window method to identify the pieces of spectrogram that contains bat calls. 
 
 ![BatDetect2_example](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/BatDetect2_example.png?raw=true)
 
 Example output of BatDetect2.
 
 ## Scikit-maad (Spectrogram Template Matching)
-Scikit-maad is a Python package that specializes in quantitative analysis of environmental audio recording. Given that feeding buzzes and ordinary bat calls have different shapes in the spectrogram and leveraging the stereotypical shape of feeding buzzes, we use multiple feed buzz templates and a template matching function provided in the package, proving to be effective in identifying feeding buzzes amongst bat calls.
+**Scikit-maad** is a Python package that specializes in quantitative analysis of environmental audio recording. Given that feeding buzzes and ordinary bat calls have different shapes in the spectrogram and leveraging the stereotypical shape of feeding buzzes, we use multiple feed buzz templates and a template matching function provided in the package, proving to be effective in identifying feeding buzzes amongst bat calls.
 
 ![BatCall_example](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/bat_call_example.png?raw=true)
 
@@ -72,7 +72,14 @@ Scikit-maad is a Python package that specializes in quantitative analysis of env
 
 ![TemplateMatching_example](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/template_matching_example.png?raw=true)
 
+Example output of template matching from scikit-maad using only one template. The bounding boxes in top image show the feeding buzz identified. The correlation coefficient chart below indicates the coefficient of this file with the template used. Note the three peaks in the chart corresponds to the bounding boxes in the top chart. 
+
+Our model combines the results of multiple templates (10 templates) that are passed to each spectrogram. Given that this resluts in many different potential feeding buzz detections, we use a voting system among all of these detections to choose the final feeding buzz identifications. Currently our voting threshold is: 2.
+
+
 ## Pipeline Workflow 
+
+The following diagram describes the overall pipeline of our model:
 
 ![PipelineWorkflow](https://github.com/uw-echospace/bat-detector-msds/blob/main/ims/workflow.jpg?raw=true)
 
@@ -100,7 +107,7 @@ Based on the table below, our pipeline has increased the Precision by 73%, Recal
 Computation times gains are calculated on the specific improvement that our sponsor will observe, so it has to be taken with care. We explain why:
 1. Our sponsor currently uses RavenPro. For batch processing on Mac the software limits batch processing to no more than approximately 16 files for 16GB RAM and 8 files for 8GB files, hence, they were forced to use a slower Linux machine to be able to batch process the amount of files they require. This machine is what the currently use and it's the baseline we use of 2 minutes 36 seconds per file.
 
-2. Our library can be run on any OS, specifically in the faster Mac machine they have available, we know that for a similar Mac Book Pro M1 (TODO) it takes 2 minutes 12 seconds to run. This will be the processing time they will observe per file. 
+2. Our library can be run on any OS, specifically in the faster Mac machine they have available, we know that for a similar Mac Book Pro M1X with 64GB RAM it takes 2 minutes 12 seconds to run. This will be the processing time they will observe per file. 
 
 
 # Acknowledgements
