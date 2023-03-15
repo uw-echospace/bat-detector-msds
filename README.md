@@ -24,7 +24,7 @@ The following invokation generates a TSV in `output_dir` containing all detectio
 python src/cli.py audio.wav output_dir/
 ```
 
-Additionally, you can specific the number of processes used to process the audio and generate a CSV instead of TSV:
+Additionally, you can specify the number of processes used to process the audio and generate a CSV instead of TSV:
 ```
 python src/cli.py --csv --num_processes=4 audio.wav output_dir/
 ```
@@ -37,13 +37,36 @@ All of the analytical parameters are accessible in `src/cfg.py`. Have a look!
 2. Override `DetectionInterface`'s `run()` and `get_name()` methods
 3. Add your model's constructer to `src/cfg.py` in the `models` list, passing in any parameters needed in the constructor. 
 
-The pipeline executres the `run()` method of every model present in that aforementioned `models` list in `src/cfg.py`.
+The pipeline executes the `run()` method of every model present in that aforementioned `models` list in `src/cfg.py`.
 
 
 ## Update feedbuzz detection templates
-To identify feedbuzzes, this repository uses a technique called [tempalte matching](https://en.wikipedia.org/wiki/Template_matching). We offer an initial set of templates that perform decently for feedbuzz detection in Seattle, WA. To update these templates:
-1. TODO: 1
-2. TODO: 2
+To identify feedbuzzes, this repository uses a technique called [template matching](https://en.wikipedia.org/wiki/Template_matching). We offer an initial set of templates, that is stored in `src/models/bat_call_detector/templates/template_dict.pickle`  that could perform decently for feeding buzz from bat calls native to Seattle, Washington. The templates are generated based on the following steps:
+
+1. An individual feeding buzz is identified in an audio recording. The time and frequency of the feeding buzz are being identified manually.
+2. Run `generate_template()` function in `src/models/bat_call_detector/feed_buzz_helper.py` to generate template based on the time and frequency identified above.
+3. The template will be saved in a pickle object.
+
+User can see what are the templates stored in the template_dict.pikle by running `load_template()` function in `src/models/bat_call_detector/feed_buzz_helper.py`. However, the details below are the templates used in the current pipeline.
+
+| Template      | Audio File Name | Time (s) | Frequency  (kHz) |
+| ----------- | ----------- |----------- |----------- |
+| 1   | 20210910_030000_time2303_LFbuzz.wav | (9.762, 10.059) | (14532.7, 29760.3)
+| 2   | 20210910_033000.wav  | (70.637, 71.328) |(19745, 28638.2)
+| 3   | 20210910_033000.wav  |(620.663, 620.854) |(12434.9,29910.9)
+| 4   | 20210910_033000.wav  |(898.079, 898.368) |(11426.6, 25205.9)
+| 5   | 20210910_030000.wav  |(608.139, 608.452) |(14328.0,30138.3)
+| 6   | 20210910_030000.wav  |(744.961, 745.0877) |(10375.5, 47430.83)
+| 7   | 20210910_030000.wav  |(1065.034, 1065.228) |(14328, 25691.7)
+| 8   | 20211016_030000.wav  |(1611.886, 1612.014) |(19214.9,53801.6)
+| 9   | 20211016_030000.wav  |(1717.383, 1717.518) |(19762.8, 46442.7)
+| 10  | 20211016_030000.wav |(1728.248, 1728.397 )|(20751, 52865.6)
+
+
+User can choose to update these templates as a way to improve the performance of feeding buzz detection. Follow the steps below to update the templates. Note that all the functions mentioned below are in `src/models/bat_call_detector/feed_buzz_helper.py`
+1. Run `load_template()`  to assess existing template. 
+2. Run `remove_template()`  to remove any unwanted template.
+3. Run `generate_template()`  to generate new templates and save it to existing or new template dictionary.
 
 ## Help
 ```
@@ -111,7 +134,7 @@ Computation times gains are calculated on the specific improvement that our spon
 
 
 # Acknowledgements
-Dr. Wu-Jung Lee -- Univeristy of Washington [EchoSpace](https://uw-echospace.github.io) \
+Dr. Wu-Jung Lee -- University of Washington [EchoSpace](https://uw-echospace.github.io) \
 Aditya Krishna -- University of Washington [EchoSpace](https://uw-echospace.github.io) \
 Juan Sebastian Ulloa -- Author of [scikit-maad](https://github.com/macaodha/batdetect2) \
 Oisin Mac Aodha -- Author of [Bat Detect 2](https://github.com/macaodha/batdetect2)
