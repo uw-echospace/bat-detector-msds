@@ -16,12 +16,17 @@ NOVERLAP = 512
 WINDOW = 'hann'
 DB_RANGE = 80
 
-'''
-Remove templates from current template dictionary based on user specific template.
 
-Return: a saved pickle with removed items.
-'''
 def remove_template(pickle_template_path:Path, remove_namelist:list):
+    '''
+    Remove templates from current template dictionary based on user specific template.
+
+    Parameters:: 
+        pickle_template_path: Path that stores the existing template dictionary
+        remove_namelist: A list containing the name(s) of template that user wants to remove. The strings must match the names in the keys of the template that is being loaded.
+
+    Return:: a saved pickle with removed items
+    '''
     print('This function will remove these templates {} from current template dictionary'.format(remove_namelist))
     
     flag = True
@@ -55,10 +60,25 @@ def remove_template(pickle_template_path:Path, remove_namelist:list):
         print('Stopping function...')
         return
             
-"""
-Generate template based on user defined time and frequency limit.
-"""
+
 def generate_template(template_audio_path:Path, pickle_template_path:Path, freq_type:str, tlims:tuple, flims:tuple):
+    """
+    Generate template based on user defined time and frequency limit.
+
+    Paremeters::
+        template_audio_path: a Path object containing the directory of the original .wav file that contains the feeding buzz
+
+        pickle_template_path: a Path object containing the directory where the pickle object will be stored
+
+        freq_type: either 'lf' for low frequency template or 'hf' for high frequency template
+
+        tlims: tuple containing the start time and end time of the feeding buzz. Both values must be identified manually beforehand.
+
+        flims: uple containing the start frequency and end frequency of the feeding buzz. Both values must be identified manually beforehand.
+    
+    Return:: None
+
+    """
     # we want to create template, save it and update the template dictionary
     template_dict = load_templates(pickle_template_path)
     template_name = 'template_{}_{}_{}_{}'.format(freq_type,template_audio_path.stem, tlims[0], tlims[1])
@@ -71,12 +91,16 @@ def generate_template(template_audio_path:Path, pickle_template_path:Path, freq_
         save_template_dict(template_dict, pickle_template_path)
     return
 
-"""
-Load pickled template into a dictionary.
 
-Return: a dictionary
-"""
 def load_templates(template_path:Path):
+    """
+    Load pickled template into a dictionary.
+
+    Parameters::
+        template_path: a Path containing the pickle object
+
+    Return:: a dictionary
+    """
     #Ideally we should be able to choose which templates to load, for now we will load all
     try:
         with open(template_path, 'rb') as handle:
@@ -87,22 +111,50 @@ def load_templates(template_path:Path):
         template_dict = dict()
     return template_dict
 
-"""
-Save dictionary into a pickle.
-"""
+
 def save_template_dict(template_dict:dict, pickle_template_path: Path):
+    """
+    Save dictionary into a pickle.
+
+    Parameters::
+        template_audio_path: a Path object containing the directory of the original .wav file that contains the feeding buzz
+
+        pickle_template_path: a Path object containing the directory where the pickle object will be stored
+
+    Return:: None
+    """
         # we save the updated dict
     with open(pickle_template_path, 'wb') as handle:
         pickle.dump(template_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
         handle.close()
     
 
-"""
-Run template matching process for one specific template across target audio file. 
 
-Return: a pd.DataFrame containing identified feeding buzzes with correlation coefficient.
-"""
 def run_template_matching(Sxx_audio: np.ndarray,  tn: any, ext: any, template: tuple, template_name:str, peak_th: float, peak_distance: float):
+    """
+    Run template matching process for one specific template across target audio file. 
+
+    Parameters::
+        Sxx_audio: Spectrogram : Matrix containing K frames with N/2 frequency bins, 
+        K*N <= length (wave) Sxx unit is power => Sxx_power if mode is ‘psd’ Sxx unit is amplitude => Sxx_ampli if mode is ‘amplitude’ or ‘complex’
+
+        tn: 1d ndarray of floats, time vector (horizontal x-axis)
+
+        ext: list of scalars [left, right, bottom, top], the location, in data-coordinates, of the lower-left and upper-right corners.
+
+        template: tuple of a dictionary containing template information in this structure {template_name: (spectrogram matrix of the template, frequency types, time range, frequency range)}.
+
+        template_name: name of the template used in current iteration
+
+        peak_th:float, ranges -1 to 1, threshold applied to find peaks in the cross-correlation array
+
+        peak_distance: float, required minimal temporal distance (>= 0) in seconds between neighbouring
+        peaks. If set to `None`, the minimum temporal resolution will be used.
+        The minimal temporal resolution is given by the array tn and depends on the parameters
+        used to compute the spectrogram.
+
+    Return:: a pd.DataFrame containing identified feeding buzzes with correlation coefficient.
+    """
     xcorrcoef, rois = tm.template_matching(Sxx_audio, template[0], tn, ext, peak_th, peak_distance)
     rois['min_f'] = template[2][0]
     rois['max_f'] = template[2][1]
@@ -110,12 +162,30 @@ def run_template_matching(Sxx_audio: np.ndarray,  tn: any, ext: any, template: t
 
     return rois
 
-"""
-Select one region of interest from a group of similar regions of interest of different template. This happens because an actual feeding buzz is likely to match with several templates due to high coefficient. The parameter num_matches_threshold indicates the minimum number of templates the region of interest requires to match with. 
 
-Return: a pd.Dataframe 
-"""
 def match_rois(rois: pd.DataFrame, out_df:pd.DataFrame, num_matches_threshold: int, buzz_feed_range: float, alpha:float):
+    """
+    Select one region of interest from a group of similar regions of interest of different template. 
+    This happens because an actual feeding buzz is likely to match with several templates due to high coefficient. 
+    The parameter num_matches_threshold indicates the minimum number of templates the region of interest requires to match with. 
+
+    Parameters::
+        rois: a DataFrame containing the feeding buzz identified by the template matching function, results from template matching pipeline.
+
+        out_df: originally an empty DataFrame
+
+        num_matches+threshold: int, ranges 0 to the total number of templates.
+            The number of template that matches the detected area of interest(aoi). The smaller this number is, the
+            fewer templates that the detected aoi has to match in order to be returned as a confirmed feeding buzz.
+
+        buzz_feed_range: float, in milisecond. ranges 0.0 to 1.0.
+            The distance between two consecutive feeding buzz.
+
+        alpha: int, ranges from 0 to 1.
+            A tunable parameter to find the surrounding feeding buzzes identified by similar templates.
+
+    Return:: a pd.Dataframe with filtered false positive
+    """
     match_dict = dict()
 
     match_range = alpha*buzz_feed_range/2
@@ -144,14 +214,39 @@ def match_rois(rois: pd.DataFrame, out_df:pd.DataFrame, num_matches_threshold: i
 
 
 
-"""
-Run template matching across all templates in template dict for each 1 minute audio file
-
-Return: a pd.Dataframe combining results using all templates,
-        columns = ['Begin Time (s)', 'End Time (s)','Low Freq (Hz', 'High Freq (Hz)', 'Collide'].
-"""
 def run_multiple_template_matching(PATH_AUDIO: Path, out_df:pd.DataFrame, peak_th: float, peak_distance: float, template_dict:dict, num_matches_threshold:int, buzz_feed_range: float, alpha: float):
+    """
+    Run template matching across all templates in template dict for each 1 minute audio file
 
+    Parameters::
+        PATH_AUDIO: a Path object containing the post-processed audio .wav file.
+
+        out_df: orginally an empty DataFrame
+
+        peak_th: float, ranges -1 to 1.
+            Threshold applied to find peaks in the cross-correlation array
+
+        peak_distance: float.
+            Required minimal temporal distance (>= 0) in seconds between neighbouring
+            peaks. If set to `None`, the minimum temporal resolution will be used.
+            The minimal temporal resolution is given by the array tn and depends on the parameters
+            used to compute the spectrogram.
+
+        template_dict: a dict object holding all the templates generated from generate_template() function
+
+        num_matches_threshold: int, ranges 0 to the total number of templates.
+            The number of template that matches the detected area of interest(aoi). The smaller this number is, the
+            fewer templates that the detected aoi has to match in order to be returned as a confirmed feeding buzz.
+
+        buzz_feed_range:float, in milisecond. ranges 0.0 to 1.0.
+            The distance between two consecutive feeding buzz.
+
+        alpha: int, ranges from 0 to 1.
+            A tunable parameter to find the surrounding feeding buzzes identified by similar templates.
+
+    Return:: a pd.Dataframe combining results using all templates,
+            columns = ['Begin Time (s)', 'End Time (s)','Low Freq (Hz', 'High Freq (Hz)', 'Collide'].
+    """
     # Load sound and initiate variables
     s, fs = sound.load(PATH_AUDIO)
     rois_df = pd.DataFrame() 
