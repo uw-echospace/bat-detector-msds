@@ -12,7 +12,7 @@ We recommend using Python 3.9.x. Other versions may work, but they're not tested
 
 From repository root, run the following commands:
 ```
-git submodule --init --recursive
+git submodule update --init --recursive
 ```
 ```
 pip install -r requirements.txt
