@@ -295,9 +295,9 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
     return cfg
 
-def generate_segmented_paths(summer_audio_files, cfg):
+def generate_segmented_paths(audio_files, cfg):
     segmented_file_paths = []
-    for audio_file in summer_audio_files:
+    for audio_file in audio_files:
         segmented_file_paths += generate_segments(
             audio_file = audio_file, 
             output_dir = cfg['tmp_dir'],
@@ -336,8 +336,13 @@ def run_models(file_mappings, cfg, csv_name):
 
 def run_batdetect2_pipeline(input_dir, csv_name, output_dir, tmp_dir):
     cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-    summer_audio_files = sorted(list(Path(input_dir).iterdir()))
-    segmented_file_paths = generate_segmented_paths(summer_audio_files, cfg)
+
+    audio_files = []
+    for file in sorted(list(Path(input_dir).iterdir())):
+        if (file.name[-4:] == ".WAV"):
+            audio_files.append(file)
+
+    segmented_file_paths = generate_segmented_paths(audio_files, cfg)
     file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
     bd_dets = run_models(file_path_mappings, cfg, csv_name)
 
