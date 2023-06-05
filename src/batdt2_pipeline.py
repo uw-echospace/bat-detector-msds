@@ -64,8 +64,7 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
             sub_length = sub_end - sub_start
             ip_audio.seek(sub_start)
             op_audio = ip_audio.read(sub_length)
-            if 
-                sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
+            sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
 
     return output_files 
 
