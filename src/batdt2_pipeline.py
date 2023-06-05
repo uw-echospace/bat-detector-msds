@@ -81,7 +81,7 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 def get_files_from_dir(input_dir):
     audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
-        if (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav"):
+        if (len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
             audio_files.append(file)
 
     return audio_files
