@@ -122,10 +122,9 @@ def run_models(file_mappings, cfg, csv_name):
 
     return bd_dets
 
-def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, save=True):
+def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True):
     recover_folder = input_dir.split('/')[-2]
     audiomoth_folder = input_dir.split('/')[-1]
-    audiomoth_unit = audiomoth_folder.split('_')[-1]
     august_dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
     activity = np.array([])
     activity_times = []
@@ -150,15 +149,19 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, save=True):
 
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
-    plt.title(f"Activity from Central Pond", loc='left', y=1.05)
+    plt.title(f"Activity from {site_name}", loc='left', y=1.05)
     plt.imshow(activity+1, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2])
     plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=60)
     plt.colorbar()
     if save:
-        plt.savefig(f"{output_dir}/activity_{recover_folder}_{audiomoth_unit}.png", bbox_inches='tight')
+        plt.savefig(f"{output_dir}/activity_{recover_folder}_{audiomoth_folder}.png", bbox_inches='tight')
     plt.tight_layout()
     plt.show()
+
+def delete_segments(necessary_paths):
+    for path in necessary_paths:
+        os.remove(path['audio_file'])
 
 def run_pipeline(input_dir, csv_name, output_dir, tmp_dir):
     if not os.path.isdir(output_dir):
@@ -168,10 +171,72 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir):
     segmented_file_paths = generate_segmented_paths(audio_files, cfg)
     file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
     bd_dets = run_models(file_path_mappings, cfg, csv_name)
+    delete_segments(segmented_file_paths)
 
-    plot_dets_as_activity_grid(input_dir, csv_name, output_dir, save=True)
+    recover_folder = input_dir.split('/')[-2]
+    recover_date = recover_folder.split('-')[1]
+    audiomoth_folder = input_dir.split('/')[-1]
+    audiomoth_unit = audiomoth_folder.split('_')[-1]
+    field_records = get_field_records(Path("ubna_2022b.csv"))
+    site_name = get_site_name(field_records, recover_date, audiomoth_unit)
+    print(f"Looking at data from {site_name}...")
+    plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True)
 
     return bd_dets
+
+def get_field_records(path_to_records):
+    """Extracts .csv field records from given path and converts it to DataFrame object.
+
+    Parameters
+    ------------
+    path_to_records : `pathlib.Path`
+        - Path to the location of .csv file field records
+
+    Returns
+    ------------
+    fr : `pandas.DataFrame`
+        - DataFrame table that matches the information in the .md file 
+        - stored as `repo_root_level/field_records/ubna_2022b.md`
+    """
+
+    if (path_to_records.is_file()):
+        df_fr = pd.read_csv(path_to_records, sep=',') 
+
+    return df_fr
+
+
+def get_site_name(df_fr, DATE, SD_CARD_NUM):
+    """Gets the location where an AudioMoth was deployed at a certain date
+    using the deployment field records.
+
+    Parameters
+    ------------
+    df_fr : `pandas.DataFrame`
+        - DataFrame table that matches the information in the .md file 
+        - stored as `repo_root_level/field_records/ubna_2022b.md`
+    DATE : `str`
+        The date when an AudioMoth was deployed
+    SD_CARD_NUM : `str`
+        The SD card inside the AudioMoth to identify which AudioMoth the user wants.
+
+    Returns
+    ------------
+    site_name : `str`
+        - Name of the location where the Audiomoth was deployed at that date
+        according to the field records.
+        - If the deployment is not recorded, site_name will be "(Site not found in Field Records)"
+    """
+
+    cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
+    cond2 =  df_fr["SD card #"]==f"{SD_CARD_NUM}"
+    site = df_fr.loc[cond1&cond2, "Site"]
+    
+    if (site.empty):
+        site_name = "(Site not found in Field Records)"
+    else:
+        site_name = site.item()
+    
+    return site_name
 
 def parse_args():
     """
