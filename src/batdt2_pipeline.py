@@ -30,6 +30,9 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
     duration: seconds
     """
 
+    if (os.stat(audio_file).st_size == 0):
+        return []
+    
     ip_audio = sf.SoundFile(audio_file)
 
     sampling_rate = ip_audio.samplerate
@@ -61,7 +64,8 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
             sub_length = sub_end - sub_start
             ip_audio.seek(sub_start)
             op_audio = ip_audio.read(sub_length)
-            sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
+            if 
+                sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
 
     return output_files 
 
@@ -166,6 +170,8 @@ def delete_segments(necessary_paths):
 def run_pipeline(input_dir, csv_name, output_dir, tmp_dir):
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
+    if not os.path.isdir(tmp_dir):
+        os.makedirs(tmp_dir)
     cfg = get_params(output_dir, tmp_dir, 4, 30.0)
     audio_files = get_files_from_dir(input_dir)
     segmented_file_paths = generate_segmented_paths(audio_files, cfg)
