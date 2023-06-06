@@ -128,7 +128,7 @@ def run_models(file_mappings, cfg, csv_name):
 def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True):
     recover_folder = input_dir.split('/')[-2]
     audiomoth_folder = input_dir.split('/')[-1]
-    august_dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
+    august_dets = pd.read_csv(f'{output_dir}/{csv_name}')
     activity = np.array([])
     activity_times = []
     activity_dates = []
