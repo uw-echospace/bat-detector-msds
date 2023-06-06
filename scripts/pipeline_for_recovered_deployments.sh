@@ -5,7 +5,6 @@ read -p "Enter recover folder path: " recover_folder_path
 read -p "Enter SD card label: " sd_unit
 
 recover_folder=$(basename "$recover_folder_path")
-echo $recover_folder
 
 . /home/adkris/miniconda3/etc/profile.d/conda.sh
 conda activate bat_msds
