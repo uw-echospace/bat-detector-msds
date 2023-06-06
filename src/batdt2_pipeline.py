@@ -147,6 +147,9 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=
         if (not(activity_dates.__contains__(file_date))):
             activity_dates.append(file_date)
             activity_for_date = np.array([])
+    
+    if (not(activity_times[-1] == "13:00")):
+        activity_times.pop()
 
     print(activity_dates)
     print(activity_times)
