@@ -166,26 +166,30 @@ def delete_segments(necessary_paths):
     for path in necessary_paths:
         os.remove(path['audio_file'])
 
-def run_pipeline(input_dir, csv_name, output_dir, tmp_dir):
-    if not os.path.isdir(output_dir):
-        os.makedirs(output_dir)
-    if not os.path.isdir(tmp_dir):
-        os.makedirs(tmp_dir)
-    cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-    audio_files = get_files_from_dir(input_dir)
-    segmented_file_paths = generate_segmented_paths(audio_files, cfg)
-    file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-    bd_dets = run_models(file_path_mappings, cfg, csv_name)
-    delete_segments(segmented_file_paths)
+def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, generate_fig=True):
+    
+    bd_dets = pd.DataFrame()
+    if run_model:
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+        if not os.path.isdir(tmp_dir):
+            os.makedirs(tmp_dir)
+        cfg = get_params(output_dir, tmp_dir, 4, 30.0)
+        audio_files = get_files_from_dir(input_dir)
+        segmented_file_paths = generate_segmented_paths(audio_files, cfg)
+        file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+        bd_dets = run_models(file_path_mappings, cfg, csv_name)
+        delete_segments(segmented_file_paths)
 
-    recover_folder = input_dir.split('/')[-2]
-    recover_date = recover_folder.split('-')[1]
-    audiomoth_folder = input_dir.split('/')[-1]
-    audiomoth_unit = audiomoth_folder.split('_')[-1]
-    field_records = get_field_records(Path("ubna_2022b.csv"))
-    site_name = get_site_name(field_records, recover_date, audiomoth_unit)
-    print(f"Looking at data from {site_name}...")
-    plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True)
+    if generate_fig:
+        recover_folder = input_dir.split('/')[-2]
+        recover_date = recover_folder.split('-')[1]
+        audiomoth_folder = input_dir.split('/')[-1]
+        audiomoth_unit = audiomoth_folder.split('_')[-1]
+        field_records = get_field_records(Path("ubna_2022b.csv"))
+        site_name = get_site_name(field_records, recover_date, audiomoth_unit)
+        print(f"Looking at data from {site_name}...")
+        plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True)
 
     return bd_dets
 
@@ -272,10 +276,22 @@ def parse_args():
         help="the temp directory where the audio segments go",
         default="output/tmp",
     )
+    parser.add_argument(
+        "run_model",
+        type=bool,
+        help="Do you want to run the model? As opposed to just generating the figure",
+        default=True,
+    )
+    parser.add_argument(
+        "generate_fig",
+        type=bool,
+        help="Do you want to generate and save a corresponding summary figure?",
+        default=True,
+    )
 
     return vars(parser.parse_args())
 
 if __name__ == "__main__":
     args = parse_args()
 
-    run_pipeline(args['input_dir'], args['csv_filename'], args['output_dir'], args['temp_dir'])
+    run_pipeline(args['input_dir'], args['csv_filename'], args['output_dir'], args['temp_dir'], args['run_model'], args['generate_fig'])
