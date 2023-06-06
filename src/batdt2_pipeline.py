@@ -169,7 +169,7 @@ def delete_segments(necessary_paths):
 def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, generate_fig=True):
     
     bd_dets = pd.DataFrame()
-    if run_model:
+    if (run_model == "true"):
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
         if not os.path.isdir(tmp_dir):
@@ -181,7 +181,7 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         bd_dets = run_models(file_path_mappings, cfg, csv_name)
         delete_segments(segmented_file_paths)
 
-    if generate_fig:
+    if (generate_fig == "true"):
         recover_folder = input_dir.split('/')[-2]
         recover_date = recover_folder.split('-')[1]
         audiomoth_folder = input_dir.split('/')[-1]
@@ -278,15 +278,15 @@ def parse_args():
     )
     parser.add_argument(
         "run_model",
-        type=bool,
+        type=str,
         help="Do you want to run the model? As opposed to just generating the figure",
-        default=True,
+        default="true",
     )
     parser.add_argument(
         "generate_fig",
-        type=bool,
+        type=str,
         help="Do you want to generate and save a corresponding summary figure?",
-        default=True,
+        default="true",
     )
 
     return vars(parser.parse_args())
