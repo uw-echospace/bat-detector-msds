@@ -6,7 +6,7 @@ sdUnit=$2
 
 recoverFolder=$(basename "$recoverPath")
 
-echo "Input Directory: $recoverFolder"/"$sdUnit";
+echo "Input Directory: $recoverPath"/"$sdUnit";
 echo "Output CSV name: batdetect2_pipeline__"$recoverFolder"_"$sdUnit".csv"
 echo "Output Directory: output_dir/"$recoverFolder"/"$sdUnit""
 
