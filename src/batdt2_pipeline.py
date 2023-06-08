@@ -163,8 +163,8 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     plt.figure(figsize=(12, 8))
     plt.title(f"Activity from {site_name}", loc='left', y=1.05)
     plt.imshow(activity+1, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2], rotation=30)
-    plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=30)
+    plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2], rotation=50)
+    plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=50)
     plt.ylabel('UTC Time (HH:MM)')
     if show_PST:
         plt.ylabel('PST Time (HH:MM)')
