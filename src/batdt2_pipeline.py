@@ -125,28 +125,37 @@ def run_models(file_mappings, cfg, csv_name):
 
     return bd_dets
 
-def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True):
+def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_PST=False, save=True):
     recover_folder = input_dir.split('/')[-2]
     audiomoth_folder = input_dir.split('/')[-1]
-    august_dets = pd.read_csv(f'{output_dir}/{csv_name}')
+    dets = pd.read_csv(f'{output_dir}/{csv_name}')
     activity = np.array([])
     activity_times = []
     activity_dates = []
 
     for file in get_files_from_dir(input_dir):
-        filedets = august_dets.loc[august_dets['input_file']==file.name]
+        filedets = dets.loc[dets['input_file']==file.name]
         activity = np.hstack([activity, len(filedets)])
 
-        file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+        file_dt_UTC = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
 
-        file_time = dt.datetime.strftime(file_dt, "%H:%M")
-        if (not(activity_times.__contains__(file_time))):
-            activity_times.append(file_time)
+        if show_PST:
+            if (file_dt_UTC.hour >= 7):
+                file_dt_PST = dt.datetime.strptime(f"{file_dt_UTC.date()}_{str(file_dt_UTC.hour - 7).zfill(2)}{file_dt_UTC.minute}", "%Y-%m-%d_%H%M")
+                file_time_PST = dt.datetime.strftime(file_dt_PST, "%H:%M")
+            else:
+                file_dt_PST = dt.datetime.strptime(f"{file_dt_UTC.date()}_{str(24 + file_dt_UTC.hour - 7).zfill(2)}{file_dt_UTC.minute}", "%Y-%m-%d_%H%M")
+                file_time_PST = dt.datetime.strftime(file_dt_PST, "%H:%M")
+            if (not(activity_times.__contains__(file_time_PST))):
+                activity_times.append(file_time_PST)
+        else:
+            file_time_UTC = dt.datetime.strftime(file_dt_UTC, "%H:%M")
+            if (not(activity_times.__contains__(file_time_UTC))):
+                activity_times.append(file_time_UTC)
 
-        file_date = dt.datetime.strftime(file_dt, "%m/%d/%y")
+        file_date = dt.datetime.strftime(file_dt_UTC, "%m/%d/%y")
         if (not(activity_dates.__contains__(file_date))):
             activity_dates.append(file_date)
-            activity_for_date = np.array([])
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
@@ -154,8 +163,12 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=
     plt.figure(figsize=(12, 8))
     plt.title(f"Activity from {site_name}", loc='left', y=1.05)
     plt.imshow(activity+1, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2])
-    plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=60)
+    plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2], rotation=30)
+    plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=30)
+    plt.ylabel('UTC Time (HH:MM)')
+    if show_PST:
+        plt.ylabel('PST Time (HH:MM)')
+    plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     if save:
         plt.savefig(f"{output_dir}/activity_{recover_folder}_{audiomoth_folder}.png", bbox_inches='tight')
