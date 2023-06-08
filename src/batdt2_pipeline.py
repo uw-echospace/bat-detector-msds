@@ -171,7 +171,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     if save:
-        plt.savefig(f"{output_dir}/activity_{recover_folder}_{audiomoth_folder}.png", bbox_inches='tight')
+        plt.savefig(f"{output_dir}/activity_{recover_folder}_{audiomoth_folder}.png", bbox_inches='tight', pad_inches=3)
     plt.tight_layout()
     plt.show()
 
