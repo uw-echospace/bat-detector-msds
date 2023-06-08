@@ -199,7 +199,10 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         recover_date = recover_folder.split('-')[1]
         audiomoth_folder = input_dir.split('/')[-1]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
-        field_records = get_field_records(Path(f"{Path.home()}/bat-detector-msds/notebooks/ubna_2022b.csv"))
+        if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
+            field_records = get_field_records(Path(f"{Path.home()}/bat-detector-msds/notebooks/ubna_2022b.csv"))
+        if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
+            field_records = get_field_records(Path(f"{Path.home()}/bat-detector-msds/notebooks/ubna_2023.csv"))
         site_name = get_site_name(field_records, recover_date, audiomoth_unit)
         print(f"Looking at data from {site_name}...")
         plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True)
@@ -223,6 +226,15 @@ def get_field_records(path_to_records):
 
     if (path_to_records.is_file()):
         df_fr = pd.read_csv(path_to_records, sep=',') 
+
+        df_fr.columns = df_fr.columns.str.strip()
+        for col in df_fr.columns:
+            df_fr[col] = df_fr[col].astype(str).str.strip()
+
+        for i in range(len(df_fr["SD card #"].values)):
+            df_fr["SD card #"].values[i] = df_fr["SD card #"].values[i].zfill(3)
+    else:
+        df_fr = pd.DataFrame()
 
     return df_fr
 
