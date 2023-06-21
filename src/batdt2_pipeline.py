@@ -30,7 +30,7 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
     duration: seconds
     """
 
-    if (os.stat(audio_file).st_size == 0 | os.stat(audio_file).st_size == 488):
+    if (os.stat(audio_file).st_size == 0 or os.stat(audio_file).st_size == 488):
         return []
     
     ip_audio = sf.SoundFile(audio_file)
