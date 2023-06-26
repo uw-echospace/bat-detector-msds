@@ -13,6 +13,8 @@ import matplotlib.colors as colors
 import datetime as dt
 from pathlib import Path
 
+import exiftool
+
 # set python path to correctly use batdetect2 submodule
 import sys
 sys.path.append(os.getcwd())
@@ -29,9 +31,6 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
     start_time: seconds
     duration: seconds
     """
-
-    if (os.stat(audio_file).st_size == 0 or os.stat(audio_file).st_size == 488):
-        return []
     
     ip_audio = sf.SoundFile(audio_file)
 
@@ -80,9 +79,34 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
 def get_files_from_dir(input_dir):
     audio_files = []
+    good_audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
-        if (len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-            audio_files.append(file)
+        if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
+             len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+            file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+                audio_files.append(file)
+                # comments = exiftool.ExifToolHelper().get_tags(file, tags='RIFF:Comment')
+                # if (not("microphone" in comments[0]['RIFF:Comment'])):
+                #     good_audio_files.append(Path(comments[0]['SourceFile']))
+                #    
+    comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
+    df_comments = pd.DataFrame(comments)
+    good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
+
+    for i in range(len(good_audio_files)):
+        good_audio_files[i] = Path(good_audio_files[i])
+                
+    return good_audio_files
+
+def get_files_to_reference(input_dir):
+    audio_files = []
+    for file in sorted(list(Path(input_dir).iterdir())):
+        if (os.path.exists(file) and
+             len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+            file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+                audio_files.append(file)
 
     return audio_files
 
@@ -132,12 +156,17 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity = np.array([])
     activity_times = []
     activity_dates = []
+    good_audio_files = get_files_from_dir(input_dir)
+    ref_audio_files = get_files_to_reference(input_dir)
 
-    for file in get_files_from_dir(input_dir):
-        filedets = dets.loc[dets['input_file']==file.name]
-        activity = np.hstack([activity, len(filedets)])
+    for file in ref_audio_files:
+        filedets = dets.loc[dets['input_file']==(file).name]
+        if file in good_audio_files:
+            activity = np.hstack([activity, len(filedets) + 1])
+        else:
+            activity = np.hstack([activity, 0])
 
-        file_dt_UTC = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+        file_dt_UTC = dt.datetime.strptime((file).name, "%Y%m%d_%H%M%S.WAV")
 
         if show_PST:
             if (file_dt_UTC.hour >= 7):
@@ -159,10 +188,14 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
+    masked_array_for_nodets = np.ma.masked_where(activity==0, activity)
+    cmap = plt.get_cmap('viridis')
+    cmap.set_bad(color='red')
+
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
     plt.title(f"Activity from {site_name}", loc='left', y=1.05)
-    plt.imshow(activity+1, norm=colors.LogNorm(vmin=1, vmax=10e3))
+    plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2], rotation=50)
     plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=50)
     plt.ylabel('UTC Time (HH:MM)')
@@ -188,8 +221,9 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-        audio_files = get_files_from_dir(input_dir)
-        segmented_file_paths = generate_segmented_paths(audio_files, cfg)
+        good_audio_files = get_files_from_dir(input_dir)
+        print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
+        segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_dets = run_models(file_path_mappings, cfg, csv_name)
         delete_segments(segmented_file_paths)
