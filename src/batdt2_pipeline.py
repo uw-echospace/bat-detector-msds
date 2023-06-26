@@ -77,7 +77,26 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
     return cfg
 
-def get_files_from_dir(input_dir):
+def get_files_for_pipeline(input_dir):
+    audio_files = []
+    good_audio_files = []
+    for file in sorted(list(Path(input_dir).iterdir())):
+        if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
+             len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+            file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+                audio_files.append(file)
+
+    comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
+    df_comments = pd.DataFrame(comments)
+    good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
+
+    for i in range(len(good_audio_files)):
+        good_audio_files[i] = Path(good_audio_files[i])
+                
+    return good_audio_files
+
+def get_files_to_reference(input_dir):
     audio_files = []
     good_audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
@@ -102,8 +121,8 @@ def get_files_from_dir(input_dir):
 def get_files_to_reference(input_dir):
     audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
-        if (os.path.exists(file) and
-             len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+      if (os.path.exists(file) and len(file.name.split('.')) == 2 and 
+            (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
             file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
             if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
                 audio_files.append(file)
@@ -156,7 +175,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity = np.array([])
     activity_times = []
     activity_dates = []
-    good_audio_files = get_files_from_dir(input_dir)
+    good_audio_files = get_files_for_pipeline(input_dir)
     ref_audio_files = get_files_to_reference(input_dir)
 
     for file in ref_audio_files:
@@ -221,7 +240,7 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-        good_audio_files = get_files_from_dir(input_dir)
+        good_audio_files = get_files_for_pipeline(input_dir)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
