@@ -146,11 +146,13 @@ def get_files_for_pipeline(input_dir):
 
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
     df_comments = pd.DataFrame(comments)
-    print(df_comments)
+    print(f"There are {len(audio_files)} audio files that passed 1st level of filtering!")
     good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
 
     for i in range(len(good_audio_files)):
         good_audio_files[i] = Path(good_audio_files[i])
+
+    print(f"There are {len(good_audio_files)} audio files that passed 2nd level of filtering!")
                 
     return good_audio_files
 
