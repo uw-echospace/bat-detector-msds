@@ -105,10 +105,7 @@ def get_files_to_reference(input_dir):
             file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
             if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
                 audio_files.append(file)
-                # comments = exiftool.ExifToolHelper().get_tags(file, tags='RIFF:Comment')
-                # if (not("microphone" in comments[0]['RIFF:Comment'])):
-                #     good_audio_files.append(Path(comments[0]['SourceFile']))
-                #    
+                
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
     df_comments = pd.DataFrame(comments)
     good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
