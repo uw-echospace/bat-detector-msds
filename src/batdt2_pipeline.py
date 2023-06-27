@@ -27,9 +27,27 @@ import models.bat_call_detector.feed_buzz_helper as fbh
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
-    Segments audio_file into clips of duration length and saves them to output_dir.
-    start_time: seconds
-    duration: seconds
+    Segments audio file into clips of duration length and saves them to output/tmp folder.
+    Allows detection model to be run on segments instead of entire file as recommended.
+    These segments will be deleted from the output/tmp folder after detections have been generated.
+
+    Parameters
+    ------------
+    audio_file : `pathlib.Path`
+        - The path to an audio_file from the input directory provided in the command line
+    output_dir : `pathlib.Path`
+        - The path to the tmp folder that saves all of our segments.
+    start_time : `float`
+        - The time at which the segments will start being generated from within the audio file
+    duration : `float`
+        - The duration of all segments generated from the audio file.
+
+    Returns
+    ------------
+    output_files : `List`
+        - The path (a str) to each generated segment will be stored in this list.
+        - The offset of each generated segment will be stored in this list.
+        - Both items are stored in a dict{} for each generated segment.
     """
     
     ip_audio = sf.SoundFile(audio_file)
@@ -69,6 +87,26 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
 
 
 def get_params(output_dir, tmp_dir, num_processes, segment_duration):
+    """
+    Gets model params using separate method stored in `src/cfg.py`
+
+    Parameters
+    ------------
+    output_dir : `str`
+        - The path to the directory where outputs of the pipeline will be saved.
+    tmp_dir : `str`
+        - The path to the directory where segments of all audio files from the input directory will be saved.
+    num_processes : `int`
+        - The number of processes the user can set to run this pipeline on
+    segment_duration : `float`
+        - The duration of all segments generated from all audio files.
+
+    Returns
+    ------------
+    cfg : `dict`
+        - A dictionary of all model parameters and pipeline parameters.
+    """
+
     cfg = get_config()
     cfg["output_dir"] = Path(output_dir)
     cfg["tmp_dir"] = Path(tmp_dir)
@@ -78,6 +116,24 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
     return cfg
 
 def get_files_for_pipeline(input_dir):
+    """
+    Gets a list of audio files existing in an input directory to feed into the pipeline.
+
+    Parameters
+    ------------
+    input_dir : `str`
+        - The provided path to a directory consisting of audio files the user wants to feed into our pipeline.
+
+    Returns
+    ------------
+    good_audio_files : `List`
+        - A list of pathlib.Path objects to all usable audio files existing in input_dir
+        - Files are checked as candidates if they first exist and are not empty.
+        - Then they must be .wav or .WAV files, as those are the files recorded by Audiomoths
+        - Finally, files are only added if they are starting at 30min 0secs or 0min 0secs for every hour:
+            - This is to avoid stating that we detected X amount of detections for a file whose duration is not 30 mins.
+    """
+
     audio_files = []
     good_audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
@@ -251,8 +307,8 @@ def get_field_records(path_to_records):
     Returns
     ------------
     fr : `pandas.DataFrame`
-        - DataFrame table that matches the information in the .md file 
-        - stored as `repo_root_level/field_records/ubna_2022b.md`
+        - DataFrame table that matches the information in the .csv file 
+        - stored as `repo_root_level/field_records/{.csv}`
     """
 
     if (path_to_records.is_file()):
