@@ -141,7 +141,7 @@ def get_files_for_pipeline(input_dir):
         if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
              len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
             file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+            if (file_dt.second == 0):
                 audio_files.append(file)
 
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
@@ -181,7 +181,7 @@ def get_files_to_reference(input_dir):
       if (os.path.exists(file) and len(file.name.split('.')) == 2 and 
             (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
             file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+            if (file_dt.second == 0):
                 audio_files.append(file)
 
     return audio_files
