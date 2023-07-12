@@ -126,7 +126,9 @@ def get_metrics_over_days(dates, location, labels, presence_threshold, scheme=0)
 
     return presence_over_days, lfpresence_over_days, hfpresence_over_days, numdets_over_days, lfnumdets_over_days, hfnumdets_over_days
 
-def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', spec_NFFT = 256, rm_dB = 200, save=False, save_dir='../output_dir'):
+def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, 
+                    show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, 
+                    det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', spec_NFFT = 256, rm_dB = 200, save=False, save_dir='../output_dir'):
     
     ## If user wants to plot in PST time, adjust the hour accordingly to read into datetime
     hour = int(filename[9:11])
@@ -265,7 +267,8 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
                         linewidth=det_linewidth, edgecolor='yellow', facecolor='none', alpha=0.8)
         
         ## Only plot the detection boxes if they are within the simulated recording period
-        if (np.floor((xs_inds[i]+x_durations[i])*fs).astype('int32') < len(audio_sec) and audio_sec[np.floor((xs_inds[i]+x_durations[i])*fs).astype('int32')] != 0):
+        if (np.floor((xs_inds[i]+x_durations[i])*fs).astype('int32') < len(audio_sec) 
+            and audio_sec[np.floor((xs_inds[i]+x_durations[i])*fs).astype('int32')] != 0):
             ax.add_patch(rect)
             num_dets += 1
 
@@ -290,15 +293,18 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
             if (p_on < 1.0 and int(tick)%cycle_length == 0):
                 ## In the case where we want to show threshold in duty cycled recording, the threshold will need to follow recording periods
                 if (show_threshold):
-                    plt.axhline(hf_threshold, xmin=(int(tick)-reftimes[0])/times[1], xmax=(int(tick)-reftimes[0] + int(p_on*cycle_length))/times[1], linestyle='dashed', color='cyan')
-                rect = patches.Rectangle((int(tick)-reftimes[0], 0), width=int(p_on*cycle_length), height=fs/2, linewidth=1, edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
+                    plt.axhline(hf_threshold, xmin=(int(tick)-reftimes[0])/times[1], 
+                                xmax=(int(tick)-reftimes[0] + int(p_on*cycle_length))/times[1], linestyle='dashed', color='cyan')
+                rect = patches.Rectangle((int(tick)-reftimes[0], 0), width=int(p_on*cycle_length), height=fs/2, 
+                                         linewidth=1, edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
                 ax.add_patch(rect)
             
             ## This is a region for continuous recording
             if (p_on == 1.0):
                 tick = int(tick) - reftimes[0]
                 if (tick%(reftimes[1] - reftimes[0]) == 0):
-                    rect = patches.Rectangle((tick, 0), width=int(audio_sec.shape[0] / fs), height=fs/2, linewidth=1, edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
+                    rect = patches.Rectangle((tick, 0), width=int(audio_sec.shape[0] / fs), height=fs/2, linewidth=1, 
+                                             edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
                     ax.add_patch(rect)
 
         ## Here we handle plotting of the legend for the multiple regions we wish to show
