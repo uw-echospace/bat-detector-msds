@@ -126,8 +126,9 @@ def get_metrics_over_days(dates, location, labels, presence_threshold, scheme=0)
 
     return presence_over_days, lfpresence_over_days, hfpresence_over_days, numdets_over_days, lfnumdets_over_days, hfnumdets_over_days
 
-def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', spec_NFFT = 256, rm_dB = 200, save=False):
-    ## Strip the datetime for year, month, date, and hour from filename
+def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', spec_NFFT = 256, rm_dB = 200, save=False, save_dir='../output_dir'):
+    
+    ## If user wants to plot in PST time, adjust the hour accordingly to read into datetime
     hour = int(filename[9:11])
     if (show_PST):
         if (hour >= 7):
@@ -135,6 +136,8 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
         else:
             hour = 24 + hour - 7
     zero_pad_hour = str(hour).zfill(2)
+
+    ## Strip the datetime for year, month, date, and hour from filename
     file_dt = dt.datetime.strptime(f'{filename[:9]}{zero_pad_hour}{int(offset/60)%60}{int(offset%60)}', '%Y%m%d_%H%M%S')
 
     ## Only find numPoints amount of labels from all available seconds
@@ -145,18 +148,18 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
 
     ## Calculate Time Labels for X-Axis using Datetime objects as Strings
     if times[1] < 400:
-        if times[1] < 150:
+        if times[1] < 150: # If duration of plotted signal is less than 150s, show detail up to microseconds for each time stamp.
             time_labels = [dt.datetime(year=file_dt.year, month=file_dt.month, 
                                                 day=file_dt.day, hour=file_dt.hour + int((file_dt.minute + (sec/60))/60), 
                                                 minute=(file_dt.minute + int((file_dt.second + sec)/60))%60, second=int((file_dt.second + sec)%60), 
                                                 microsecond=np.round(1e6*((file_dt.second + sec)%60-int((file_dt.second + sec)%60))).astype('int32')).strftime('%T.%f')[:-4] 
                                                 for sec in sec_labels]
-        else:
+        else: # If duration of plotted signal is less than 400s but greater than 150s, show detail up to seconds for each time stamp.
             time_labels = [dt.datetime(year=file_dt.year, month=file_dt.month, 
                                             day=file_dt.day, hour=file_dt.hour + int((file_dt.minute + (sec/60))/60), 
                                             minute=(file_dt.minute + int((file_dt.second + sec)/60))%60, second=int((file_dt.second + sec)%60)).strftime('%T')
                                             for sec in sec_labels]
-    else:
+    else: # If duration of plotted signal is greater than 400s, show detail up to minutes only for each time stamp.
         time_labels = [dt.datetime(year=file_dt.year, month=file_dt.month, 
                                             day=file_dt.day, hour=file_dt.hour + int((file_dt.minute + (sec/60))/60), 
                                             minute=(file_dt.minute + int((file_dt.second + sec)/60))%60).strftime('%H:%M') 
@@ -167,21 +170,25 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
     x_ticks = s_ticks*fs
 
     ## Calculate detection parameters from msds output to use for drawing rectangles
-    xs_inds, xs_freqs, x_durations, x_bandwidths, det_labels = get_msds_params_from_df(df, reftimes[0]+times)
+    xs_inds, xs_freqs, x_durations, x_bandwidths, det_labels = ss.get_msds_params_from_df(df, reftimes[0]+times)
     vmin = 20*np.log10(np.max(audio_sec)) - rm_dB  # hide anything below -rm_dB dB
 
-    ## Create figure
-    legend_fontsize = 16
-    ylabel_fontsize=20
-    if (show_audio):
-        if (times[1] < 1200):
+    ## Create figure for the audio signal: multiple figures can be generated with this method
+    legend_fontsize = 16 # This is the fontsize for the text in the legend
+    ylabel_fontsize = 20 # This is the fontsize for the text in the ylabel
+
+    if (show_audio): # If show_audio is true, the plot will consist of an audio signal along with a spectrogram of the given audio signal
+        ## Throughout this method, some if cases are written to handle more intensive plots by only plotting what's necessary
+        ## So for audio signals of greater than 20mins, there will be less intensive plots like generating spectrograms
+
+        if (times[1] < 1200): # If the signal is less than 20mins, we plot 3 subplots: audio signal, spectrogram, and a spectrogram w/ detections
             plt.figure(figsize=(18, 12))
-            # Plotting Audio Signal
             plt.subplot(311)
-        else:
+        else: # If the signal is greater than 20mins, we plot only 2 subplots: audio signal and a spectrogram w/ detections
             plt.figure(figsize=(12, 8))
-            # Plotting Audio Signal
             plt.subplot(211)
+
+        ## Plot the provided audio as a signal in this section
         plt.title(f"Audio from {file_dt.date()} in {location}, {time_labels[0]} to {time_labels[-1]}")
         plt.plot(audio_sec)
         plt.xlim((0, s_ticks[-1]*fs))
@@ -191,13 +198,11 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
         if (np.max(amp_ticks) > 1000):
             plt.yticks(ticks=amp_ticks, labels=(amp_ticks/1000).astype('int16'))
             plt.ylabel("Amplitude (kV)")
-
         plt.ylim((amp_ticks[0], amp_ticks[-1]))
         plt.grid(which="both")
-
         
-        ## Plotting Spectrogram of Audio Signal
-        if (times[1] < 1200):
+        ## Moving on to the next subplot
+        if (times[1] < 1200): # Plot the spectrogram of the audio signal in the case of signal being less than 20mins
             plt.subplot(312)
             plt.title(f"Spectrogram Representation showing Frequencies {0} to {fs//2000}kHz")
             plt.specgram(audio_sec, Fs=fs, cmap=spec_cmap, vmin=vmin)
@@ -211,68 +216,103 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
 
             ## Plotting Spectrogram with MSDS outputs overlayed
             plt.subplot(313)
-        else:
+        else: # Create a subplot for the spectrogram w/ detections in the case of signal being greater than 20mins
             plt.subplot(212)
+        ## Give a title to the subplot with the spectograms w/ detections overlayed
         plt.title(f"Spectrogram Representation with Call Detections Overlayed")
-    else:
+
+    else: # If show_audio is false, the plot will consist of only a spectrogram of the given audio signal
+        ## be_subplot provides functionality to either plot spectrogram as its own plot or include it with other method call plots
         if (not(be_subplot)):
-            plt.figure(figsize=(18, 4))
+            plt.figure(figsize=(12, 4))
             plt.title(f"{file_dt.date()} in {location} | {cycle_length//60}-min, {100*p_on:.1f}% Duty Cycle")
-    if (show_spectrogram):
+
+    ## show_spectrogram provides functionality to hide the spectrogram if one wanted to just show the subsampling scheme
+    if (show_spectrogram): 
+        ## User is allowed to set their own NFFT, cmap, and vmin to plot clear customizable spectrograms
         plt.specgram(audio_sec, NFFT=spec_NFFT, Fs=fs, cmap=spec_cmap, vmin=vmin)
+
+    ## Set the generalizable plt features such as xlim, ylabel, and xticks
     plt.xlim((0, s_ticks[-1]))
     plt.ylabel("Frequency (kHz)", fontsize=ylabel_fontsize)
     plt.xticks(ticks=s_ticks, labels=time_labels)
+
+    ## If show_PST is on, set xlabel as PST, 
     if (show_PST):
-        if (times[1] < 400):
+        if (times[1] < 400): # If timestamps are in second-precision, set xlabel units as (HH:MM:SS)
             plt.xlabel("PST Time (HH:MM:SS)")
-        else:
+        else: # If timestamps are in minute-precision, set xlabel units as (HH:MM)
             plt.xlabel("PST Time (HH:MM)")
     else:
-        if (times[1] < 400):
+        if (times[1] < 400): # If timestamps are in second-precision, set xlabel units as (HH:MM:SS)
             plt.xlabel("UTC Time (HH:MM:SS)")
         else:
-            plt.xlabel("UTC Time (HH:MM)")
+            plt.xlabel("UTC Time (HH:MM)") # If timestamps are in minute-precision, set xlabel units as (HH:MM)
+
     # Find y-axis tick locations from specgram-calculated locations and keep limit just in case
     f_ticks = plt.yticks()[0]
     f_ticks = f_ticks[f_ticks <= fs/2]
     plt.yticks(ticks=f_ticks, labels=(f_ticks/1000).astype('int16'))
+
+    ## Below section pertains to plotting detections and managing legend information on the spectrogram
     ax = plt.gca()
-    num_dets = 0
+    num_dets = 0 # Keep track of number of detections plotted to display after in legend
+    
+    ## Iterate through detections and draw yellow boxes around each detection within the recording period
     for i in range(len(xs_inds)):
         rect = patches.Rectangle((xs_inds[i], xs_freqs[i]), 
                         x_durations[i], x_bandwidths[i], 
                         linewidth=det_linewidth, edgecolor='yellow', facecolor='none', alpha=0.8)
+        
+        ## Only plot the detection boxes if they are within the simulated recording period
         if (np.floor((xs_inds[i]+x_durations[i])*fs).astype('int32') < len(audio_sec) and audio_sec[np.floor((xs_inds[i]+x_durations[i])*fs).astype('int32')] != 0):
             ax.add_patch(rect)
             num_dets += 1
+
+    ## Next we will display semi-opaque regions for simulated recording and sleep periods
     if (show_spectrogram):
+        ## When showing the spectrogram, these regions will be semi-transparent yellow that blend w/ spectrogram to appear green
         on_color = "yellow"
         on_alpha = 0.2
     else:
+        ## When showing only the subsampling schemes (no audio and spectrogram), these regions will be black to contrast with white
         on_color = 'black'
         on_alpha = 1.0
-    if (not(show_audio)):
-        if (p_on == 1.0):
+
+    ## Below we handle threshold lines, legends, and simulated regions
+    if (not(show_audio)): # This case exists when we want to compare verious spectrograms together w/out showing audio
+        ## Here we show threshold so audience can see where clusters of bat calls lie across frequency against a threshold
+        if (p_on == 1.0): ## This threshold goes from 0 to the end of audio plot as it is for a continuouus recording
             if (show_threshold):
                     plt.axhline(hf_threshold, xmin=0, xmax=(audio_sec.shape[0])/times[1], linestyle='dashed', color='cyan')
         for tick in sec_labels:
+            ## This is a region for duty cycled recording
             if (p_on < 1.0 and int(tick)%cycle_length == 0):
+                ## In the case where we want to show threshold in duty cycled recording, the threshold will need to follow recording periods
                 if (show_threshold):
                     plt.axhline(hf_threshold, xmin=(int(tick)-reftimes[0])/times[1], xmax=(int(tick)-reftimes[0] + int(p_on*cycle_length))/times[1], linestyle='dashed', color='cyan')
-                rect = patches.Rectangle((int(tick)-reftimes[0], 0), width=int(p_on*cycle_length), height=96000, linewidth=1, edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
+                rect = patches.Rectangle((int(tick)-reftimes[0], 0), width=int(p_on*cycle_length), height=fs/2, linewidth=1, edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
                 ax.add_patch(rect)
+            
+            ## This is a region for continuous recording
             if (p_on == 1.0):
                 tick = int(tick) - reftimes[0]
                 if (tick%(reftimes[1] - reftimes[0]) == 0):
-                    rect = patches.Rectangle((tick, 0), width=int(audio_sec.shape[0] / fs), height=96000, linewidth=1, edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
+                    rect = patches.Rectangle((tick, 0), width=int(audio_sec.shape[0] / fs), height=fs/2, linewidth=1, edgecolor=on_color, facecolor=on_color, alpha=on_alpha)
                     ax.add_patch(rect)
 
-        if (show_spectrogram):
+        ## Here we handle plotting of the legend for the multiple regions we wish to show
+        if (show_spectrogram): ## This also is only a feature when show_spectrogram is true
+            ## Yellow is the color we use for the detections and detection boxes
             yellow_rect = patches.Patch(edgecolor=on_color, facecolor=on_color, label = f"{num_dets} Detections")
+            ## Green which is really semi-transparent yellow overlayed onto a blue spectrogram is used for simulated recording period
             green_rect = patches.Patch(edgecolor='yellow', facecolor="green", alpha = 0.5, label="Simulated Recording Period")
+            ## Blue is the color used for simulated sleep period as majority of the spectrogram background w/out yellow region overlay is blue
             blue_rect = patches.Patch(edgecolor='k', facecolor="royalblue", alpha=0.8, label="Simulated Sleep Period")
+
+            ## Showing legend implies we are including details of recording period, sleep period, and # of dets
             if (show_legend):
+                ## Given specific white spaces and region positions, these are several if-cases to position the legend in a pleasing way
                 if (p_on < 1.0):
                     if (sec_labels[0]==0):
                         plt.legend(handles=[green_rect, blue_rect, yellow_rect], fontsize=legend_fontsize, loc=1)
@@ -283,40 +323,49 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
                         plt.legend(handles=[green_rect, blue_rect, yellow_rect], fontsize=legend_fontsize, ncol=3, loc=1)
                     else:
                         plt.legend(handles=[green_rect, blue_rect, yellow_rect], fontsize=legend_fontsize, ncol=3, loc=2)
+
+            ## We wish to sometimes show number of detections even when show_legend is false. This is for that case
             if (show_num_dets):
                 plt.legend(handles=[yellow_rect], fontsize=legend_fontsize, loc=1)
 
-    else: 
+    else: # When we are showing audio and showing spectogram, we again only plot the # of yellow detection boxes
         if (show_spectrogram):
             if (show_legend):
-                yellow_rect = patches.Patch(edgecolor=on_color, facecolor=on_color, label = "Detections")
+                yellow_rect = patches.Patch(edgecolor=on_color, facecolor=on_color, label = f"{num_dets} Detections")
                 if (sec_labels[0]==0):
                     plt.legend(handles=[yellow_rect], fontsize=legend_fontsize, loc=1)
                 else:
                     plt.legend(handles=[yellow_rect], fontsize=legend_fontsize, loc=2)
 
-    if (show_spectrogram):
+    ## Let's autoformat the xticks/timestamps.
+    ## In the case where we want to show only subsampling schemes (no spectorgram), we don't need proper timestamps
+    if (show_spectrogram): 
         plt.gcf().autofmt_xdate()
-    plt.tight_layout()
+    plt.tight_layout() # plt.tight_layout() is something I always done for final touch-ups
+
+    ## Pretty basic save commands for plot using provided save directories
     if (save):
-        directory = f'{Path.home()}/Documents/UBNA/Symposium/Figures/spectrograms/{dt.datetime.strftime(file_dt, "%Y%m%d")}'
+        directory = f'{save_dir}/{dt.datetime.strftime(file_dt, "%Y%m%d")}'
         start_datetime = dt.datetime.strftime(dt.datetime.strptime(time_labels[0], "%H:%M:%S.%f"), "%H%M%S")
         end_datetime = dt.datetime.strftime(dt.datetime.strptime(time_labels[-1], "%H:%M:%S.%f"), "%H%M%S")
         if not os.path.isdir(directory):
             os.makedirs(directory)
 
+        ## If plot is a spectrogram only, then save under a specific folder for subsampling routine
         if (not(show_audio)):
             directory = f'{directory}/{int(cycle_length*p_on)//60}min_every_{cycle_length//60}min'
             if not os.path.isdir(directory):
                 os.makedirs(directory)
             plt.savefig(
                 f'{directory}/{location.split()[0]}{location.split()[1]}__{start_datetime}to{end_datetime}.png')
-        else:
+        else: # If plot is a spectrogram and audio, then save under a specific folder as examples/
             directory = f'{directory}/examples'
             if not os.path.isdir(directory):
                 os.makedirs(directory)
             plt.savefig(
                 f'{directory}/{location.split()[0]}{location.split()[1]}__{start_datetime}to{end_datetime}.png')
+    
+    ## If plot is its own figure (be_subplot=false), call plt.show()
     if (not(be_subplot)):
         plt.show()
 
