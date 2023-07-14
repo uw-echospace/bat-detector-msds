@@ -115,7 +115,28 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
     return cfg
 
-def get_files_for_pipeline(input_dir):
+def get_dates_of_deployment(input_dir):
+    dates = set()
+    for filepath in list(Path(input_dir).iterdir()):
+        filename = filepath.name
+        if (os.path.exists(filepath) and len(filename.split('.')) == 2 and 
+            (filename.split('.')[1]=="WAV" or filename.split('.')[1]=="wav")):
+            file_dt = dt.datetime.strptime(filename, "%Y%m%d_%H%M%S.WAV")
+            dates.add(dt.datetime.strftime(file_dt, '%Y%m%d'))
+        
+    dates = sorted(list(dates))
+    return dates
+
+def get_recording_period(input_dir):
+    config_path = f'{input_dir}/CONFIG.TXT'
+    config_details = pd.read_csv(config_path, header=0, index_col=0, sep=" : ", engine='python').transpose()
+    config_details.columns = config_details.columns.str.strip()
+    recording_period = config_details['Recording period 1'].values[0]
+    period_tokens = recording_period.split(' ')
+
+    return period_tokens[0], period_tokens[2]
+
+def get_files_for_pipeline(reference_filepaths):
     """
     Gets a list of audio files existing in an input directory to feed into the pipeline.
 
@@ -137,12 +158,18 @@ def get_files_for_pipeline(input_dir):
 
     audio_files = []
     good_audio_files = []
-    for file in sorted(list(Path(input_dir).iterdir())):
-        if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
-             len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-            file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
-                audio_files.append(file)
+    for file in reference_filepaths:
+        if (os.path.exists(file) and not(os.stat(file).st_size == 0)):
+            audio_files.append(file)
+
+    # audio_files = []
+    # good_audio_files = []
+    # for file in sorted(list(Path(input_dir).iterdir())):
+    #     if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
+    #          len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+    #             audio_files.append(file)
 
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
     df_comments = pd.DataFrame(comments)
@@ -176,15 +203,44 @@ def get_files_to_reference(input_dir):
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
 
-    audio_files = []
-    for file in sorted(list(Path(input_dir).iterdir())):
-      if (os.path.exists(file) and len(file.name.split('.')) == 2 and 
-            (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-            file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
-                audio_files.append(file)
+    # audio_files = []
+    # for file in sorted(list(Path(input_dir).iterdir())):
+    #   if (os.path.exists(file) and len(file.name.split('.')) == 2 and 
+    #         (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+    #             audio_files.append(file)
 
-    return audio_files
+    # return audio_files
+
+    start_time, end_time = get_recording_period(input_dir)
+    dates = get_dates_of_deployment(input_dir)
+
+    reference_filepaths = []
+    for date in dates:
+        start_dt = dt.datetime.strptime(f'{date}_{start_time}:00', "%Y%m%d_%H:%M:%S")
+        if (end_time == '24:00'):
+            end_time = '23:59'
+        end_dt = dt.datetime.strptime(f'{date}_{end_time}:00', "%Y%m%d_%H:%M:%S")
+
+        cur_dt = start_dt
+        while cur_dt < end_dt:
+            filepath = f'{input_dir}/{dt.datetime.strftime(cur_dt, "%Y%m%d_%H%M%S.WAV")}'
+            if (os.path.exists(filepath)):
+                reference_filepaths += [Path(filepath)]
+
+            if (cur_dt.minute < 30):
+                new_min = str(cur_dt.minute + 30).zfill(2)
+                new_hour = str(cur_dt.hour).zfill(2)
+            else:
+                new_min = str(cur_dt.minute - 30).zfill(2)
+                new_hour = str(cur_dt.hour + 1).zfill(2)
+            cur_time = f'{new_hour}:{new_min}'
+            if (cur_time == '24:00'):
+                cur_time = '23:59'
+            cur_dt = dt.datetime.strptime(f'{date}_{cur_time}:00', "%Y%m%d_%H:%M:%S")
+
+    return reference_filepaths
 
 def generate_segmented_paths(audio_files, cfg):
     """
