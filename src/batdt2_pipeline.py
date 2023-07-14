@@ -374,8 +374,8 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     recover_folder = input_dir.split('/')[-2]
     audiomoth_folder = input_dir.split('/')[-1]
     dets = pd.read_csv(f'{output_dir}/{csv_name}')
-    good_audio_files = get_files_for_pipeline(input_dir)
     ref_audio_files = get_files_to_reference(input_dir)
+    good_audio_files = get_files_for_pipeline(ref_audio_files)
     activity = np.array([])
     activity_times = []
     activity_dates = []
@@ -478,7 +478,8 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-        good_audio_files = get_files_for_pipeline(input_dir)
+        ref_audio_files = get_files_to_reference(input_dir)
+        good_audio_files = get_files_for_pipeline(ref_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
