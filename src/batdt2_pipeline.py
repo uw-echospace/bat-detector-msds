@@ -473,6 +473,17 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
 
     bd_dets = pd.DataFrame()
     if (run_model == "true"):
+        recover_folder = input_dir.split('/')[-2]
+        recover_date = recover_folder.split('-')[1]
+        audiomoth_folder = input_dir.split('/')[-1]
+        audiomoth_unit = audiomoth_folder.split('_')[-1]
+        if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
+            field_records = get_field_records(Path(f"{os.path.dirname(__file__)}/../field_records/ubna_2022b.csv"))
+        if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
+            field_records = get_field_records(Path(f"{os.path.dirname(__file__)}/../field_records/ubna_2023.csv"))
+        site_name = get_site_name(field_records, recover_date, audiomoth_unit)
+        print(f"Looking at data from {site_name}...")
+        output_dir = f'{output_dir}/{site_name}'
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
         if not os.path.isdir(tmp_dir):
@@ -497,6 +508,7 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
             field_records = get_field_records(Path(f"{os.path.dirname(__file__)}/../field_records/ubna_2023.csv"))
         site_name = get_site_name(field_records, recover_date, audiomoth_unit)
         print(f"Looking at data from {site_name}...")
+        output_dir = f'{output_dir}/{site_name}'
         plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True)
 
     return bd_dets
