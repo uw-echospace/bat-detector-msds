@@ -128,18 +128,18 @@ def add_num_to_buckets(bucket1, bucket2, bucket3, num1, num2, num3):
 
     Parameters
     ------------
-    bucket1 : `numpy.array()`
-    bucket2 : `numpy.array()`
-    bucket3 : `numpy.array()`
+    bucket1 : `numpy.array`
+    bucket2 : `numpy.array`
+    bucket3 : `numpy.array`
     num1 : `int`
     num2 : `int`
     num3 : `int`
 
     Returns
     ------------
-    bucket1 : `numpy.array()`
-    bucket2 : `numpy.array()`
-    bucket3 : `numpy.array()`
+    bucket1 : `numpy.array`
+    bucket2 : `numpy.array`
+    bucket3 : `numpy.array`
 
     """
 
@@ -155,22 +155,22 @@ def get_presence_from_numdets(num_dets, num_lfdets, num_hfdets, presence_thresho
 
     Parameters
     ------------
-    num_dets : `numpy.array()`
+    num_dets : `numpy.array`
         - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
-    num_lfdets : `numpy.array()`
+    num_lfdets : `numpy.array`
         - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
-    num_hfdets : `numpy.array()`
+    num_hfdets : `numpy.array`
         - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
     presence_threshold : `int`
         - Threshold for number of detections required to be classified as presence. Less than threshold is absence
 
     Returns
     ------------
-    presence : `numpy.array()`
+    presence : `numpy.array`
         - Numpy array of the # of bat call presences for any frequency sorted according to start of recording and end of recording
-    lfpresence : `numpy.array()`
+    lfpresence : `numpy.array`
         - Numpy array of the # of low-frequency bat call presences for any frequency sorted according to start of recording and end of recording
-    hfpresence : `numpy.array()`
+    hfpresence : `numpy.array`
         - Numpy array of the # of high-frequency bat call presences for any frequency sorted according to start of recording and end of recording
 
     """
@@ -193,11 +193,11 @@ def get_metrics_from_day(date, location, labels, presence_threshold, cycle_lengt
     Parameters
     ------------
     date : `str`
-        - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
+        - String in the format "%Y%m%d" or "YYYYMMDD"
     location : `str`
-        - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
+        - The full name of the location: "Central Pond", "Telephone Field", etc.
     labels : `List`
-        - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
+        - Expected list of audio files that should be in the directory using the CONFIG.TXT file
     presence_threshold : `int`
         - Threshold for number of detections required to be classified as presence. Less than threshold is absence
     cycle_length : `int`
@@ -207,17 +207,17 @@ def get_metrics_from_day(date, location, labels, presence_threshold, cycle_lengt
 
     Returns
     ------------
-    presence : `numpy.array()`
+    presence : `numpy.array`
         - Numpy array of the # of bat call presences for any frequency sorted according to start of recording and end of recording
-    lfpresence : `numpy.array()`
+    lfpresence : `numpy.array`
         - Numpy array of the # of low-frequency bat call presences for any frequency sorted according to start of recording and end of recording
-    hfpresence : `numpy.array()`
+    hfpresence : `numpy.array`
         - Numpy array of the # of high-frequency bat call presences for any frequency sorted according to start of recording and end of recording
-    num_dets : `numpy.array()`
+    num_dets : `numpy.array`
         - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
-    num_lfdets : `numpy.array()`
+    num_lfdets : `numpy.array`
         - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
-    num_hfdets : `numpy.array()`
+    num_hfdets : `numpy.array`
         - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
 
     """
@@ -247,11 +247,11 @@ def get_metrics_over_days(dates, location, labels, presence_threshold, cycle_len
     Parameters
     ------------
     date : `str`
-        - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
+        - String in the format "%Y%m%d" or "YYYYMMDD"
     location : `str`
-        - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
+        - The full name of the location: "Central Pond", "Telephone Field", etc.
     labels : `List`
-        - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
+        - Expected list of audio files that should be in the directory using the CONFIG.TXT file
     presence_threshold : `int`
         - Threshold for number of detections required to be classified as presence. Less than threshold is absence
     cycle_length : `int`
@@ -261,17 +261,17 @@ def get_metrics_over_days(dates, location, labels, presence_threshold, cycle_len
 
     Returns
     ------------
-    presence : `numpy.array()`
+    presence : `numpy.array`
         - Numpy array of the # of bat call presences for any frequency sorted according to start of recording and end of recording
-    lfpresence : `numpy.array()`
+    lfpresence : `numpy.array`
         - Numpy array of the # of low-frequency bat call presences for any frequency sorted according to start of recording and end of recording
-    hfpresence : `numpy.array()`
+    hfpresence : `numpy.array`
         - Numpy array of the # of high-frequency bat call presences for any frequency sorted according to start of recording and end of recording
-    num_dets : `numpy.array()`
+    num_dets : `numpy.array`
         - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
-    num_lfdets : `numpy.array()`
+    num_lfdets : `numpy.array`
         - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
-    num_hfdets : `numpy.array()`
+    num_hfdets : `numpy.array`
         - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
 
     """
@@ -323,6 +323,68 @@ def get_metrics_over_days(dates, location, labels, presence_threshold, cycle_len
 def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, 
                     show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, 
                     det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', spec_NFFT = 256, rm_dB = 200, save=False, save_dir='../output_dir'):
+    """
+    Returns presence arrays for each frequency grouping of bat calls over multiple dates.
+    Returns the number of detections for each frequency grouping of bat calls across provided timespan over multiple dates.
+    These arrays are assembled from the existing .csv files stored inside output_dir/
+
+    Parameters
+    ------------
+    location : `str`
+        - The full name of the location: "Central Pond", "Telephone Field", etc.
+    filename : `str`
+        - String of the audio file name in the format "%Y%m%d_%H%M%S.WAV" or "YYYYMMDD_hhmmss.WAV"
+    df : `pandas.DataFrame`
+        - Dataframe of the detections associated with the audio file. Can be duty-cycled or contiuous.
+    audio_sec : `soundfile.SoundFile`
+        - Section of audio from the original audio file to be plotted with potentially detections overlayed
+    fs : `int`
+        - Sampling rate of the audio file.
+    offset : `int`
+        - The offset of the audio file in the hour. Files corresponding to 030000.WAV have offset=0 and 033000.WAV have offset=1800
+    reftimes : `numpy.array`
+        - Parameters for the window, in seconds, of time we are plotting of the audio file.
+    times : `numpy.array`
+        - Parameters for within the above window, in seconds. With reference to reftimes, times is a sub-window parameter.
+    cycle_length : `int`
+        - The total duration in seconds of recording and sleep. For 5min ON and 25min OFF, the cycle length would be 30min.
+        - Using this value to show what recording and sleep periods would look like for given audio file.
+    p_on : `float`
+        - The decimal value of the ratio of recording time to cycle length. For 5min ON and 25min OFF, percent on is 5/30 or 1/6.
+        - Using this value to show what recording and sleep periods would look like for given audio file.
+    be_subplot : `bool`
+        - Flag used to represent plots as subplots in order to control the figure size and title and join with other method calls on user-end.
+    show_PST : `bool`
+        - Flag to show PST time instead of UTC time in all timestamps
+    show_legend : `bool`
+        - Flag to show more detail within the legend; default legend even when show_legend is false exists and shows number of detections in df
+    show_threshold : `bool`
+        - Flag to show dashed horizontal line for users to see calls in relation to specific frequency values.
+    lf_threshold : `int`
+        - Frequency value to show threshold across plotted spectrogram of audio at that value to see where calls exist with respect to value.
+    hf_threshold : `int`
+        - Frequency value to show threshold across plotted spectrogram of audio at that value to see where calls exist with respect to value.
+    show_num_dets : `bool`
+        - Flag to show the number of detections in the spectrogram of the audio. Can be false and no legend will be shown.
+    det_linewidth : `int`
+        - Integer value to control the thickness of the detection boxes on the user-end.
+    show_audio : `bool`
+        - Flag to show plot of audio above spectrogram plot. Useful to see where the spectrogram is coming from.
+    show_spectrogram : `bool`
+        - Flag to show the spectrogram of the audio section. Can be switched off to just show boxes with simulated recording periods.
+    spec_cmap : `str`
+        - Colormap for the spectrogram. Good to use 'jet' for very zoomed in sections to get high-contrast. Normally use `cmap` for large sections.
+    spec_NFFT : `int`
+        - Integer value for NFFT of the spectrogram. Useful to go large when audio section is zoomed in. Good to have on user-end.
+    rm_dB : `int`
+        - The dB of noise values to remove from the spectrogram by adjusting vmin. In order to make background less noisy.
+    save : `bool`
+        - Flag to save the plot under provided save directory
+    save_dir : `str`
+        - String for the path to save the plots. By default, it is "output_dir/"
+
+
+    """
     
     ## If user wants to plot in PST time, adjust the hour accordingly to read into datetime
     hour = int(filename[9:11])
@@ -570,6 +632,32 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
         plt.show()
 
 def get_msds_params_from_df(dets:pd.DataFrame, times):
+    """
+    Gets detection parameters for plotting detection boxes for a corresponding audio file.
+
+    Parameters
+    ------------
+    dets : `pandas.DataFrame`
+        - DataFrame corresponding to the detections generated by the MSDS pipeline for a given file.
+    times : `numpy.array`
+        - List of values of where the desired audio_section is to be plotted.
+        - Used to get detections only within the desired audio section and ignoring the rest.
+    
+    Returns
+    ------------
+    xs_inds : `numpy.array`
+        - All bat call detection start_time values corresponding to given DataFrame
+    xs_freqs : `numpy.array`
+        - All bat call detection low_freq values corresponding to given DataFrame
+    x_durations : `numpy.array`
+        - All bat call detection time durations corresponding to given DataFrame
+    x_bandwidths : `numpy.array`
+        - All bat call detection frequency ranges values corresponding to given DataFrame
+    det_labels : `numpy.array`
+        - All bat call detection event labels corresponding to given DataFrame
+    
+    """
+
     df = dets
     s_times = df['start_time']
     e_times = df['end_time']
