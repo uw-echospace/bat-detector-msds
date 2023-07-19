@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 import os
 import pandas as pd
+import dask.dataframe as dd
 import soundfile as sf
 from maad import sound, util
 from tqdm import tqdm
@@ -24,6 +25,32 @@ import models.bat_call_detector.feed_buzz_helper as fbh
 
 
 def subsample_withpaths(segmented_file_paths, cfg, cycle_length, percent_on):
+    """
+    Filters and returns a sub-list of audio segments that only exist within simulated duty-cycle schemes.
+
+    Parameters
+    ------------
+    segmented_file_paths : `List`
+        - A list of dictionaries related to every generated segment.
+        - Each dictionary stores a generated segment's path in the tmp_dir and offset in the original audio file.
+    cfg : `dict`
+        - A dictionary of pipeline parameters:
+        - tmp_dir is the directory where segments will be stored
+        - start_time is the time at which segments are generated from each audio file.
+        - segment_duration is the duration of each generated segment
+    cycle_length : `int`
+        - The total duration in seconds of recording and sleep. For 5min ON and 25min OFF, the cycle length would be 30min.
+    percent_on : `float`
+        - The decimal value of the ratio of recording time to cycle length. For 5min ON and 25min OFF, percent on is 5/30 or 1/6.
+    
+    Returns
+    ------------
+    necessary_paths : `List`
+        - Filtered list of segmented_file_paths that contain only the segments that are within the recording period of the provided duty-cycling scheme.
+        - Uses offset in segmented_file_paths and each segment's duration stored in cfg to see if audio segment is within recording period.
+    
+    """
+
     necessary_paths = []
 
     for path in segmented_file_paths:
@@ -33,14 +60,62 @@ def subsample_withpaths(segmented_file_paths, cfg, cycle_length, percent_on):
 
     return necessary_paths
 
-def get_dets_from_csv_files(date, location):
-    dets1 = pd.read_csv(f"../output_dir/1min_every_6min__{location.split()[0]}_{date}_030000to130000.csv")
-    dets2 = pd.read_csv(f"../output_dir/5min_every_30min__{location.split()[0]}_{date}_030000to130000.csv")
-    c_dets = pd.read_csv(f"../output_dir/continuous__{location.split()[0]}_{date}_030000to130000.csv")
+def get_dets_from_csv_files(date, location, cycle_length, percent_on):
+    """
+    Method to retrieve detections as DataFrames from .csv files saved in output_dir/.
+    Uses duty-cycle scheme params: cycle_length and percent_on to find corresponding .csv file
+    Assumes that only 1 file for a given scheme, date, and location exists. 
+    If multiple files exist for a given scheme, date, and location, .csv files are appended together.
 
-    return c_dets, dets1, dets2
+    Parameters
+    ------------
+    date : `str`
+        - String in the format "%Y%m%d" or "YYYYMMDD"
+    location : `str`
+        - The full name of the location: "Central Pond", "Telephone Field", etc.
+    cycle_length : `int`
+        - The total duration in seconds of recording and sleep. For 5min ON and 25min OFF, the cycle length would be 30min.
+    percent_on : `float`
+        - The decimal value of the ratio of recording time to cycle length. For 5min ON and 25min OFF, percent on is 5/30 or 1/6.
+    
+    
+    Returns
+    ------------
+    bd_dets : `pandas.DataFrame`
+        - A DataFrame of detections corresponding to the given date, location, and duty-cycling scheme.
+        - 7 columns in this DataFrame: start_time, end_time, low_freq, high_freq, detection_confidence, event, input_file
+    
+    """
+
+    if percent_on < 1.0:
+        bd_dets = dd.read_csv(f"../output_dir/{int(cycle_length*percent_on)//60}min_every_{cycle_length//60}min__{location.split()[0]}_{date}*.csv").compute()
+    else:
+        bd_dets = dd.read_csv(f"../output_dir/continuous__{location.split()[0]}_{date}*.csv").compute()
+
+    return bd_dets
 
 def get_dets_lfdets_and_hfdets(dets, filename):
+    """
+    Retrieves the detections corresponding to a specific file using the larger detections .csv file.
+
+    Parameters
+    ------------
+    dets : `pandas.DataFrame`
+        - A DataFrame of detections with frequency ranges and original file name for each detection.
+    filename : `str`
+        - The desired file that user wants detections corresponding to.
+    
+    Returns
+    ------------
+    detects : `pandas.DataFrame`
+        - A DataFrame of detections linked to a specific input file for all frequency range.
+    lfdetects : `pandas.DataFrame`
+        - A DataFrame of low-frequency detections linked to a specific input file.
+    hfdetects : `pandas.DataFrame`
+        - A DataFrame of high-frequency detections linked to a specific input file.
+    
+    """
+    
     detects = dets[dets['input_file']==filename]
     lfdetects = detects[detects["high_freq"] < 45000]
     hfdetects = detects[detects["low_freq"] > 35000]
@@ -48,6 +123,26 @@ def get_dets_lfdets_and_hfdets(dets, filename):
     return detects, lfdetects, hfdetects
 
 def add_num_to_buckets(bucket1, bucket2, bucket3, num1, num2, num3):
+    """
+    Helper method to horizontally stack 3 numbers to 3 corresponding numpy arrays.
+
+    Parameters
+    ------------
+    bucket1 : `numpy.array()`
+    bucket2 : `numpy.array()`
+    bucket3 : `numpy.array()`
+    num1 : `int`
+    num2 : `int`
+    num3 : `int`
+
+    Returns
+    ------------
+    bucket1 : `numpy.array()`
+    bucket2 : `numpy.array()`
+    bucket3 : `numpy.array()`
+
+    """
+
     bucket1 = np.hstack([bucket1, [num1]])
     bucket2 = np.hstack([bucket2, [num2]])
     bucket3 = np.hstack([bucket3, [num3]])
@@ -55,6 +150,31 @@ def add_num_to_buckets(bucket1, bucket2, bucket3, num1, num2, num3):
     return bucket1, bucket2, bucket3
 
 def get_presence_from_numdets(num_dets, num_lfdets, num_hfdets, presence_threshold):
+    """
+    Returns presence arrays (1 or 0) given arrays with number of detections according to provided presence threshold
+
+    Parameters
+    ------------
+    num_dets : `numpy.array()`
+        - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
+    num_lfdets : `numpy.array()`
+        - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
+    num_hfdets : `numpy.array()`
+        - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
+    presence_threshold : `int`
+        - Threshold for number of detections required to be classified as presence. Less than threshold is absence
+
+    Returns
+    ------------
+    presence : `numpy.array()`
+        - Numpy array of the # of bat call presences for any frequency sorted according to start of recording and end of recording
+    lfpresence : `numpy.array()`
+        - Numpy array of the # of low-frequency bat call presences for any frequency sorted according to start of recording and end of recording
+    hfpresence : `numpy.array()`
+        - Numpy array of the # of high-frequency bat call presences for any frequency sorted according to start of recording and end of recording
+
+    """
+
     presence = np.ones(num_dets.shape[0])
     presence[num_dets < presence_threshold] = 0
     lfpresence = np.ones(num_lfdets.shape[0])
@@ -64,12 +184,49 @@ def get_presence_from_numdets(num_dets, num_lfdets, num_hfdets, presence_thresho
 
     return presence, lfpresence, hfpresence
 
-def get_metrics_from_day(date, location, labels, presence_threshold, scheme=0):
+def get_metrics_from_day(date, location, labels, presence_threshold, cycle_length, percent_on):
+    """
+    Returns presence arrays for each frequency grouping of bat calls for a single date.
+    Returns the number of detections for each frequency grouping of bat calls across provided timespan for a single date
+    These arrays are assembled from the existing .csv files stored inside output_dir/
+
+    Parameters
+    ------------
+    date : `str`
+        - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
+    location : `str`
+        - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
+    labels : `List`
+        - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
+    presence_threshold : `int`
+        - Threshold for number of detections required to be classified as presence. Less than threshold is absence
+    cycle_length : `int`
+        - The total duration in seconds of recording and sleep. For 5min ON and 25min OFF, the cycle length would be 30min.
+    percent_on : `float`
+        - The decimal value of the ratio of recording time to cycle length. For 5min ON and 25min OFF, percent on is 5/30 or 1/6.
+
+    Returns
+    ------------
+    presence : `numpy.array()`
+        - Numpy array of the # of bat call presences for any frequency sorted according to start of recording and end of recording
+    lfpresence : `numpy.array()`
+        - Numpy array of the # of low-frequency bat call presences for any frequency sorted according to start of recording and end of recording
+    hfpresence : `numpy.array()`
+        - Numpy array of the # of high-frequency bat call presences for any frequency sorted according to start of recording and end of recording
+    num_dets : `numpy.array()`
+        - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
+    num_lfdets : `numpy.array()`
+        - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
+    num_hfdets : `numpy.array()`
+        - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
+
+    """
+
     num_dets = np.array([])
     num_lfdets = np.array([])
     num_hfdets = np.array([])
 
-    dets = get_dets_from_csv_files(date, location)[scheme]
+    dets = get_dets_from_csv_files(date, location, cycle_length, percent_on)
 
     for label in labels:
         if (label.split('_')[0] == date):
@@ -81,7 +238,44 @@ def get_metrics_from_day(date, location, labels, presence_threshold, scheme=0):
 
     return presence, lfpresence, hfpresence, num_dets, num_lfdets, num_hfdets
 
-def get_metrics_over_days(dates, location, labels, presence_threshold, scheme=0):
+def get_metrics_over_days(dates, location, labels, presence_threshold, cycle_length, percent_on):
+    """
+    Returns presence arrays for each frequency grouping of bat calls over multiple dates.
+    Returns the number of detections for each frequency grouping of bat calls across provided timespan over multiple dates.
+    These arrays are assembled from the existing .csv files stored inside output_dir/
+
+    Parameters
+    ------------
+    date : `str`
+        - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
+    location : `str`
+        - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
+    labels : `List`
+        - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
+    presence_threshold : `int`
+        - Threshold for number of detections required to be classified as presence. Less than threshold is absence
+    cycle_length : `int`
+        - The total duration in seconds of recording and sleep. For 5min ON and 25min OFF, the cycle length would be 30min.
+    percent_on : `float`
+        - The decimal value of the ratio of recording time to cycle length. For 5min ON and 25min OFF, percent on is 5/30 or 1/6.
+
+    Returns
+    ------------
+    presence : `numpy.array()`
+        - Numpy array of the # of bat call presences for any frequency sorted according to start of recording and end of recording
+    lfpresence : `numpy.array()`
+        - Numpy array of the # of low-frequency bat call presences for any frequency sorted according to start of recording and end of recording
+    hfpresence : `numpy.array()`
+        - Numpy array of the # of high-frequency bat call presences for any frequency sorted according to start of recording and end of recording
+    num_dets : `numpy.array()`
+        - Numpy array of the # of bat call detections for any frequency sorted according to start of recording and end of recording
+    num_lfdets : `numpy.array()`
+        - Numpy array of the # of low-frequency bat call detections sorted according to start of recording and end of recording
+    num_hfdets : `numpy.array()`
+        - Numpy array of the # of high-frequency bat call detections sorted according to start of recording and end of recording
+
+    """
+
     presence_over_days = np.array([])
     lfpresence_over_days = np.array([])
     hfpresence_over_days = np.array([])
@@ -91,7 +285,7 @@ def get_metrics_over_days(dates, location, labels, presence_threshold, scheme=0)
     hfnumdets_over_days = np.array([])
 
     for i, f_date in enumerate(dates):
-        presence, lfpresence, hfpresence, num_dets, num_lfdets, num_hfdets = get_metrics_from_day(f_date, location, labels, presence_threshold, scheme)
+        presence, lfpresence, hfpresence, num_dets, num_lfdets, num_hfdets = get_metrics_from_day(f_date, location, labels, presence_threshold, cycle_length, percent_on)
 
         if (i==0):
             presence_over_days = np.hstack((presence_over_days, presence))
@@ -172,7 +366,7 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
     x_ticks = s_ticks*fs
 
     ## Calculate detection parameters from msds output to use for drawing rectangles
-    xs_inds, xs_freqs, x_durations, x_bandwidths, det_labels = ss.get_msds_params_from_df(df, reftimes[0]+times)
+    xs_inds, xs_freqs, x_durations, x_bandwidths, det_labels = get_msds_params_from_df(df, reftimes[0]+times)
     vmin = 20*np.log10(np.max(audio_sec)) - rm_dB  # hide anything below -rm_dB dB
 
     ## Create figure for the audio signal: multiple figures can be generated with this method
@@ -393,9 +587,27 @@ def get_msds_params_from_df(dets:pd.DataFrame, times):
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
-    Segments audio_file into clips of duration length and saves them to output_dir.
-    start_time: seconds
-    duration: seconds
+    Segments audio file into clips of duration length and saves them to output/tmp folder.
+    Allows detection model to be run on segments instead of entire file as recommended.
+    These segments will be deleted from the output/tmp folder after detections have been generated.
+
+    Parameters
+    ------------
+    audio_file : `pathlib.Path`
+        - The path to an audio_file from the input directory provided in the command line
+    output_dir : `pathlib.Path`
+        - The path to the tmp folder that saves all of our segments.
+    start_time : `float`
+        - The time at which the segments will start being generated from within the audio file
+    duration : `float`
+        - The duration of all segments generated from the audio file.
+
+    Returns
+    ------------
+    output_files : `List`
+        - The path (a str) to each generated segment of the given audio file will be stored in this list.
+        - The offset of each generated segment of the given audio file will be stored in this list.
+        - Both items are stored in a dict{} for each generated segment.
     """
 
     ip_audio = sf.SoundFile(audio_file)
@@ -435,6 +647,26 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
 
 
 def get_params(output_dir, tmp_dir, num_processes, segment_duration):
+    """
+    Gets model params using separate method stored in `src/cfg.py`
+
+    Parameters
+    ------------
+    output_dir : `str`
+        - The path to the directory where outputs of the pipeline will be saved.
+    tmp_dir : `str`
+        - The path to the directory where segments of all audio files from the input directory will be saved.
+    num_processes : `int`
+        - The number of processes the user can set to run this pipeline on
+    segment_duration : `float`
+        - The duration of all segments generated from all audio files.
+
+    Returns
+    ------------
+    cfg : `dict`
+        - A dictionary of all model parameters and pipeline parameters.
+    """
+
     cfg = get_config()
     cfg["output_dir"] = Path(output_dir)
     cfg["tmp_dir"] = Path(tmp_dir)
@@ -443,7 +675,28 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
     return cfg
 
+
 def generate_segmented_paths(summer_audio_files, cfg):
+    """
+    Generates and returns a list of segments using provided cfg parameters for each audio file in audio_files.
+
+    Parameters
+    ------------
+    audio_files : `List`
+        - List of pathlib.Path objects of the paths to each audio file in the provided input directory.
+    cfg : `dict`
+        - A dictionary of pipeline parameters:
+        - tmp_dir is the directory where segments will be stored
+        - start_time is the time at which segments are generated from each audio file.
+        - segment_duration is the duration of each generated segment
+
+    Returns
+    ------------
+    segmented_file_paths : `List`
+        - A list of dictionaries related to every generated segment.
+        - Each dictionary stores a generated segment's path in the tmp_dir and offset in the original audio file.
+    """
+
     segmented_file_paths = []
     for audio_file in summer_audio_files:
         segmented_file_paths += generate_segments(
@@ -455,8 +708,25 @@ def generate_segmented_paths(summer_audio_files, cfg):
     return segmented_file_paths
 
 
-## Create necessary mappings from audio to model to file path
 def initialize_mappings(necessary_paths, cfg):
+    """
+    Generates and returns a list of mappings using provided cfg parameters for each audio segment in the provided necessary paths.
+
+    Parameters
+    ------------
+    necessary_paths : `List`
+        - List of dictionaries generated by generate_segmented_paths()
+    cfg : `dict`
+        - A dictionary of pipeline parameters:
+        - models is the models in the pipeline that are being used.
+
+    Returns
+    ------------
+    l_for_mapping : `List`
+        - A list of dictionaries related to every generated segment with more pipeline details.
+        - Each dictionary stores the prior segmented_path dict{}, the model to apply, and the original file name of the segment.
+    """
+
     l_for_mapping = [{
         'audio_seg': audio_seg, 
         'model': cfg['models'][0],
@@ -465,8 +735,31 @@ def initialize_mappings(necessary_paths, cfg):
 
     return l_for_mapping
 
-## Run models and get detections!
+
 def run_models(file_mappings, cfg, csv_name):
+    """
+    Runs the batdetect2 model to detect bat search-phase calls in the provided audio segments and saves detections into a .csv.
+
+    Parameters
+    ------------
+    file_mappings : `List`
+        - List of dictionaries generated by initialize_mappings()
+    cfg : `dict`
+        - A dictionary of pipeline parameters:
+        - models is the models in the pipeline that are being used.
+    csv_name : `str`
+        - The detections of bat search-phase calls in each audio file existing in the provided input directory.
+        - Stored as the provided csv name.
+
+    Returns
+    ------------
+    bd_dets : `pandas.DataFrame`
+        - A DataFrame of detections that will also be saved in the provided output_dir under the above csv_name
+        - 7 columns in this DataFrame: start_time, end_time, low_freq, high_freq, detection_confidence, event, input_file
+        - Detections are always specified w.r.t their input_file; earliest start_time can be 0 and latest end_time can be 1795.
+        - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
+    """
+
     bd_dets = pd.DataFrame()
     for i in tqdm(range(len(file_mappings))):
         cur_seg = file_mappings[i]
@@ -483,6 +776,33 @@ def run_models(file_mappings, cfg, csv_name):
     return bd_dets
 
 def run_subsampling_pipeline(input_dir, cycle_length, percent_on, csv_name, output_dir, tmp_dir):
+    """Runs the batdetect2 pipeline on provided directory of audio files and saves detections and activity plot in output directory
+
+    Parameters
+    ------------
+    input_dir : `str`
+        - String-based path to the directory of audio files which our pipeline will be fed to generate detections
+    cycle_length : `int`
+        - The total duration in seconds of recording and sleep. For 5min ON and 25min OFF, the cycle length would be 30min.
+    percent_on : `float`
+        - The decimal value of the ratio of recording time to cycle length. For 5min ON and 25min OFF, percent on is 5/30 or 1/6.
+    csv_name : `str`
+        - The name of the csv that our detections generated from the audio files in input_dir will be saved in.
+    output_dir : `str`
+        - String-based path to the directory that will store the outputs: detections and the plot
+    tmp_dir : `str`
+        - String-based path to the directory that will temporarily store our generated segments to feed into batdetect2 
+
+    Returns
+    ------------
+    bd_dets : `pandas.DataFrame`
+        - A DataFrame of detections that will also be saved in the provided output_dir under the above csv_name
+        - 7 columns in this DataFrame: start_time, end_time, low_freq, high_freq, detection_confidence, event, input_file
+        - Detections are always specified w.r.t their input_file; earliest start_time can be 0 and latest end_time can be 1795.
+        - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
+        - Detections generated when dutycycling would be missing detections generated on continuous data where sleep was simulated.
+    """
+    
     cfg = get_params(output_dir, tmp_dir, 4, 30.0)
     audio_files = sorted(list(Path(input_dir).iterdir()))
     segmented_file_paths = generate_segmented_paths(audio_files, cfg)
