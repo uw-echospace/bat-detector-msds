@@ -1,0 +1,8 @@
+name: bat_msds
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - ipykernel
+  - dask
+prefix: /Users/adityakrishna/miniforge3/envs/bat_msds
