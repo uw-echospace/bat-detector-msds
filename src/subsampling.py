@@ -724,8 +724,83 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
     return cfg
 
+def get_dates_of_deployment(input_dir):
+    dates = set()
+    for filepath in list(Path(input_dir).iterdir()):
+        filename = filepath.name
+        if (os.path.exists(filepath) and len(filename.split('.')) == 2 and 
+            (filename.split('.')[1]=="WAV" or filename.split('.')[1]=="wav")):
+            file_dt = dt.datetime.strptime(filename, "%Y%m%d_%H%M%S.WAV")
+            dates.add(dt.datetime.strftime(file_dt, '%Y%m%d'))
+        
+    dates = sorted(list(dates))
+    return dates
 
-def generate_segmented_paths(summer_audio_files, cfg):
+def get_files_to_reference(input_dir, start_time, end_time):
+    """
+    Gets a list of audio files existing in an input directory representative of the times recorded each day.
+
+    Parameters
+    ------------
+    input_dir : `str`
+        - The provided path to a directory consisting of audio files the user wants to feed into our pipeline.
+    start_time : `str`
+        - The time at which we want the pipeline to start selecting files for the detections
+        - Format : "HH:MM"
+    end_time : `str`
+        - The time at which we want the pipeline to stop detection on the selected files
+        - Format : "HH:MM"
+
+    Returns
+    ------------
+    audio_files : `List`
+        - A list of pathlib.Path objects to all usable audio files existing in input_dir
+        - Files are checked as candidates if they just exist.
+        - Then they must be .wav or .WAV files, as those are the files recorded by Audiomoths
+        - Then, files are added to a set if they are starting at 30min 0secs or 0min 0secs for every hour:
+            - This is to avoid stating that we detected X amount of detections for a file whose duration is not 30 mins.
+        - Files are not filtered for emptiness or error as we just want the filenames for time reference.
+    """
+
+    # audio_files = []
+    # for file in sorted(list(Path(input_dir).iterdir())):
+    #   if (os.path.exists(file) and len(file.name.split('.')) == 2 and 
+    #         (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+    #             audio_files.append(file)
+
+    # return audio_files
+
+    dates = get_dates_of_deployment(input_dir)
+
+    reference_filepaths = []
+    for date in dates:
+        start_dt = dt.datetime.strptime(f'{date}_{start_time}:00', "%Y%m%d_%H:%M:%S")
+        if (end_time == '24:00'):
+            end_time = '23:59'
+        end_dt = dt.datetime.strptime(f'{date}_{end_time}:00', "%Y%m%d_%H:%M:%S")
+
+        cur_dt = start_dt
+        while cur_dt < end_dt:
+            filepath = f'{input_dir}/{dt.datetime.strftime(cur_dt, "%Y%m%d_%H%M%S.WAV")}'
+            if (os.path.exists(filepath)):
+                reference_filepaths += [Path(filepath)]
+
+            if (cur_dt.minute < 30):
+                new_min = str(cur_dt.minute + 30).zfill(2)
+                new_hour = str(cur_dt.hour).zfill(2)
+            else:
+                new_min = str(cur_dt.minute - 30).zfill(2)
+                new_hour = str(cur_dt.hour + 1).zfill(2)
+            cur_time = f'{new_hour}:{new_min}'
+            if (cur_time == '24:00'):
+                cur_time = '23:59'
+            cur_dt = dt.datetime.strptime(f'{date}_{cur_time}:00', "%Y%m%d_%H:%M:%S")
+
+    return reference_filepaths
+
+def generate_segmented_paths(summer_audio_files, ref_audio_files, cfg):
     """
     Generates and returns a list of segments using provided cfg parameters for each audio file in audio_files.
 
@@ -748,7 +823,8 @@ def generate_segmented_paths(summer_audio_files, cfg):
 
     segmented_file_paths = []
     for audio_file in summer_audio_files:
-        if (audio_file.name.split('.')[-1] == "WAV" or audio_file.name.split('.')[-1] == "wav"):
+        if ((audio_file.name.split('.')[-1] == "WAV" or audio_file.name.split('.')[-1] == "wav")
+            and (audio_file in ref_audio_files)):
             segmented_file_paths += generate_segments(
                 audio_file = audio_file, 
                 output_dir = cfg['tmp_dir'],
@@ -897,7 +973,9 @@ def run_subsampling_detections_pipeline(input_dir, cycle_lengths, percent_ons, c
     else:
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         audio_files = sorted(list(Path(input_dir).iterdir()))
-        segmented_file_paths = generate_segmented_paths(audio_files, cfg)
+        ref_audio_files = get_files_to_reference(input_dir, "03:00", "13:30")
+        print(ref_audio_files)
+        segmented_file_paths = generate_segmented_paths(audio_files, ref_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_dets = run_models(file_path_mappings, cfg, f'continuous__{csv_tag}.csv')
 
