@@ -3,6 +3,7 @@ import argparse
 import os
 import pandas as pd
 import dask.dataframe as dd
+import exiftool
 import soundfile as sf
 from tqdm import tqdm
 
