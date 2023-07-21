@@ -800,6 +800,53 @@ def get_files_to_reference(input_dir, start_time, end_time):
 
     return reference_filepaths
 
+def get_files_for_pipeline(reference_filepaths):
+    """
+    Gets a list of audio files existing in an input directory to feed into the pipeline.
+
+    Parameters
+    ------------
+    input_dir : `str`
+        - The provided path to a directory consisting of audio files the user wants to feed into our pipeline.
+
+    Returns
+    ------------
+    good_audio_files : `List`
+        - A list of pathlib.Path objects to all usable audio files existing in input_dir
+        - Files are checked as candidates if they first exist and are not empty.
+        - Then they must be .wav or .WAV files, as those are the files recorded by Audiomoths
+        - Then, files are added to a set if they are starting at 30min 0secs or 0min 0secs for every hour:
+            - This is to avoid stating that we detected X amount of detections for a file whose duration is not 30 mins.
+        - This set is finally filtered using exiftool comments to find files with no Audiomoth error.
+    """
+
+    audio_files = []
+    good_audio_files = []
+    for file in reference_filepaths:
+        if (os.path.exists(file) and not(os.stat(file).st_size == 0)):
+            audio_files.append(file)
+
+    # audio_files = []
+    # good_audio_files = []
+    # for file in sorted(list(Path(input_dir).iterdir())):
+    #     if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
+    #          len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+    #             audio_files.append(file)
+
+    comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
+    df_comments = pd.DataFrame(comments)
+    print(f"There are {len(audio_files)} audio files that passed 1st level of filtering!")
+    good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
+
+    for i in range(len(good_audio_files)):
+        good_audio_files[i] = Path(good_audio_files[i])
+
+    print(f"There are {len(good_audio_files)} audio files that passed 2nd level of filtering!")
+                
+    return good_audio_files
+
 def generate_segmented_paths(summer_audio_files, ref_audio_files, cfg):
     """
     Generates and returns a list of segments using provided cfg parameters for each audio file in audio_files.
@@ -973,7 +1020,7 @@ def run_subsampling_detections_pipeline(input_dir, cycle_lengths, percent_ons, c
     else:
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         audio_files = sorted(list(Path(input_dir).iterdir()))
-        ref_audio_files = get_files_to_reference(input_dir, "03:00", "13:30")
+        ref_audio_files = get_files_for_pipeline(get_files_to_reference(input_dir, "03:00", "13:30"))
         print(ref_audio_files)
         segmented_file_paths = generate_segmented_paths(audio_files, ref_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
