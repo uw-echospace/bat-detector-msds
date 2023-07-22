@@ -1004,13 +1004,14 @@ def run_subsampling_detections_pipeline(input_dir, cycle_lengths, percent_ons, c
         for date in dates:
             ref_audio_files = get_files_to_reference(input_dir, [date], "03:00", "13:30")
             print(ref_audio_files)
-            good_audio_files = get_files_for_pipeline(ref_audio_files)
-            print(good_audio_files)
-            segmented_file_paths = generate_segmented_paths(audio_files, good_audio_files, cfg)
-            file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-            location_tag = csv_tag.split("_")[0]
-            time_tag = f'{good_audio_files[0].split("_")[-1].split(".")[0]}to{good_audio_files[-1].split("_")[-1].split(".")[0]}'
-            bd_dets = run_models(file_path_mappings, cfg, f'continuous__{location_tag}_{date}_{time_tag}.csv')
+            if ref_audio_files:
+                good_audio_files = get_files_for_pipeline(ref_audio_files)
+                print(good_audio_files)
+                segmented_file_paths = generate_segmented_paths(audio_files, good_audio_files, cfg)
+                file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+                location_tag = csv_tag.split("_")[0]
+                time_tag = f'{good_audio_files[0].split("_")[-1].split(".")[0]}to{good_audio_files[-1].split("_")[-1].split(".")[0]}'
+                bd_dets = run_models(file_path_mappings, cfg, f'continuous__{location_tag}_{date}_{time_tag}.csv')
 
     for i, cycle_length in enumerate(cycle_lengths):
         simulate_dutycycle_on_dets(bd_dets, cycle_length, percent_ons[i], save=(save=="True"), 
