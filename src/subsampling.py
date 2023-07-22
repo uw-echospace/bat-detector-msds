@@ -1003,6 +1003,7 @@ def run_subsampling_detections_pipeline(input_dir, cycle_lengths, percent_ons, c
         dates = get_dates_of_deployment(input_dir)
         for date in dates:
             ref_audio_files = get_files_to_reference(input_dir, [date], "03:00", "13:30")
+            print(ref_audio_files)
             good_audio_files = get_files_for_pipeline(ref_audio_files)
             print(good_audio_files)
             segmented_file_paths = generate_segmented_paths(audio_files, good_audio_files, cfg)
