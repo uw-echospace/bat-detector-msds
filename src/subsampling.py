@@ -737,7 +737,7 @@ def get_dates_of_deployment(input_dir):
     dates = sorted(list(dates))
     return dates
 
-def get_files_to_reference(input_dir, start_time, end_time):
+def get_files_to_reference(input_dir, dates, start_time, end_time):
     """
     Gets a list of audio files existing in an input directory representative of the times recorded each day.
 
@@ -762,18 +762,6 @@ def get_files_to_reference(input_dir, start_time, end_time):
             - This is to avoid stating that we detected X amount of detections for a file whose duration is not 30 mins.
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
-
-    # audio_files = []
-    # for file in sorted(list(Path(input_dir).iterdir())):
-    #   if (os.path.exists(file) and len(file.name.split('.')) == 2 and 
-    #         (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
-    #             audio_files.append(file)
-
-    # return audio_files
-
-    dates = get_dates_of_deployment(input_dir)
 
     reference_filepaths = []
     for date in dates:
@@ -826,15 +814,6 @@ def get_files_for_pipeline(reference_filepaths):
     for file in reference_filepaths:
         if (os.path.exists(file) and not(os.stat(file).st_size == 0)):
             audio_files.append(file)
-
-    # audio_files = []
-    # good_audio_files = []
-    # for file in sorted(list(Path(input_dir).iterdir())):
-    #     if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
-    #          len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
-    #             audio_files.append(file)
 
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
     df_comments = pd.DataFrame(comments)
@@ -1021,11 +1000,16 @@ def run_subsampling_detections_pipeline(input_dir, cycle_lengths, percent_ons, c
     else:
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         audio_files = sorted(list(Path(input_dir).iterdir()))
-        ref_audio_files = get_files_for_pipeline(get_files_to_reference(input_dir, "03:00", "13:30"))
-        print(ref_audio_files)
-        segmented_file_paths = generate_segmented_paths(audio_files, ref_audio_files, cfg)
-        file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-        bd_dets = run_models(file_path_mappings, cfg, f'continuous__{csv_tag}.csv')
+        dates = get_dates_of_deployment(input_dir)
+        for date in dates:
+            ref_audio_files = get_files_to_reference(input_dir, [date], "03:00", "13:30")
+            good_audio_files = get_files_for_pipeline(ref_audio_files)
+            print(good_audio_files)
+            segmented_file_paths = generate_segmented_paths(audio_files, good_audio_files, cfg)
+            file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+            location_tag = csv_tag.split("_")[0]
+            time_tag = f'{good_audio_files[0].split("_")[-1].split(".")[0]}to{good_audio_files[-1].split("_")[-1].split(".")[0]}'
+            bd_dets = run_models(file_path_mappings, cfg, f'continuous__{location_tag}_{date}_{time_tag}.csv')
 
     for i, cycle_length in enumerate(cycle_lengths):
         simulate_dutycycle_on_dets(bd_dets, cycle_length, percent_ons[i], save=(save=="True"), 
