@@ -362,8 +362,10 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity = np.array([])
     activity_times = []
     activity_dates = []
+    filenames = []
 
     for file in ref_audio_files:
+        filenames += [(file).name]
         filedets = dets.loc[dets['input_file']==(file).name]
         if file in good_audio_files:
             activity = np.hstack([activity, len(filedets) + 1])
@@ -389,6 +391,12 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
         file_date = dt.datetime.strftime(file_dt_UTC, "%m/%d/%y")
         if (not(activity_dates.__contains__(file_date))):
             activity_dates.append(file_date)
+
+    activity_df = pd.DataFrame()
+    activity_df["date_and_time_UTC"] = pd.to_datetime(filenames, format="%Y%m%d_%H%M%S.WAV")
+    activity_df["num_of_detections"] = pd.Series(activity)
+    activity_df.set_index("date_and_time_UTC")
+    activity_df.to_csv(f"{output_dir}/activity__{site_name}_{recover_folder}.csv")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
