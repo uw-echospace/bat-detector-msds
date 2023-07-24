@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 import os
 import pandas as pd
+import dask.dataframe as dd
 import soundfile as sf
 from maad import sound, util
 from tqdm import tqdm
@@ -354,7 +355,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
 
     recover_folder = input_dir.split('/')[-2]
     audiomoth_folder = input_dir.split('/')[-1]
-    dets = pd.read_csv(f'{output_dir}/{csv_name}')
+    dets = dd.read_csv(f'{output_dir}/*.csv')
     start_time, end_time = get_recording_period(input_dir)
     dates = get_dates_of_deployment(input_dir)
     ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
@@ -396,7 +397,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity_df["date_and_time_UTC"] = pd.to_datetime(filenames, format="%Y%m%d_%H%M%S.WAV")
     activity_df["num_of_detections"] = pd.Series(activity)
     activity_df.set_index("date_and_time_UTC")
-    activity_df.to_csv(f"{output_dir}/activity__{site_name}_{recover_folder}.csv")
+    activity_df.to_csv(f"{output_dir}/activity__{recover_folder}_{audiomoth_folder}.csv")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
