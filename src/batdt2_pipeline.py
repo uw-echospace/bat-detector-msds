@@ -129,10 +129,13 @@ def get_dates_of_deployment(input_dir):
 
 def get_recording_period(input_dir):
     config_path = f'{input_dir}/CONFIG.TXT'
-    config_details = pd.read_csv(config_path, header=0, index_col=0, sep=" : ", engine='python').transpose()
-    config_details.columns = config_details.columns.str.strip()
-    recording_period = config_details['Recording period 1'].values[0]
-    period_tokens = recording_period.split(' ')
+    if (os.path.isfile(config_path)):
+        config_details = pd.read_csv(config_path, header=0, index_col=0, sep=" : ", engine='python').transpose()
+        config_details.columns = config_details.columns.str.strip()
+        recording_period = config_details['Recording period 1'].values[0]
+        period_tokens = recording_period.split(' ')
+    else:
+        period_tokens = ["00:00", "-", "24:00"]
 
     return period_tokens[0], period_tokens[2]
 
@@ -162,15 +165,6 @@ def get_files_for_pipeline(reference_filepaths):
         if (os.path.exists(file) and not(os.stat(file).st_size == 0)):
             audio_files.append(file)
 
-    # audio_files = []
-    # good_audio_files = []
-    # for file in sorted(list(Path(input_dir).iterdir())):
-    #     if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
-    #          len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
-    #             audio_files.append(file)
-
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
     df_comments = pd.DataFrame(comments)
     print(f"There are {len(audio_files)} audio files that passed 1st level of filtering!")
@@ -183,7 +177,7 @@ def get_files_for_pipeline(reference_filepaths):
                 
     return good_audio_files
 
-def get_files_to_reference(input_dir):
+def get_files_to_reference(input_dir, dates, start_time, end_time):
     """
     Gets a list of audio files existing in an input directory representative of the times recorded each day.
 
@@ -202,19 +196,6 @@ def get_files_to_reference(input_dir):
             - This is to avoid stating that we detected X amount of detections for a file whose duration is not 30 mins.
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
-
-    # audio_files = []
-    # for file in sorted(list(Path(input_dir).iterdir())):
-    #   if (os.path.exists(file) and len(file.name.split('.')) == 2 and 
-    #         (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-    #         file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
-    #         if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
-    #             audio_files.append(file)
-
-    # return audio_files
-
-    start_time, end_time = get_recording_period(input_dir)
-    dates = get_dates_of_deployment(input_dir)
 
     reference_filepaths = []
     for date in dates:
@@ -374,7 +355,9 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     recover_folder = input_dir.split('/')[-2]
     audiomoth_folder = input_dir.split('/')[-1]
     dets = pd.read_csv(f'{output_dir}/{csv_name}')
-    ref_audio_files = get_files_to_reference(input_dir)
+    start_time, end_time = get_recording_period(input_dir)
+    dates = get_dates_of_deployment(input_dir)
+    ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
     good_audio_files = get_files_for_pipeline(ref_audio_files)
     activity = np.array([])
     activity_times = []
@@ -493,7 +476,9 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-        ref_audio_files = get_files_to_reference(input_dir)
+        start_time, end_time = get_recording_period(input_dir)
+        dates = get_dates_of_deployment(input_dir)
+        ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)

@@ -15,4 +15,4 @@ echo "Output Directory: output_dir/"$recoverFolder"/"$sdUnit""
 . /home/adkris/miniconda3/etc/profile.d/conda.sh
 conda activate bat_msds
 
-python3 src/batdt2_pipeline.py "$recoverPath"/"$sdUnit" batdetect2_pipeline__"$recoverFolder"_"$sdUnit".csv output_dir/"$recoverFolder" output/tmp $runModel $genFig
+python3 src/batdt2_pipeline.py "$recoverPath"/"$sdUnit" bd2__"$recoverFolder"_"$sdUnit".csv output_dir/"$recoverFolder" output/tmp $runModel $genFig
