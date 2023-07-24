@@ -1014,9 +1014,10 @@ def run_subsampling_detections_pipeline(input_dir, cycle_lengths, percent_ons, c
                 time_tag = f'{first_filename_of_date.split("_")[-1].split(".")[0]}to{last_filename_of_date.split("_")[-1].split(".")[0]}'
                 bd_dets = run_models(file_path_mappings, cfg, f'continuous__{location_tag}_{date}_{time_tag}.csv')
 
-    for i, cycle_length in enumerate(cycle_lengths):
-        simulate_dutycycle_on_dets(bd_dets, cycle_length, percent_ons[i], save=(save=="True"), 
-                                   save_filename=f'{np.round(cycle_length*percent_ons[i]).astype("int")//60}min_every_{cycle_length//60}min__{csv_tag}.csv', save_dir=Path(output_dir))
+    if percent_ons[0] < 1.0:
+        for i, cycle_length in enumerate(cycle_lengths):
+            simulate_dutycycle_on_dets(bd_dets, cycle_length, percent_ons[i], save=(save=="True"), 
+                                    save_filename=f'{np.round(cycle_length*percent_ons[i]).astype("int")//60}min_every_{cycle_length//60}min__{csv_tag}.csv', save_dir=Path(output_dir))
 
     return bd_dets
 
