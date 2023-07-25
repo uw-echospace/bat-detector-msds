@@ -401,6 +401,9 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
+    test_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
+    test_df.to_csv(f"{output_dir}/test__{recover_folder}_{audiomoth_folder}.csv")
+
     masked_array_for_nodets = np.ma.masked_where(activity==0, activity)
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red')
