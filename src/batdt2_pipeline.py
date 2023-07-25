@@ -355,7 +355,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
 
     recover_folder = input_dir.split('/')[-2]
     audiomoth_folder = input_dir.split('/')[-1]
-    dets = dd.read_csv(f'{output_dir}/*.csv')
+    dets = pd.read_csv(f'{output_dir}/{csv_name}')
     start_time, end_time = get_recording_period(input_dir)
     dates = get_dates_of_deployment(input_dir)
     ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
