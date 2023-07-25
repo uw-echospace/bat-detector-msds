@@ -368,7 +368,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     if show_PST:
         activity_datetimes = activity_datetimes.tz_convert(tz='US/Pacific')
 
-    activity_times = (activity_datetimes).strftime("%H:%M")
+    activity_times = (activity_datetimes).strftime("%H:%M").unique()
     activity_dates = (activity_datetimes).strftime("%Y/%m/%d").unique()
 
     dets_per_file = dets.groupby(['input_file'])['input_file'].count()
