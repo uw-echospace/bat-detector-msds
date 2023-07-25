@@ -360,49 +360,40 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     dates = get_dates_of_deployment(input_dir)
     ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
     good_audio_files = get_files_for_pipeline(ref_audio_files)
-    activity = np.array([])
-    activity_times = []
-    activity_dates = []
-    filenames = []
+    
+    ref_audio_filenames = [file.name for file in ref_audio_files]
+    good_audio_filenames = [file.name for file in good_audio_files]
 
-    for file in ref_audio_files:
-        filenames += [(file).name]
-        filedets = dets.loc[dets['input_file']==(file).name]
-        if file in good_audio_files:
-            activity = np.hstack([activity, len(filedets) + 1])
-        else:
-            activity = np.hstack([activity, 0])
+    activity_datetimes = pd.to_datetime(ref_audio_filenames, format="%Y%m%d_%H%M%S.WAV").tz_localize('UTC')
+    if show_PST:
+        activity_datetimes = activity_datetimes.tz_convert(tz='US/Pacific')
 
-        file_dt_UTC = dt.datetime.strptime((file).name, "%Y%m%d_%H%M%S.WAV")
+    activity_times = (activity_datetimes).strftime("%H:%M")
+    activity_dates = (activity_datetimes).strftime("%Y/%m/%d").unique()
 
-        if show_PST:
-            if (file_dt_UTC.hour >= 7):
-                file_dt_PST = dt.datetime.strptime(f"{file_dt_UTC.date()}_{str(file_dt_UTC.hour - 7).zfill(2)}{file_dt_UTC.minute}", "%Y-%m-%d_%H%M")
-                file_time_PST = dt.datetime.strftime(file_dt_PST, "%H:%M")
+    dets_per_file = dets.groupby(['input_file'])['input_file'].count()
+
+    activity = []
+    for file in ref_audio_filenames:
+        if file in good_audio_filenames:
+            if (file in dets_per_file.index):
+                activity += [dets_per_file[file]]
             else:
-                file_dt_PST = dt.datetime.strptime(f"{file_dt_UTC.date()}_{str(24 + file_dt_UTC.hour - 7).zfill(2)}{file_dt_UTC.minute}", "%Y-%m-%d_%H%M")
-                file_time_PST = dt.datetime.strftime(file_dt_PST, "%H:%M")
-            if (not(activity_times.__contains__(file_time_PST))):
-                activity_times.append(file_time_PST)
+                activity += [1]
         else:
-            file_time_UTC = dt.datetime.strftime(file_dt_UTC, "%H:%M")
-            if (not(activity_times.__contains__(file_time_UTC))):
-                activity_times.append(file_time_UTC)
-
-        file_date = dt.datetime.strftime(file_dt_UTC, "%m/%d/%y")
-        if (not(activity_dates.__contains__(file_date))):
-            activity_dates.append(file_date)
+            activity += [0]
+    activity = np.array(activity)
 
     activity_df = pd.DataFrame()
-    activity_df["date_and_time_UTC"] = pd.to_datetime(filenames, format="%Y%m%d_%H%M%S.WAV")
+    activity_df["date_and_time_UTC"] = pd.to_datetime(ref_audio_filenames, format="%Y%m%d_%H%M%S.WAV")
     activity_df["num_of_detections"] = pd.Series(activity)
     activity_df.set_index("date_and_time_UTC")
     activity_df.to_csv(f"{output_dir}/activity__{recover_folder}_{audiomoth_folder}.csv")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
-    test_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
-    test_df.to_csv(f"{output_dir}/test__{recover_folder}_{audiomoth_folder}.csv")
+    plot_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
+    plot_df.to_csv(f"{output_dir}/activity_plot__{recover_folder}_{audiomoth_folder}.csv")
 
     masked_array_for_nodets = np.ma.masked_where(activity==0, activity)
     cmap = plt.get_cmap('viridis')
@@ -420,7 +411,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     if save:
-        plt.savefig(f"{output_dir}/activity_{recover_folder}_{audiomoth_folder}.png", bbox_inches='tight', pad_inches=0.5)
+        plt.savefig(f"{output_dir}/activity_plot__{recover_folder}_{audiomoth_folder}.png", bbox_inches='tight', pad_inches=0.5)
     plt.tight_layout()
     plt.show()
 
