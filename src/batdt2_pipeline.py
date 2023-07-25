@@ -381,7 +381,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
             activity += [0]
     activity = np.array(activity)
 
-    activity_df = pd.DataFrame(activity, index=activity_datetimes_for_file, columns=["date_and_time_UTC", "num_of_detections"])
+    activity_df = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
     activity_df.to_csv(f"{output_dir}/activity__{recover_folder}_{audiomoth_folder}.csv")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
