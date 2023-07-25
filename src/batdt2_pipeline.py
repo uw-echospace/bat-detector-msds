@@ -360,22 +360,19 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     dates = get_dates_of_deployment(input_dir)
     ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
     good_audio_files = get_files_for_pipeline(ref_audio_files)
-    
-    ref_audio_filenames = [file.name for file in ref_audio_files]
-    good_audio_filenames = [file.name for file in good_audio_files]
-
-    activity_datetimes = pd.to_datetime(ref_audio_filenames, format="%Y%m%d_%H%M%S.WAV").tz_localize('UTC')
+    activity_datetimes_for_file = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S.WAV", exact=False).tz_localize('UTC')
+    activity_datetimes_for_plot = activity_datetimes_for_file
     if show_PST:
-        activity_datetimes = activity_datetimes.tz_convert(tz='US/Pacific')
+        activity_datetimes_for_plot = activity_datetimes_for_plot.tz_convert(tz='US/Pacific')
 
-    activity_times = (activity_datetimes).strftime("%H:%M").unique()
-    activity_dates = (activity_datetimes).strftime("%Y/%m/%d").unique()
-
+    activity_times = (activity_datetimes_for_plot).strftime("%H:%M").unique()
+    activity_dates = (activity_datetimes_for_plot).strftime("%m/%d/%y").unique()
     dets_per_file = dets.groupby(['input_file'])['input_file'].count()
 
     activity = []
-    for file in ref_audio_filenames:
-        if file in good_audio_filenames:
+    for ref_file in ref_audio_files:
+        file = ref_file.name
+        if ref_file in good_audio_files:
             if (file in dets_per_file.index):
                 activity += [dets_per_file[file]]
             else:
@@ -384,10 +381,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
             activity += [0]
     activity = np.array(activity)
 
-    activity_df = pd.DataFrame()
-    activity_df["date_and_time_UTC"] = pd.to_datetime(ref_audio_filenames, format="%Y%m%d_%H%M%S.WAV")
-    activity_df["num_of_detections"] = pd.Series(activity)
-    activity_df.set_index("date_and_time_UTC")
+    activity_df = pd.DataFrame(activity, index=activity_datetimes_for_file)
     activity_df.to_csv(f"{output_dir}/activity__{recover_folder}_{audiomoth_folder}.csv")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
@@ -395,16 +389,16 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     plot_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
     plot_df.to_csv(f"{output_dir}/activity_plot__{recover_folder}_{audiomoth_folder}.csv")
 
-    masked_array_for_nodets = np.ma.masked_where(activity==0, activity)
+    masked_array_for_nodets = np.ma.masked_where(plot_df.values==0, plot_df.values)
     cmap = plt.get_cmap('viridis')
-    cmap.set_bad(color='red')
+    cmap.set_bad(color='red', alpha=1.0)
 
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
     plt.title(f"Activity from {site_name}", loc='left', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2], rotation=50)
-    plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=50)
+    plt.yticks(np.arange(0, len(plot_df.index), 2)-0.5, plot_df.index[::2], rotation=30)
+    plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_df.columns, rotation=30)
     plt.ylabel('UTC Time (HH:MM)')
     if show_PST:
         plt.ylabel('PST Time (HH:MM)')
