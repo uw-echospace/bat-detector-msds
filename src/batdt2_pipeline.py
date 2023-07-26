@@ -116,17 +116,9 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
     return cfg
 
-def get_dates_of_deployment(input_dir):
-    dates = set()
-    for filepath in list(Path(input_dir).iterdir()):
-        filename = filepath.name
-        if (os.path.exists(filepath) and len(filename.split('.')) == 2 and 
-            (filename.split('.')[1]=="WAV" or filename.split('.')[1]=="wav")):
-            file_dt = dt.datetime.strptime(filename, "%Y%m%d_%H%M%S.WAV")
-            dates.add(dt.datetime.strftime(file_dt, '%Y%m%d'))
-        
-    dates = sorted(list(dates))
-    return dates
+def get_datetimes_of_deployment(input_dir):
+    datetimes_from_dir =sorted(pd.to_datetime(list(Path(input_dir).iterdir()), format="%Y%m%d_%H%M%S.WAV", errors='coerce', exact=False).dropna())
+    return datetimes_from_dir
 
 def get_recording_period(input_dir):
     config_path = f'{input_dir}/CONFIG.TXT'
@@ -163,7 +155,7 @@ def get_files_for_pipeline(reference_filepaths):
     audio_files = []
     good_audio_files = []
     for file in reference_filepaths:
-        if (os.path.exists(file) and not(os.stat(file).st_size == 0)):
+        if (file.exists() and not(os.stat(file).st_size == 0)):
             audio_files.append(file)
 
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
@@ -178,7 +170,7 @@ def get_files_for_pipeline(reference_filepaths):
                 
     return good_audio_files
 
-def get_files_to_reference(input_dir, dates, start_time, end_time):
+def get_files_to_reference(input_dir, datetimes_in_dir, start_time, end_time):
     """
     Gets a list of audio files existing in an input directory representative of the times recorded each day.
 
@@ -198,31 +190,18 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
 
-    reference_filepaths = []
-    for date in dates:
-        start_dt = dt.datetime.strptime(f'{date}_{start_time}:00', "%Y%m%d_%H:%M:%S")
-        if (end_time == '24:00'):
-            end_time = '23:59'
-        end_dt = dt.datetime.strptime(f'{date}_{end_time}:00', "%Y%m%d_%H:%M:%S")
+    ref_times = pd.date_range(datetimes_in_dir[0], datetimes_in_dir[-1], freq="30T")
+    cond1 = np.logical_and(ref_times.hour >= int(start_time.split(':')[0]), ref_times.hour < int(end_time.split(':')[0]))
+    cond2 = np.logical_and(ref_times.hour == int(end_time.split(':')[0]), ref_times.minute < int(end_time.split(':')[-1]))
+    all_filenames = ref_times[np.logical_or(cond1, cond2)].strftime("%Y%m%d_%H%M%S.WAV")
 
-        cur_dt = start_dt
-        while cur_dt < end_dt:
-            filepath = f'{input_dir}/{dt.datetime.strftime(cur_dt, "%Y%m%d_%H%M%S.WAV")}'
-            if (os.path.exists(filepath)):
-                reference_filepaths += [Path(filepath)]
+    ref_filepaths = []
+    for file in all_filenames:
+        ref_filepath = Path(f"{input_dir}/{file}")
+        if (ref_filepath.exists()):
+            ref_filepaths += [ref_filepath]
 
-            if (cur_dt.minute < 30):
-                new_min = str(cur_dt.minute + 30).zfill(2)
-                new_hour = str(cur_dt.hour).zfill(2)
-            else:
-                new_min = str(cur_dt.minute - 30).zfill(2)
-                new_hour = str(cur_dt.hour + 1).zfill(2)
-            cur_time = f'{new_hour}:{new_min}'
-            if (cur_time == '24:00'):
-                cur_time = '23:59'
-            cur_dt = dt.datetime.strptime(f'{date}_{cur_time}:00', "%Y%m%d_%H:%M:%S")
-
-    return reference_filepaths
+    return ref_filepaths
 
 def generate_segmented_paths(audio_files, cfg):
     """
@@ -322,7 +301,7 @@ def run_models(file_mappings, cfg, csv_name):
 
     return bd_dets
 
-def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_PST=False, save=True):
+def construct_activity_grid(input_dir, csv_name, output_dir, show_PST=False):
     """
     Plots the detections generated from giving an input_dir, output_dir, and csv_name in an activity grid format
 
@@ -357,8 +336,8 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     audiomoth_folder = input_dir.split('/')[-1]
     dets = pd.read_csv(f'{output_dir}/{csv_name}')
     start_time, end_time = get_recording_period(input_dir)
-    dates = get_dates_of_deployment(input_dir)
-    ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
+    datetimes_from_dir = get_datetimes_of_deployment(input_dir)
+    ref_audio_files = get_files_to_reference(input_dir, datetimes_from_dir, start_time, end_time)
     good_audio_files = get_files_for_pipeline(ref_audio_files)
     activity_datetimes_for_file = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S.WAV", exact=False).tz_localize('UTC')
     activity_datetimes_for_plot = activity_datetimes_for_file
@@ -388,6 +367,11 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
 
     plot_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
     plot_df.to_csv(f"{output_dir}/activity_plot__{recover_folder}_{audiomoth_folder}.csv")
+
+    return plot_df
+
+
+def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, site_name, show_PST=False, save=True):
 
     masked_array_for_nodets = np.ma.masked_where(plot_df.values==0, plot_df.values)
     cmap = plt.get_cmap('viridis')
@@ -484,7 +468,8 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         delete_segments(segmented_file_paths)
 
     if (generate_fig == "true"):
-        plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, save=True)
+        activity_df = construct_activity_grid(input_dir, csv_name, output_dir)
+        plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, site_name, save=True)
 
     return bd_dets
 
