@@ -568,11 +568,12 @@ def run_pipeline(user_input, csv_name, output_path, tmp_dir, run_model=True, gen
         dates_from_dir = get_dates_of_deployment(input_dir)
         ref_audio_files = get_files_to_reference(input_dir, dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
+        print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
     if Path(user_input).is_file():
         input_file = user_input
         recover_folder = input_file.split('/')[-3]
         recover_date = recover_folder.split('-')[1]
-        audiomoth_folder = input_dir.split('/')[-2]
+        audiomoth_folder = input_file.split('/')[-2]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
         good_audio_files = [input_file]
 
@@ -595,7 +596,6 @@ def run_pipeline(user_input, csv_name, output_path, tmp_dir, run_model=True, gen
 
     if (run_model == "true"):
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-        print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_dets = run_models(file_path_mappings, cfg, csv_name)
