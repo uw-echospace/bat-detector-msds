@@ -117,11 +117,41 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
     return cfg
 
 def get_dates_of_deployment(input_dir):
+    """
+    Gets dates which Audiomoth recorded from Audiomoth deployment directory.
+
+    Parameters
+    ------------
+    input_dir : `str`
+        - The directory of Audiomoth recordings + CONFIG.TXT corresponding to a deployment session.
+
+    Returns
+    ------------
+    dates_from_dir : `List`
+        - List of file-related dates in format "YYYYMMDD".
+    """
+    
     datetimes_from_dir = pd.to_datetime(list(Path(input_dir).iterdir()), format="%Y%m%d_%H%M%S.WAV", errors='coerce', exact=False).dropna()
     dates_from_dir = sorted(datetimes_from_dir.strftime("%Y%m%d").unique())
     return dates_from_dir
 
 def get_recording_period(input_dir):
+    """
+    Gets configured recording period of Audiomoth over a deployment session using CONFIG.TXT.
+
+    Parameters
+    ------------
+    input_dir : `str`
+        - The directory of Audiomoth recordings + CONFIG.TXT corresponding to a deployment session.
+
+    Returns
+    ------------
+    start_time : `str`
+        - The start time of the configured recording period.
+    end_time : `str`
+        - The end time of the configured recording period.
+    """
+
     config_path = f'{input_dir}/CONFIG.TXT'
     if (os.path.isfile(config_path)):
         config_details = pd.read_csv(config_path, header=0, index_col=0, sep=" : ", engine='python').transpose()
@@ -139,7 +169,7 @@ def get_recording_period(input_dir):
 
 def get_files_for_pipeline(reference_filepaths):
     """
-    Gets a list of audio files existing in an input directory to feed into the pipeline.
+    Filters out a list of audio files that are good to be fed into the MSDS pipeline
 
     Parameters
     ------------
@@ -152,8 +182,6 @@ def get_files_for_pipeline(reference_filepaths):
         - A list of pathlib.Path objects to all usable audio files existing in input_dir
         - Files are checked as candidates if they first exist and are not empty.
         - Then they must be .wav or .WAV files, as those are the files recorded by Audiomoths
-        - Then, files are added to a set if they are starting at 30min 0secs or 0min 0secs for every hour:
-            - This is to avoid stating that we detected X amount of detections for a file whose duration is not 30 mins.
         - This set is finally filtered using exiftool comments to find files with no Audiomoth error.
     """
 
@@ -177,7 +205,7 @@ def get_files_for_pipeline(reference_filepaths):
 
 def get_files_to_reference(input_dir, dates, start_time, end_time):
     """
-    Gets a list of audio files existing in an input directory representative of the times recorded each day.
+    Assembles a list of audio files existing in the input directory that should be error-free and contain calls.
 
     Parameters
     ------------
@@ -188,10 +216,7 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
     ------------
     audio_files : `List`
         - A list of pathlib.Path objects to all usable audio files existing in input_dir
-        - Files are checked as candidates if they just exist.
-        - Then they must be .wav or .WAV files, as those are the files recorded by Audiomoths
-        - Then, files are added to a set if they are starting at 30min 0secs or 0min 0secs for every hour:
-            - This is to avoid stating that we detected X amount of detections for a file whose duration is not 30 mins.
+        - Audio .WAV files are artificially assembled using CONFIG.TXT information: these files should exist in our directory.
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
 
@@ -307,36 +332,37 @@ def run_models(file_mappings, cfg, csv_name):
 
     return bd_dets
 
-def construct_activity_grid(ref_audio_files, good_audio_files, recover_folder, audiomoth_folder, csv_name, output_dir, show_PST=False):
+def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_dir, show_PST=False):
     """
-    Plots the detections generated from giving an input_dir, output_dir, and csv_name in an activity grid format
+    Constructs DataFrames corresponding to different important ways of storing activity for a deployment session.
+    plot_df is an activity grid with date headers and time indices and number of detections as values.
+    activity_df is a 2-column dataframe with datetime indices and corresponding number of calls detected for resampling purposes.
 
     Parameters
     ------------
-    input_dir : `str`
-        - The path to the input directory containing the files that are linked to the desired detections we wish to plot.
     csv_name : `str`
         - The detections of bat search-phase calls in each audio file existing in the provided input directory.
-        - Stored as "batdetect2_pipeline__recover-DATE_UBNA_###.csv"
+        - Stored as "bd2__recover-DATE_UBNA_###.csv"
+    ref_audio_files : `List`
+        - A list of audio files that should be recorded by the Audiomoth representing the times that were recorded.
+    good_audio_files : `List`
+        - A list of audio files that are error-free and were fed into the MSDS pipeline.
     output_dir : `str`
-        - The path to the output directory where the detections.csv will be saved as well as the newly generated plot
-    site_name : `str`
-        - The name of the site where the recordings in the input_dir were recorded from.
+        - The path to the output directory where the activity grid and the 2-column activity .csv files will be saved.
     show_PST : `boolean`
         - A flag whether user wants to time in PST instead of UTC.
         - For example, today's 03:00 UTC will become yesterday's 20:00 PST (-7 hrs)
-    save : `boolean`
-        - A flag whether user wants to save the plot under "output_dir/recover-DATE/UBNA_###" similar to how recordings are stored in our hard drive.
 
     Returns
     ------------
-    A plot with the following details:
-        - y-axis corresponding to the time of day ranging, for example, from 03:00 to 13:00 UTC.
-        - x-axis corresponding to the days of activity ranging, for example, from 2023-06-10 to 2023-06-15
-        - Cell intensity corresponding to the number of detections per 30-min of each day
-            - Intensity actually is (number of detections + 1) so 0 detections is represented as lowest color on colorbar
+    plot_df : `pd.DataFrame`
+        - Rows corresponding to the time of day ranging, for example, from 03:00 to 13:00 UTC.
+        - Columns corresponding to the days of activity ranging, for example, from 2023-06-10 to 2023-06-15
+        - Cell value corresponding to the number of detections per 30-min of each day
+            - Values are 0 for error-files, 1 for call-absence, number of detections otherwise.
             - Recordings where the Audiomoth experienced errors are colored red.
     """
+    csv_tag = csv_name.split('__')[-1]
 
     activity_datetimes_for_file = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S.WAV", exact=False).tz_localize('UTC')
     activity_datetimes_for_plot = activity_datetimes_for_file
@@ -362,17 +388,38 @@ def construct_activity_grid(ref_audio_files, good_audio_files, recover_folder, a
     activity = np.array(activity)
 
     activity_df = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
-    activity_df.to_csv(f"{output_dir}/activity__{recover_folder}_{audiomoth_folder}.csv")
+    activity_df.to_csv(f"{output_dir}/activity__{csv_tag}")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
     plot_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
-    plot_df.to_csv(f"{output_dir}/activity_plot__{recover_folder}_{audiomoth_folder}.csv")
+    plot_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}")
 
     return plot_df
 
 
 def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, site_name, show_PST=False, save=True):
+    """
+    Plots the above-returned plot_df DataFrame that represents activity over a deployment session.
+
+    Parameters
+    ------------
+    plot_df : `pd.DataFrame`
+        - Rows corresponding to the time of day ranging, for example, from 03:00 to 13:00 UTC.
+        - Columns corresponding to the days of activity ranging, for example, from 2023-06-10 to 2023-06-15
+        - Cell value corresponding to the number of detections per 30-min of each day
+    output_dir : `str`
+        - The path to the output directory where the activity grid and the 2-column activity .csv files will be saved.
+    recover_folder : `str`
+        - The name of the recover folder for the input deployment directory: recover-DATE
+    audiomoth_folder : `str`
+        - The name of the audiomoth SD card # folder for the input deployment directory: UBNA_###
+    site_name: `str`
+        - The location where the Audiomoth was deployed; Found using the field records.
+    show_PST : `boolean`
+        - A flag whether user wants to time in PST instead of UTC.
+        - For example, today's 03:00 UTC will become yesterday's 20:00 PST (-7 hrs)
+    """
 
     masked_array_for_nodets = np.ma.masked_where(plot_df.values==0, plot_df.values)
     cmap = plt.get_cmap('viridis')
@@ -395,6 +442,29 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
     plt.show()
 
 def construct_cumulative_activity(output_dir, site, resample_tag):
+    """
+    Constructs a cumulative appended DataFrame grid using dask.dataframe.
+    This DataFrame gathers all detected activity contained in output_dir for a given site.
+
+    Parameters
+    ------------
+    output_dir : `str`
+        - The output directory that will save the cumulative dataframes.
+    site : `str`
+        - The site we wish to assemble all activity from.
+    resample_tag : `str`
+        - The resample_tag associated with resampling: choose above 30T like 1H, 2H or D.
+
+    Returns
+    ------------
+    activity_df : `pd.DataFrame`
+        - Rows corresponding to the time of day ranging, for example, from 03:00 to 13:00 UTC.
+        - Columns corresponding to the days of activity ranging, for example, from 2023-06-10 to 2023-06-15
+        - Cell value corresponding to the number of detections per 30-min of each day
+            - Values are 0 for error-files, 1 for call-absence, number of detections otherwise.
+            - Recordings where the Audiomoth experienced errors are colored red.
+    """
+
     new_df = dd.read_csv(f"{output_dir}/recover-2023*/{site}/activity__*.csv").compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S")
     new_df.pop(new_df.columns[0])
@@ -405,7 +475,7 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
     selected_time_df = selected_time_df.dropna()
     selected_time_df = selected_time_df.replace(-1, 0)
 
-    dt_hourmin_info = sorted(list(set((selected_time_df.index).strftime("%H:%M"))))
+    dt_hourmin_info = sorted(((selected_time_df.index).strftime("%H:%M")).unique())
     dates = (pd.date_range(selected_time_df.index[0], selected_time_df.index[-1], freq="D")).strftime("%m-%d-%y")
     activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
 
@@ -415,6 +485,23 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
     return activity_df
 
 def plot_cumulative_activity(activity_df, output_dir, site, resample_tag):
+    """
+    Plots the cumulative appended DataFrame grid of all detected activity a given site.
+
+    Parameters
+    ------------
+    activity_df : `pd.DataFrame`
+        - Rows corresponding to the time of day ranging, for example, from 03:00 to 13:00 UTC.
+        - Columns corresponding to the days of activity ranging, for example, from 2023-06-10 to 2023-06-15
+        - Cell value corresponding to the number of detections per 30-min of each day
+    output_dir : `str`
+        - The output directory that will save the cumulative dataframes.
+    site : `str`
+        - The site we wish to assemble all activity from.
+    resample_tag : `str`
+        - The resample_tag associated with resampling: choose above 30T like 1H, 2H or D.
+    """
+
     masked_array_for_nodets = np.ma.masked_where(activity_df.values==0, activity_df.values)
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red')
@@ -509,7 +596,7 @@ def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, gene
         delete_segments(segmented_file_paths)
 
     if (generate_fig == "true"):
-        activity_df = construct_activity_grid(ref_audio_files, good_audio_files, recover_folder, audiomoth_folder, csv_name, output_dir)
+        activity_df = construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_dir)
         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, site_name, save=True)
 
         cumulative_activity_df = construct_cumulative_activity(output_path, site_name, "30T")
