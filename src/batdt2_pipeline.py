@@ -529,7 +529,7 @@ def delete_segments(necessary_paths):
     for path in necessary_paths:
         Path(path['audio_file']).unlink(missing_ok=False)
 
-def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, generate_fig=True):
+def run_pipeline(user_input, csv_name, output_path, tmp_dir, run_model=True, generate_fig=True):
     """Runs the batdetect2 pipeline on provided directory of audio files and saves detections and activity plot in output directory
 
     Parameters
@@ -557,10 +557,21 @@ def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, gene
         - Detections are always specified w.r.t their input_file; earliest start_time can be 0 and latest end_time can be 1795.
         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
     """
-    recover_folder = input_dir.split('/')[-2]
-    recover_date = recover_folder.split('-')[1]
-    audiomoth_folder = input_dir.split('/')[-1]
-    audiomoth_unit = audiomoth_folder.split('_')[-1]
+
+    if Path(user_input).is_dir():
+        input_dir = user_input
+        recover_folder = input_dir.split('/')[-2]
+        recover_date = recover_folder.split('-')[1]
+        audiomoth_folder = input_dir.split('/')[-1]
+        audiomoth_unit = audiomoth_folder.split('_')[-1]
+        start_time, end_time = get_recording_period(input_dir)
+        dates_from_dir = get_dates_of_deployment(input_dir)
+        ref_audio_files = get_files_to_reference(input_dir, dates_from_dir, start_time, end_time)
+        good_audio_files = get_files_for_pipeline(ref_audio_files)
+    if Path(user_input).is_file():
+        input_file = user_input
+        good_audio_files = [input_file]
+
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
         field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
@@ -571,19 +582,14 @@ def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, gene
         output_dir = f'{output_path}/{site_name}'
     else:
         output_dir = f'{output_path}/{audiomoth_folder}'
-
-    start_time, end_time = get_recording_period(input_dir)
-    dates_from_dir = get_dates_of_deployment(input_dir)
-    ref_audio_files = get_files_to_reference(input_dir, dates_from_dir, start_time, end_time)
-    good_audio_files = get_files_for_pipeline(ref_audio_files)
+    if not Path(output_dir).is_dir():
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+    if not Path(tmp_dir).is_dir():
+        Path(tmp_dir).mkdir(parents=True, exist_ok=True)
 
     bd_dets = pd.DataFrame()
 
     if (run_model == "true"):
-        if not Path(output_dir).is_dir():
-            Path(output_dir).mkdir(parents=True, exist_ok=True)
-        if not Path(tmp_dir).is_dir():
-            Path(tmp_dir).mkdir(parents=True, exist_ok=True)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
@@ -591,10 +597,9 @@ def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, gene
         bd_dets = run_models(file_path_mappings, cfg, csv_name)
         delete_segments(segmented_file_paths)
 
-    if (generate_fig == "true"):
+    if (generate_fig == "true" and Path(user_input).is_dir()):
         activity_df = construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_dir)
         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, site_name, save=True)
-
         cumulative_activity_df = construct_cumulative_activity(output_path, site_name, "30T")
         plot_cumulative_activity(cumulative_activity_df, output_path, site_name, "30T")
 
