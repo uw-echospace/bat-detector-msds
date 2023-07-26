@@ -210,7 +210,7 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
 
     Returns
     ------------
-    audio_files : `List`
+    ref_filepaths : `List`
         - A list of pathlib.Path objects to all usable audio files existing in input_dir
         - Audio .WAV files are artificially assembled using CONFIG.TXT information: these files should exist in our directory.
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
