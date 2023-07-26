@@ -116,9 +116,10 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 
     return cfg
 
-def get_datetimes_of_deployment(input_dir):
-    datetimes_from_dir =sorted(pd.to_datetime(list(Path(input_dir).iterdir()), format="%Y%m%d_%H%M%S.WAV", errors='coerce', exact=False).dropna())
-    return datetimes_from_dir
+def get_dates_of_deployment(input_dir):
+    datetimes_from_dir = pd.to_datetime(list(Path(input_dir).iterdir()), format="%Y%m%d_%H%M%S.WAV", errors='coerce', exact=False).dropna()
+    dates_from_dir = sorted(datetimes_from_dir.strftime("%Y%m%d").unique())
+    return dates_from_dir
 
 def get_recording_period(input_dir):
     config_path = f'{input_dir}/CONFIG.TXT'
@@ -128,9 +129,13 @@ def get_recording_period(input_dir):
         recording_period = config_details['Recording period 1'].values[0]
         period_tokens = recording_period.split(' ')
     else:
-        period_tokens = ["00:00", "-", "24:00"]
+        period_tokens = ["00:00", "-", "23:59"]
+    start_time = period_tokens[0]
+    end_time = period_tokens[2]
+    if end_time == "24:00":
+        end_time = "23:59"
 
-    return period_tokens[0], period_tokens[2]
+    return start_time, end_time
 
 def get_files_for_pipeline(reference_filepaths):
     """
@@ -170,7 +175,7 @@ def get_files_for_pipeline(reference_filepaths):
                 
     return good_audio_files
 
-def get_files_to_reference(input_dir, datetimes_in_dir, start_time, end_time):
+def get_files_to_reference(input_dir, dates, start_time, end_time):
     """
     Gets a list of audio files existing in an input directory representative of the times recorded each day.
 
@@ -190,10 +195,11 @@ def get_files_to_reference(input_dir, datetimes_in_dir, start_time, end_time):
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
 
-    ref_times = pd.date_range(datetimes_in_dir[0], datetimes_in_dir[-1], freq="30T")
-    cond1 = np.logical_and(ref_times.hour >= int(start_time.split(':')[0]), ref_times.hour < int(end_time.split(':')[0]))
-    cond2 = np.logical_and(ref_times.hour == int(end_time.split(':')[0]), ref_times.minute < int(end_time.split(':')[-1]))
-    all_filenames = ref_times[np.logical_or(cond1, cond2)].strftime("%Y%m%d_%H%M%S.WAV")
+    all_dates = pd.Index([])
+    for date in dates:
+        date_range = pd.date_range(dt.datetime.strptime(f'{date}_{start_time}', "%Y%m%d_%H:%M"), dt.datetime.strptime(f'{date}_{end_time}', "%Y%m%d_%H:%M"), freq="30T", inclusive='left')
+        all_dates = all_dates.append(date_range)
+    all_filenames = all_dates.strftime("%Y%m%d_%H%M%S.WAV")
 
     ref_filepaths = []
     for file in all_filenames:
@@ -301,7 +307,7 @@ def run_models(file_mappings, cfg, csv_name):
 
     return bd_dets
 
-def construct_activity_grid(input_dir, csv_name, output_dir, show_PST=False):
+def construct_activity_grid(ref_audio_files, good_audio_files, recover_folder, audiomoth_folder, csv_name, output_dir, show_PST=False):
     """
     Plots the detections generated from giving an input_dir, output_dir, and csv_name in an activity grid format
 
@@ -332,13 +338,6 @@ def construct_activity_grid(input_dir, csv_name, output_dir, show_PST=False):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    recover_folder = input_dir.split('/')[-2]
-    audiomoth_folder = input_dir.split('/')[-1]
-    dets = pd.read_csv(f'{output_dir}/{csv_name}')
-    start_time, end_time = get_recording_period(input_dir)
-    datetimes_from_dir = get_datetimes_of_deployment(input_dir)
-    ref_audio_files = get_files_to_reference(input_dir, datetimes_from_dir, start_time, end_time)
-    good_audio_files = get_files_for_pipeline(ref_audio_files)
     activity_datetimes_for_file = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S.WAV", exact=False).tz_localize('UTC')
     activity_datetimes_for_plot = activity_datetimes_for_file
     if show_PST:
@@ -346,6 +345,8 @@ def construct_activity_grid(input_dir, csv_name, output_dir, show_PST=False):
 
     activity_times = (activity_datetimes_for_plot).strftime("%H:%M").unique()
     activity_dates = (activity_datetimes_for_plot).strftime("%m/%d/%y").unique()
+
+    dets = pd.read_csv(f'{output_dir}/{csv_name}')
     dets_per_file = dets.groupby(['input_file'])['input_file'].count()
 
     activity = []
@@ -393,6 +394,45 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
     plt.tight_layout()
     plt.show()
 
+def construct_cumulative_activity(output_dir, site, resample_tag):
+    new_df = dd.read_csv(f"{output_dir}/recover-2023*/{site}/activity__*.csv").compute()
+    new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S")
+    new_df.pop(new_df.columns[0])
+    new_df = new_df.replace(0, -1)
+
+    resampled_df = new_df.resample(resample_tag, on="date_and_time_UTC").sum()
+    selected_time_df = resampled_df.replace(0, np.nan)
+    selected_time_df = selected_time_df.dropna()
+    selected_time_df = selected_time_df.replace(-1, 0)
+
+    dt_hourmin_info = sorted(list(set((selected_time_df.index).strftime("%H:%M"))))
+    dates = (pd.date_range(selected_time_df.index[0], selected_time_df.index[-1], freq="D")).strftime("%m-%d-%y")
+    activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
+
+    activity_df = pd.DataFrame(activity, index=dt_hourmin_info, columns=dates)
+    activity_df.to_csv(f'{output_dir}/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.csv')
+
+    return activity_df
+
+def plot_cumulative_activity(activity_df, output_dir, site, resample_tag):
+    masked_array_for_nodets = np.ma.masked_where(activity_df.values==0, activity_df.values)
+    cmap = plt.get_cmap('viridis')
+    cmap.set_bad(color='red')
+
+    plt.rcParams.update({'font.size': 18})
+    plt.figure(figsize=(24, 10))
+    plt.title(f"Activity from {site}", loc='center', y=1.05)
+    plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
+    plt.yticks(np.arange(0, len(activity_df.index))-0.5, activity_df.index, rotation=45)
+    plt.xticks(np.arange(0, len(activity_df.columns))-0.5, activity_df.columns, rotation=45)
+    plt.ylabel('UTC Time (HH:MM)')
+    plt.xlabel('Date (MM-DD-YY)')
+    plt.colorbar()
+    plt.tight_layout()
+
+    plt.savefig(f'{output_dir}/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.png')
+    plt.show()
+
 def delete_segments(necessary_paths):
     """
     Deletes the segments whose paths are stored in necessary_paths
@@ -406,7 +446,7 @@ def delete_segments(necessary_paths):
     for path in necessary_paths:
         os.remove(path['audio_file'])
 
-def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, generate_fig=True):
+def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, generate_fig=True):
     """Runs the batdetect2 pipeline on provided directory of audio files and saves detections and activity plot in output directory
 
     Parameters
@@ -445,9 +485,14 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
     site_name = get_site_name(field_records, recover_date, audiomoth_unit)
     print(f"Looking at data from {site_name}...")
     if site_name != "(Site not found in Field Records)":
-        output_dir = f'{output_dir}/{site_name}'
+        output_dir = f'{output_path}/{site_name}'
     else:
-        output_dir = f'{output_dir}/{audiomoth_folder}'
+        output_dir = f'{output_path}/{audiomoth_folder}'
+
+    start_time, end_time = get_recording_period(input_dir)
+    dates_from_dir = get_dates_of_deployment(input_dir)
+    ref_audio_files = get_files_to_reference(input_dir, dates_from_dir, start_time, end_time)
+    good_audio_files = get_files_for_pipeline(ref_audio_files)
 
     bd_dets = pd.DataFrame()
 
@@ -457,10 +502,6 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         if not os.path.isdir(tmp_dir):
             os.makedirs(tmp_dir)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
-        start_time, end_time = get_recording_period(input_dir)
-        dates = get_dates_of_deployment(input_dir)
-        ref_audio_files = get_files_to_reference(input_dir, dates, start_time, end_time)
-        good_audio_files = get_files_for_pipeline(ref_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
@@ -468,8 +509,12 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         delete_segments(segmented_file_paths)
 
     if (generate_fig == "true"):
-        activity_df = construct_activity_grid(input_dir, csv_name, output_dir)
+        activity_df = construct_activity_grid(ref_audio_files, good_audio_files, recover_folder, audiomoth_folder, csv_name, output_dir)
         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, site_name, save=True)
+
+        cumulative_activity_df = construct_cumulative_activity(output_path, site_name, "30T")
+        plot_cumulative_activity(cumulative_activity_df, output_path, site_name, "30T")
+
 
     return bd_dets
 
