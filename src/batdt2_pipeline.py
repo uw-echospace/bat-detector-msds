@@ -16,7 +16,7 @@ import exiftool
 # set python path to correctly use batdetect2 submodule
 import sys
 sys.path.append(Path.cwd())
-sys.path.append(Path.cwd() / "src/models/bat_call_detector/batdetect2/")
+sys.path.append(Path.joinpath(Path.cwd(), "src/models/bat_call_detector/batdetect2/"))
 
 from cfg import get_config
 from pipeline import pipeline
