@@ -570,12 +570,12 @@ def run_pipeline(user_input, csv_name, output_path, tmp_dir, run_model=True, gen
         good_audio_files = get_files_for_pipeline(ref_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
     if Path(user_input).is_file():
-        input_file = user_input
-        recover_folder = input_file.split('/')[-3]
+        input_file = user_input.split('/')[-1]
+        recover_folder = user_input.split('/')[-3]
         recover_date = recover_folder.split('-')[1]
-        audiomoth_folder = input_file.split('/')[-2]
+        audiomoth_folder = user_input.split('/')[-2]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
-        good_audio_files = [input_file]
+        good_audio_files = [user_input]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
         field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
@@ -599,6 +599,10 @@ def run_pipeline(user_input, csv_name, output_path, tmp_dir, run_model=True, gen
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_dets = run_models(file_path_mappings, cfg, csv_name)
+        if (Path(user_input).is_file()):
+            date_of_file = input_file.split('.')[0].split('_')[0]
+            time_of_file = input_file.split('.')[0].split('_')[-1]
+            pipeline._generate_csv(bd_dets, "bd2", f"{audiomoth_folder}_{date_of_file}_{time_of_file}", Path(output_dir), False)
         delete_segments(segmented_file_paths)
 
     if (generate_fig == "true" and Path(user_input).is_dir()):
