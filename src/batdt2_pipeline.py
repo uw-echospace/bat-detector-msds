@@ -16,8 +16,8 @@ import exiftool
 
 # set python path to correctly use batdetect2 submodule
 import sys
-sys.path.append(os.getcwd())
-sys.path.append(os.path.join(os.getcwd(), "src/models/bat_call_detector/batdetect2/"))
+sys.path.append(str(Path.cwd()))
+sys.path.append(str(Path.joinpath(Path.cwd(), "src/models/bat_call_detector/batdetect2/")))
 
 from cfg import get_config
 from pipeline import pipeline
@@ -68,7 +68,7 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
         op_file = op_file[:-4] + op_file_en + ".wav"
         
-        op_path = Path(output_dir) / Path(op_file)
+        op_path = Path.joinpath(Path(output_dir), Path(op_file))
         output_files.append({
             "audio_file": op_path, 
             "offset":  start_time + (sub_start/sampling_rate),
