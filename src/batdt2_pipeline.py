@@ -461,7 +461,7 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{output_dir}/recover-2023*/{site}/activity__*.csv").compute()
+    new_df = dd.read_csv(f"../output_dir/recover-2023*/{site}/activity__*.csv").compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S")
     new_df.pop(new_df.columns[0])
     new_df = new_df.replace(0, -1)
@@ -476,7 +476,7 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
     activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
 
     activity_df = pd.DataFrame(activity, index=dt_hourmin_info, columns=dates)
-    activity_df.to_csv(f'{output_dir}/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.csv')
+    activity_df.to_csv(f'../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.csv')
 
     return activity_df
 
