@@ -513,7 +513,7 @@ def plot_cumulative_activity(activity_df, output_dir, site, resample_tag):
     plt.colorbar()
     plt.tight_layout()
 
-    plt.savefig(f'{output_dir}/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.png')
+    plt.savefig(f'../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.png')
     plt.show()
 
 def delete_segments(necessary_paths):
