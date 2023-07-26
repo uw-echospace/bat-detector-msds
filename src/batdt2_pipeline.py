@@ -462,7 +462,7 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
     """
 
     new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{site}/activity__*.csv").compute()
-    new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S")
+    new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
     new_df = new_df.replace(0, -1)
 
