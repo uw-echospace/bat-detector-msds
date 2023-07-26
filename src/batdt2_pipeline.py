@@ -570,6 +570,10 @@ def run_pipeline(user_input, csv_name, output_path, tmp_dir, run_model=True, gen
         good_audio_files = get_files_for_pipeline(ref_audio_files)
     if Path(user_input).is_file():
         input_file = user_input
+        recover_folder = input_file.split('/')[-3]
+        recover_date = recover_folder.split('-')[1]
+        audiomoth_folder = input_dir.split('/')[-2]
+        audiomoth_unit = audiomoth_folder.split('_')[-1]
         good_audio_files = [input_file]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
