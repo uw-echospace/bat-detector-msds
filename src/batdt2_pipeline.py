@@ -600,7 +600,7 @@ def run_pipeline(user_input, csv_name, output_path, tmp_dir, run_model=True, gen
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_dets = run_models(file_path_mappings, cfg, csv_name)
         if (Path(user_input).is_file()):
-            pipeline._generate_csv(bd_dets, "bd2", f"{recover_folder}_{audiomoth_folder}_{input_file.split('.')[0]}", output_dir, False)
+            pipeline._generate_csv(bd_dets, "bd2", f"{recover_folder}_{audiomoth_folder}_{input_file.split('.')[0]}", Path(output_dir), False)
         delete_segments(segmented_file_paths)
 
     if (generate_fig == "true" and Path(user_input).is_dir()):
