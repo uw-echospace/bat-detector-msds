@@ -10,13 +10,14 @@ import matplotlib.colors as colors
 
 import datetime as dt
 from pathlib import Path
+import os
 
 import exiftool
 
 # set python path to correctly use batdetect2 submodule
 import sys
-sys.path.append(Path.cwd())
-sys.path.append(Path.joinpath(Path.cwd(), "src/models/bat_call_detector/batdetect2/"))
+sys.path.append(os.getcwd())
+sys.path.append(os.path.join(os.getcwd(), "src/models/bat_call_detector/batdetect2/"))
 
 from cfg import get_config
 from pipeline import pipeline
