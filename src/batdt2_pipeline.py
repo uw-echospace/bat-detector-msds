@@ -1,14 +1,11 @@
 import numpy as np
 import argparse
-import os
 import pandas as pd
 import dask.dataframe as dd
 import soundfile as sf
-from maad import sound, util
 from tqdm import tqdm
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import matplotlib.colors as colors
 
 import datetime as dt
@@ -18,13 +15,11 @@ import exiftool
 
 # set python path to correctly use batdetect2 submodule
 import sys
-sys.path.append(os.getcwd())
-sys.path.append(os.path.join(os.getcwd(), "src/models/bat_call_detector/batdetect2/"))
+sys.path.append(Path.cwd())
+sys.path.append(Path.cwd() / "src/models/bat_call_detector/batdetect2/")
 
 from cfg import get_config
-from utils.utils import gen_empty_df
 from pipeline import pipeline
-import models.bat_call_detector.feed_buzz_helper as fbh
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
@@ -66,19 +61,19 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         sub_end = np.minimum(sub_start + ip_duration, ip_end)
 
         # For file names, convert back to seconds 
-        op_file = os.path.basename(audio_file.name).replace(" ", "_")
+        op_file = Path(audio_file).name.replace(" ", "_")
         start_seconds =  sub_start / sampling_rate
         end_seconds =  sub_end / sampling_rate
         op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
         op_file = op_file[:-4] + op_file_en + ".wav"
         
-        op_path = os.path.join(output_dir, op_file)
+        op_path = Path(output_dir) / Path(op_file)
         output_files.append({
             "audio_file": op_path, 
             "offset":  start_time + (sub_start/sampling_rate),
         })
         
-        if (os.path.exists(op_path) == False):
+        if (not(Path(op_path).exists())):
             sub_length = sub_end - sub_start
             ip_audio.seek(sub_start)
             op_audio = ip_audio.read(sub_length)
@@ -153,7 +148,7 @@ def get_recording_period(input_dir):
     """
 
     config_path = f'{input_dir}/CONFIG.TXT'
-    if (os.path.isfile(config_path)):
+    if (Path(config_path).is_file()):
         config_details = pd.read_csv(config_path, header=0, index_col=0, sep=" : ", engine='python').transpose()
         config_details.columns = config_details.columns.str.strip()
         recording_period = config_details['Recording period 1'].values[0]
@@ -188,7 +183,7 @@ def get_files_for_pipeline(reference_filepaths):
     audio_files = []
     good_audio_files = []
     for file in reference_filepaths:
-        if (file.exists() and not(os.stat(file).st_size == 0)):
+        if (file.exists() and not(file.stat().st_size == 0)):
             audio_files.append(file)
 
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
@@ -531,7 +526,7 @@ def delete_segments(necessary_paths):
     """
 
     for path in necessary_paths:
-        os.remove(path['audio_file'])
+        Path(path['audio_file']).unlink(missing_ok=False)
 
 def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, generate_fig=True):
     """Runs the batdetect2 pipeline on provided directory of audio files and saves detections and activity plot in output directory
@@ -566,9 +561,9 @@ def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, gene
     audiomoth_folder = input_dir.split('/')[-1]
     audiomoth_unit = audiomoth_folder.split('_')[-1]
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
-        field_records = get_field_records(Path(f"{os.path.dirname(__file__)}/../field_records/ubna_2022b.csv"))
+        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
-        field_records = get_field_records(Path(f"{os.path.dirname(__file__)}/../field_records/ubna_2023.csv"))
+        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
     site_name = get_site_name(field_records, recover_date, audiomoth_unit)
     print(f"Looking at data from {site_name}...")
     if site_name != "(Site not found in Field Records)":
@@ -584,10 +579,10 @@ def run_pipeline(input_dir, csv_name, output_path, tmp_dir, run_model=True, gene
     bd_dets = pd.DataFrame()
 
     if (run_model == "true"):
-        if not os.path.isdir(output_dir):
-            os.makedirs(output_dir)
-        if not os.path.isdir(tmp_dir):
-            os.makedirs(tmp_dir)
+        if not Path(output_dir).is_dir():
+            Path(output_dir).mkdir(parents=True, exist_ok=True)
+        if not Path(tmp_dir).is_dir():
+            Path(tmp_dir).mkdir(parents=True, exist_ok=True)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
