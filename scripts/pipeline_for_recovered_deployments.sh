@@ -11,10 +11,10 @@ numProcesses=$6
 recoverFolder=$(basename "$recoverPath")
 
 echo "Input Directory: $recoverPath"/"$sdUnit";
-echo "Output CSV name: bd2__"$recoverFolder"_"$sdUnit".csv"
+echo "Output CSV name: bd2__"$recoverFolder"_"$sdUnit"
 echo "Output Directory: output_dir/"$recoverFolder"/"$sdUnit""
 
 . /home/adkris/miniconda3/etc/profile.d/conda.sh
 conda activate bat_msds
 
-python3 src/batdt2_pipeline.py "$recoverPath"/"$sdUnit" bd2__"$recoverFolder"_"$sdUnit".csv output_dir/"$recoverFolder" output/tmp $runModel $genFig $shouldCSV $numProcesses
+python3 src/batdt2_pipeline.py "$recoverPath"/"$sdUnit" bd2__"$recoverFolder"_"$sdUnit" output_dir/"$recoverFolder" output/tmp $runModel $genFig $shouldCSV $numProcesses

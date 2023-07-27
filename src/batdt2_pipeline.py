@@ -83,36 +83,6 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
 
     return output_files 
 
-
-def get_params(output_dir, tmp_dir, num_processes, segment_duration):
-    """
-    Gets model params using separate method stored in `src/cfg.py`
-
-    Parameters
-    ------------
-    output_dir : `str`
-        - The path to the directory where outputs of the pipeline will be saved.
-    tmp_dir : `str`
-        - The path to the directory where segments of all audio files from the input directory will be saved.
-    num_processes : `int`
-        - The number of processes the user can set to run this pipeline on
-    segment_duration : `float`
-        - The duration of all segments generated from all audio files.
-
-    Returns
-    ------------
-    cfg : `dict`
-        - A dictionary of all model parameters and pipeline parameters.
-    """
-
-    cfg = get_config()
-    cfg["output_dir"] = Path(output_dir)
-    cfg["tmp_dir"] = Path(tmp_dir)
-    cfg["num_processes"] = num_processes
-    cfg['segment_duration'] = segment_duration
-
-    return cfg
-
 def get_dates_of_deployment(input_dir):
     """
     Gets dates which Audiomoth recorded from Audiomoth deployment directory.
@@ -290,9 +260,9 @@ def initialize_mappings(necessary_paths, cfg):
 
     return l_for_mapping
 
-def run_models(file_mappings):
+def run_models(file_path_mappings, cfg):
     """
-    Runs the batdetect2 model to detect bat search-phase calls in the provided audio segments and saves detections into a .csv.
+    Runs the batdetect2 model to detect bat search-phase calls in the provided audio segments and saves detections into a dataframe
 
     Parameters
     ------------
@@ -307,29 +277,29 @@ def run_models(file_mappings):
 
     Returns
     ------------
-    bd_dets : `pandas.DataFrame`
+    bd_preds : `pandas.DataFrame`
         - A DataFrame of detections that will also be saved in the provided output_dir under the above csv_name
         - 7 columns in this DataFrame: start_time, end_time, low_freq, high_freq, detection_confidence, event, input_file
         - Detections are always specified w.r.t their input_file; earliest start_time can be 0 and latest end_time can be 1795.
         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
     """
 
-    bd_dets = pd.DataFrame()
-    for i in tqdm(range(len(file_mappings))):
-        cur_seg = file_mappings[i]
-        bd_annotations_df = cur_seg['model']._run_batdetect(cur_seg['audio_seg']['audio_file'])
-        bd_preds = pipeline._correct_annotation_offsets(
-                bd_annotations_df,
-                cur_seg['original_file_name'],
-                cur_seg['audio_seg']['offset']
-            )
-        bd_dets = pd.concat([bd_dets, bd_preds])
+    process_pool = multiprocessing.Pool(cfg['num_processes'])
 
-    return bd_dets
+    bd_dets = tqdm(
+            process_pool.imap(apply_model, file_path_mappings, chunksize=1), 
+            desc=f"Applying BatDetect2",
+            total=len(file_path_mappings),
+        )
+    
+    bd_preds = gen_empty_df() 
+    bd_preds = pd.concat(bd_dets, ignore_index=True)
+
+    return bd_preds
 
 def apply_model(file_mapping):
     """
-    Runs the batdetect2 model to detect bat search-phase calls in the provided audio segments and saves detections into a .csv.
+    Runs the batdetect2 model on a single provided audio segmens and corrects the offsets according the segment.
 
     Parameters
     ------------
@@ -344,7 +314,7 @@ def apply_model(file_mapping):
 
     Returns
     ------------
-    bd_dets : `pandas.DataFrame`
+    corrected_bd_dets : `pandas.DataFrame`
         - A DataFrame of detections that will also be saved in the provided output_dir under the above csv_name
         - 7 columns in this DataFrame: start_time, end_time, low_freq, high_freq, detection_confidence, event, input_file
         - Detections are always specified w.r.t their input_file; earliest start_time can be 0 and latest end_time can be 1795.
@@ -352,23 +322,28 @@ def apply_model(file_mapping):
     """
 
     bd_dets = file_mapping['model']._run_batdetect(file_mapping['audio_seg']['audio_file'])
-    return pipeline._correct_annotation_offsets(
-                bd_dets,
-                file_mapping['original_file_name'],
-                file_mapping['audio_seg']['offset']
-            )
+    corrected_bd_dets = pipeline._correct_annotation_offsets(
+                                                            bd_dets,
+                                                            file_mapping['original_file_name'],
+                                                            file_mapping['audio_seg']['offset']
+                                                            )
 
-def _generate_csv(annotation_df, model_name, audio_file_name, output_path, should_csv):
-    file_name = f"{model_name}__{audio_file_name}"
+    return corrected_bd_dets
+
+def _save_predictions(annotation_df, cfg):
+    """
+    Saves a dataframe to the format that user desires: ravenpro .txt or .csv
+    """
+        
     extension = ".csv"
     sep = ","
 
-    if not should_csv:
+    if not cfg["csv"]:
         extension = ".txt"
         sep = "\t"
         annotation_df = convert_df_ravenpro(annotation_df)
 
-    csv_path = output_path / f"{file_name}{extension}"
+    csv_path = Path(cfg["output_dir"]) / f"{cfg['csv_filename']}{extension}"
     annotation_df.to_csv(csv_path, sep=sep, index=False)
     return csv_path
 
@@ -594,7 +569,7 @@ def delete_segments(necessary_paths):
     for path in necessary_paths:
         Path(path['audio_file']).unlink(missing_ok=False)
 
-def run_pipeline(args):
+def run_pipeline(cfg):
     """Runs the batdetect2 pipeline on provided directory of audio files and saves detections and activity plot in output directory
 
     Parameters
@@ -623,24 +598,22 @@ def run_pipeline(args):
         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
     """
 
-    if Path(args['input_dir']).is_dir():
-        input_dir = args['input_dir']
-        recover_folder = input_dir.split('/')[-2]
+    if cfg['input_audio'].is_dir():
+        recover_folder = cfg['input_audio'].split('/')[-2]
         recover_date = recover_folder.split('-')[1]
-        audiomoth_folder = input_dir.split('/')[-1]
+        audiomoth_folder = cfg['input_audio'].split('/')[-1]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
-        start_time, end_time = get_recording_period(input_dir)
-        dates_from_dir = get_dates_of_deployment(input_dir)
-        ref_audio_files = get_files_to_reference(input_dir, dates_from_dir, start_time, end_time)
+        start_time, end_time = get_recording_period(cfg['input_audio'])
+        dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
+        ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
-        print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(input_dir).iterdir()))} total files")
-    if Path(args['input_dir']).is_file():
-        input_filename = args['input_dir'].split('/')[-1]
-        recover_folder = args['input_dir'].split('/')[-3]
+        print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(cfg['input_audio']).iterdir()))} total files")
+    if cfg['input_audio'].is_file():
+        recover_folder = cfg['input_audio'].split('/')[-3]
         recover_date = recover_folder.split('-')[1]
-        audiomoth_folder = args['input_dir'].split('/')[-2]
+        audiomoth_folder = cfg['input_audio'].split('/')[-2]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
-        good_audio_files = [args['input_dir']]
+        good_audio_files = [cfg['input_audio']]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
         field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
@@ -648,43 +621,31 @@ def run_pipeline(args):
         field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
     site_name = get_site_name(field_records, recover_date, audiomoth_unit)
     print(f"Looking at data from {site_name}...")
+
     if site_name != "(Site not found in Field Records)":
-        output_dir = f'{args["output_dir"]}/{site_name}'
+        output_dir = cfg["output_dir"] /site_name
     else:
-        output_dir = f'{args["output_dir"]}/{audiomoth_folder}'
-    if not Path(output_dir).is_dir():
-        Path(output_dir).mkdir(parents=True, exist_ok=True)
-    if not Path(args['temp_dir']).is_dir():
-        Path(args['temp_dir']).mkdir(parents=True, exist_ok=True)
+        output_dir = cfg["output_dir"] / audiomoth_folder
+
+    if not output_dir.is_dir():
+        output_dir.mkdir(parents=True, exist_ok=True)
+    if not cfg['temp_dir'].is_dir():
+        cfg['temp_dir'].mkdir(parents=True, exist_ok=True)
 
     bd_dets = pd.DataFrame()
 
-    if (args['run_model']):
-        cfg = get_params(output_dir, args['temp_dir'], args["num_processes"], 30.0)
+    if (cfg['run_model']):
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
-        process_pool = multiprocessing.Pool(cfg['num_processes'])
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-        # bd_dets = run_models(file_path_mappings, cfg, args['csv_filename'])
-        bd_dets = tqdm(
-            process_pool.imap(apply_model, file_path_mappings, chunksize=1), 
-            desc=f"Applying BatDetect2",
-            total=len(file_path_mappings),
-        )
-        agg_df = gen_empty_df() 
-        agg_df = pd.concat(bd_dets, ignore_index=True)
-        if (Path(args['input_dir']).is_file()):
-            date_of_file = input_filename.split('.')[0].split('_')[0]
-            time_of_file = input_filename.split('.')[0].split('_')[-1]
-            _generate_csv(agg_df, "bd2", f"{audiomoth_folder}_{date_of_file}_{time_of_file}", Path(output_dir), args['csv'])
-        if (Path(args['input_dir']).is_dir()):
-            _generate_csv(agg_df, "bd2", f"{recover_folder}_{audiomoth_folder}", Path(output_dir), args['csv'])
+        bd_preds = run_models(file_path_mappings, cfg)
+        _save_predictions(bd_preds, cfg)
         delete_segments(segmented_file_paths)
 
-    if (args['generate_fig'] and Path(args['input_dir']).is_dir()):
-        activity_df = construct_activity_grid(args['csv_filename'], ref_audio_files, good_audio_files, output_dir)
+    if (cfg['generate_fig'] and cfg['input_dir'].is_dir()):
+        activity_df = construct_activity_grid(cfg['csv_filename'], ref_audio_files, good_audio_files, output_dir)
         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, site_name, save=True)
-        cumulative_activity_df = construct_cumulative_activity(args["output_dir"], site_name, "30T")
-        plot_cumulative_activity(cumulative_activity_df, args["output_dir"], site_name, "30T")
+        cumulative_activity_df = construct_cumulative_activity(cfg["output_dir"], site_name, "30T")
+        plot_cumulative_activity(cumulative_activity_df, cfg["output_dir"], site_name, "30T")
 
 
     return bd_dets
@@ -759,7 +720,7 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_dir",
+        "input_audio",
         type=str,
         help="the directory of WAV files to process",
     )
@@ -770,13 +731,13 @@ def parse_args():
         default="output.csv",
     )
     parser.add_argument(
-        "output_dir",
+        "output_directory",
         type=str,
         help="the directory where the .csv file goes",
         default="output_dir",
     )
     parser.add_argument(
-        "temp_dir",
+        "tmp_directory",
         type=str,
         help="the temp directory where the audio segments go",
         default="output/tmp",
@@ -806,5 +767,15 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
+    
+    cfg = get_config()
+    cfg["input_audio"] = Path(args["input_audio"])
+    cfg["csv_filename"] = args["csv_filename"]
+    cfg["output_dir"] = Path(args["output_directory"])
+    cfg["tmp_dir"] = Path(args["tmp_directory"])
+    cfg["run_model"] = args["run_model"]
+    cfg["generate_fig"] = args["generate_fig"]
+    cfg["should_csv"] = args["csv"]
+    cfg["num_processes"] = args["num_processes"]
 
-    run_pipeline(args)
+    run_pipeline(cfg)
