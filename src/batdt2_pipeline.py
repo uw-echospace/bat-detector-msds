@@ -599,19 +599,19 @@ def run_pipeline(cfg):
     """
 
     if cfg['input_audio'].is_dir():
-        recover_folder = cfg['input_audio'].split('/')[-2]
-        recover_date = recover_folder.split('-')[1]
-        audiomoth_folder = cfg['input_audio'].split('/')[-1]
-        audiomoth_unit = audiomoth_folder.split('_')[-1]
+        recover_folder = cfg['input_audio'].parts[-2]
+        recover_date = recover_folder.name.split('-')[1]
+        audiomoth_folder = cfg['input_audio'].parts[-1]
+        audiomoth_unit = audiomoth_folder.name.split('_')[-1]
         start_time, end_time = get_recording_period(cfg['input_audio'])
         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(cfg['input_audio']).iterdir()))} total files")
     if cfg['input_audio'].is_file():
-        recover_folder = cfg['input_audio'].split('/')[-3]
+        recover_folder = cfg['input_audio'].parts[-3]
         recover_date = recover_folder.split('-')[1]
-        audiomoth_folder = cfg['input_audio'].split('/')[-2]
+        audiomoth_folder = cfg['input_audio'].parts[-2]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
         good_audio_files = [cfg['input_audio']]
 
