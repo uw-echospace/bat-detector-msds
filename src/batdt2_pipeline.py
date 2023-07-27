@@ -661,9 +661,9 @@ def run_pipeline(cfg):
         good_audio_files = [cfg['input_audio']]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
-        field_records = get_field_records(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv")
+        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
-        field_records = get_field_records(f"{Path(__file__).parent}/../field_records/ubna_2023.csv")
+        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
     site_name = get_site_name(field_records, recover_date, audiomoth_unit)
     cfg["site"] = site_name
     print(f"Looking at data from {cfg['site']}...")
