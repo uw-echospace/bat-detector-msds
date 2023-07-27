@@ -690,6 +690,9 @@ def run_pipeline(cfg):
                     bd_preds = run_models(file_path_mappings)
                 else:
                     bd_preds = apply_models(file_path_mappings, cfg)
+                bd_preds["Recover Folder"] = recover_folder
+                bd_preds["SD Card"] = audiomoth_folder
+                bd_preds["Site name"] = cfg['site']
                 _save_predictions(bd_preds, cfg)
                 delete_segments(segmented_file_paths)
         else:
@@ -699,6 +702,8 @@ def run_pipeline(cfg):
                 bd_preds = run_models(file_path_mappings)
             else:
                 bd_preds = apply_models(file_path_mappings, cfg)
+            bd_preds["Recover Folder"] = recover_folder
+            bd_preds["SD Card"] = audiomoth_folder
             bd_preds["Site name"] = cfg['site']
             _save_predictions(bd_preds, cfg)
             delete_segments(segmented_file_paths)
