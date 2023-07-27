@@ -677,6 +677,7 @@ def run_pipeline(cfg):
     if (cfg['run_model']):
         if (cfg['individual_files']):
             for good_audio_file in good_audio_files:
+                print(f"Generating detections for {good_audio_file.name}")
                 segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
                 if (cfg["num_processes"] <= 6):
@@ -816,6 +817,17 @@ def parse_args():
         type=int,
         default=4,
     )
+    parser.add_argument(
+        "--night_only",
+        action="store_true",
+        help="Sets recording period from 03:00 to 13:30 UTC"
+    )
+    parser.add_argument(
+        "--individual_files",
+        action="store_true",
+        help="Saves individual csv files for each audio file"
+    )
+
 
     return vars(parser.parse_args())
 
@@ -831,5 +843,7 @@ if __name__ == "__main__":
     cfg["generate_fig"] = args["generate_fig"]
     cfg["should_csv"] = args["csv"]
     cfg["num_processes"] = args["num_processes"]
+    cfg['night'] = args["night_only"]
+    cfg['individual_files'] = args["individual_files"]
 
     run_pipeline(cfg)
