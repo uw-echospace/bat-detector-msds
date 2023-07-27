@@ -351,7 +351,7 @@ def apply_model(file_mapping):
         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
     """
 
-    bd_dets = file_mapping['model'].run_batdetect(file_mapping['audio_seg']['audio_file'])
+    bd_dets = file_mapping['model']._run_batdetect(file_mapping['audio_seg']['audio_file'])
     return pipeline._correct_annotation_offsets(
                 bd_dets,
                 file_mapping['original_file_name'],
