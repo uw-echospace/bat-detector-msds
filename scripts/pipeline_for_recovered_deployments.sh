@@ -11,7 +11,7 @@ numProcesses=$6
 recoverFolder=$(basename "$recoverPath")
 
 echo "Input Directory: $recoverPath"/"$sdUnit";
-echo "Output CSV name: bd2__"$recoverFolder"_"$sdUnit"
+echo "Output CSV name: bd2__"$recoverFolder"_"$sdUnit""
 echo "Output Directory: output_dir/"$recoverFolder"/"$sdUnit""
 
 . /home/adkris/miniconda3/etc/profile.d/conda.sh
