@@ -383,10 +383,7 @@ def _save_predictions(annotation_df, cfg):
         sep = "\t"
         annotation_df = convert_df_ravenpro(annotation_df)
 
-    if cfg["individual_files"]:
-        filename = f"bd2__{cfg['site']}_{cfg['audio_filename'].split('.')[0]}{extension}"
-    else:    
-        filename = f"{cfg['csv_filename']}{extension}"
+    filename = f"{cfg['csv_filename']}{extension}"
 
     csv_path = cfg["output_dir"] / filename
     annotation_df.to_csv(csv_path, sep=sep, index=False)
@@ -407,7 +404,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
         "event": "Annotation",
     }, inplace=True)
 
-    ravenpro_df["Selection"] = pd.Series(range(1, df.shape[0]))
+    ravenpro_df["Selection"] = pd.Series(range(1, df.shape[0]), dtype='float64')
     ravenpro_df["View"] = "Waveform 1"
     ravenpro_df["Channel"] = "1"
 
@@ -684,15 +681,17 @@ def run_pipeline(cfg):
         if (cfg['individual_files']):
             for good_audio_file in good_audio_files:
                 cfg["audio_filename"] = good_audio_file.name
-                print(f"Generating detections for {cfg['audio_filename']}")
-                segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
-                file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-                if (cfg["num_processes"] <= 6):
-                    bd_preds = run_models(file_path_mappings)
-                else:
-                    bd_preds = apply_models(file_path_mappings, cfg)
-                _save_predictions(bd_preds, cfg)
-                delete_segments(segmented_file_paths)
+                cfg["csv_filename"] = f"bd2__{cfg['site']}_{cfg['audio_filename'].split('.')[0]}"
+                if (not((cfg["output_dir"] / cfg["csv_filename"])).is_file()):
+                    print(f"Generating detections for {cfg['audio_filename']}")
+                    segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
+                    file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+                    if (cfg["num_processes"] <= 6):
+                        bd_preds = run_models(file_path_mappings)
+                    else:
+                        bd_preds = apply_models(file_path_mappings, cfg)
+                    _save_predictions(bd_preds, cfg)
+                    delete_segments(segmented_file_paths)
         else:
             segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
             file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
