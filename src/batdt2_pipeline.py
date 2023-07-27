@@ -71,6 +71,7 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         
         op_path = output_dir / op_file
         output_files.append({
+            "input_filepath": audio_file,
             "audio_file": op_path, 
             "offset":  start_time + (sub_start/sampling_rate),
         })
@@ -258,7 +259,7 @@ def initialize_mappings(necessary_paths, cfg):
     l_for_mapping = [{
         'audio_seg': audio_seg, 
         'model': cfg['models'][0],
-        'original_file_name': f"{audio_seg['audio_file'].name.split('__')[0]}.WAV",
+        'original_file_name': audio_seg["input_filepath"],
         } for audio_seg in necessary_paths]
 
     return l_for_mapping
@@ -682,16 +683,15 @@ def run_pipeline(cfg):
             for good_audio_file in good_audio_files:
                 cfg["audio_filename"] = good_audio_file.name
                 cfg["csv_filename"] = f"bd2__{cfg['site'].split()[0]}_{cfg['audio_filename'].split('.')[0]}"
-                if (not(Path(f'{cfg["output_dir"]}/{cfg["csv_filename"]}.csv').is_file())):
-                    print(f"Generating detections for {cfg['audio_filename']}")
-                    segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
-                    file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-                    if (cfg["num_processes"] <= 6):
-                        bd_preds = run_models(file_path_mappings)
-                    else:
-                        bd_preds = apply_models(file_path_mappings, cfg)
-                    _save_predictions(bd_preds, cfg)
-                    delete_segments(segmented_file_paths)
+                print(f"Generating detections for {cfg['audio_filename']}")
+                segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
+                file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+                if (cfg["num_processes"] <= 6):
+                    bd_preds = run_models(file_path_mappings)
+                else:
+                    bd_preds = apply_models(file_path_mappings, cfg)
+                _save_predictions(bd_preds, cfg)
+                delete_segments(segmented_file_paths)
         else:
             segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
             file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
@@ -699,6 +699,7 @@ def run_pipeline(cfg):
                 bd_preds = run_models(file_path_mappings)
             else:
                 bd_preds = apply_models(file_path_mappings, cfg)
+            bd_preds["Site name"] = cfg['site']
             _save_predictions(bd_preds, cfg)
             delete_segments(segmented_file_paths)
 
