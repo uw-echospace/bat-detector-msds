@@ -660,7 +660,7 @@ def run_pipeline(args):
     bd_dets = pd.DataFrame()
 
     if (args['run_model']):
-        cfg = get_params(output_dir, args['temp_dir'], 4, 30.0)
+        cfg = get_params(output_dir, args['temp_dir'], args["num_processes"], 30.0)
         segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         process_pool = multiprocessing.Pool(cfg['num_processes'])
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
