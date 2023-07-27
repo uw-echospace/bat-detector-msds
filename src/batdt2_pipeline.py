@@ -681,7 +681,7 @@ def run_pipeline(cfg):
         if (cfg['individual_files']):
             for good_audio_file in good_audio_files:
                 cfg["audio_filename"] = good_audio_file.name
-                cfg["csv_filename"] = f"bd2__{cfg['site']}_{cfg['audio_filename'].split('.')[0]}"
+                cfg["csv_filename"] = f"bd2__{cfg['site'].split()[0]}_{cfg['audio_filename'].split('.')[0]}"
                 if (not(Path(f'{cfg["output_dir"]}/{cfg["csv_filename"]}.csv').is_file())):
                     print(f"Generating detections for {cfg['audio_filename']}")
                     segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
