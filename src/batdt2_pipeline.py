@@ -17,7 +17,7 @@ import exiftool
 # set python path to correctly use batdetect2 submodule
 import sys
 sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.joinpath(Path.cwd(), "src/models/bat_call_detector/batdetect2/")))
+sys.path.append(str(Path.cwd() / "src/models/bat_call_detector/batdetect2/"))
 
 from cfg import get_config
 from pipeline import pipeline
@@ -63,19 +63,19 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         sub_end = np.minimum(sub_start + ip_duration, ip_end)
 
         # For file names, convert back to seconds 
-        op_file = Path(audio_file).name.replace(" ", "_")
+        op_file = audio_file.name.replace(" ", "_")
         start_seconds =  sub_start / sampling_rate
         end_seconds =  sub_end / sampling_rate
         op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
         op_file = op_file[:-4] + op_file_en + ".wav"
         
-        op_path = Path.joinpath(Path(output_dir), Path(op_file))
+        op_path = output_dir / op_file
         output_files.append({
             "audio_file": op_path, 
             "offset":  start_time + (sub_start/sampling_rate),
         })
         
-        if (not(Path(op_path).exists())):
+        if (not(op_path.exists())):
             sub_length = sub_end - sub_start
             ip_audio.seek(sub_start)
             op_audio = ip_audio.read(sub_length)
@@ -98,11 +98,11 @@ def get_dates_of_deployment(input_dir):
         - List of file-related dates in format "YYYYMMDD".
     """
     
-    datetimes_from_dir = pd.to_datetime(list(Path(input_dir).iterdir()), format="%Y%m%d_%H%M%S.WAV", errors='coerce', exact=False).dropna()
+    datetimes_from_dir = pd.to_datetime(list(input_dir.iterdir()), format="%Y%m%d_%H%M%S.WAV", errors='coerce', exact=False).dropna()
     dates_from_dir = sorted(datetimes_from_dir.strftime("%Y%m%d").unique())
     return dates_from_dir
 
-def get_recording_period(input_dir):
+def get_recording_period(cfg):
     """
     Gets configured recording period of Audiomoth over a deployment session using CONFIG.TXT.
 
@@ -118,19 +118,22 @@ def get_recording_period(input_dir):
     end_time : `str`
         - The end time of the configured recording period.
     """
-
-    config_path = f'{input_dir}/CONFIG.TXT'
-    if (Path(config_path).is_file()):
-        config_details = pd.read_csv(config_path, header=0, index_col=0, sep=" : ", engine='python').transpose()
-        config_details.columns = config_details.columns.str.strip()
-        recording_period = config_details['Recording period 1'].values[0]
-        period_tokens = recording_period.split(' ')
+    if cfg["night"]:
+        start_time = "03:00"
+        end_time = "13:30"
     else:
-        period_tokens = ["00:00", "-", "23:59"]
-    start_time = period_tokens[0]
-    end_time = period_tokens[2]
-    if end_time == "24:00":
-        end_time = "23:59"
+        config_path = cfg["input_audio"] / 'CONFIG.TXT'
+        if (config_path.is_file()):
+            config_details = pd.read_csv(config_path, header=0, index_col=0, sep=" : ", engine='python').transpose()
+            config_details.columns = config_details.columns.str.strip()
+            recording_period = config_details['Recording period 1'].values[0]
+            period_tokens = recording_period.split(' ')
+        else:
+            period_tokens = ["00:00", "-", "23:59"]
+        start_time = period_tokens[0]
+        end_time = period_tokens[2]
+        if end_time == "24:00":
+            end_time = "23:59"
 
     return start_time, end_time
 
@@ -195,7 +198,7 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
 
     ref_filepaths = []
     for file in all_filenames:
-        ref_filepath = Path(f"{input_dir}/{file}")
+        ref_filepath = input_dir / file
         if (ref_filepath.exists()):
             ref_filepaths += [ref_filepath]
 
@@ -255,7 +258,7 @@ def initialize_mappings(necessary_paths, cfg):
     l_for_mapping = [{
         'audio_seg': audio_seg, 
         'model': cfg['models'][0],
-        'original_file_name': f"{Path(audio_seg['audio_file']).name.split('__')[0]}.WAV",
+        'original_file_name': f"{audio_seg['audio_file'].name.split('__')[0]}.WAV",
         } for audio_seg in necessary_paths]
 
     return l_for_mapping
@@ -380,7 +383,7 @@ def _save_predictions(annotation_df, cfg):
         sep = "\t"
         annotation_df = convert_df_ravenpro(annotation_df)
 
-    csv_path = Path(cfg["output_dir"]) / f"{cfg['csv_filename']}{extension}"
+    csv_path = cfg["output_dir"] / f"{cfg['csv_filename']}{extension}"
     annotation_df.to_csv(csv_path, sep=sep, index=False)
     return csv_path
 
@@ -538,7 +541,7 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{site}/activity__*.csv").compute()
+    new_df = dd.read_csv(Path(__file__).parent / f"/../output_dir/recover-2023*/{site}/activity__*.csv").compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
     new_df = new_df.replace(0, -1)
@@ -553,7 +556,7 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
     activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
 
     activity_df = pd.DataFrame(activity, index=dt_hourmin_info, columns=dates)
-    activity_df.to_csv(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.csv')
+    activity_df.to_csv(Path(__file__).parent / f'/../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.csv')
 
     return activity_df
 
@@ -590,7 +593,7 @@ def plot_cumulative_activity(activity_df, output_dir, site, resample_tag):
     plt.colorbar()
     plt.tight_layout()
 
-    plt.savefig(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.png')
+    plt.savefig(Path(__file__).parent / f'/../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.png')
     plt.show()
 
 def delete_segments(necessary_paths):
@@ -604,7 +607,7 @@ def delete_segments(necessary_paths):
     """
 
     for path in necessary_paths:
-        Path(path['audio_file']).unlink(missing_ok=False)
+        path['audio_file'].unlink(missing_ok=False)
 
 def run_pipeline(cfg):
     """Runs the batdetect2 pipeline on provided directory of audio files and saves detections and activity plot in output directory
@@ -644,7 +647,7 @@ def run_pipeline(cfg):
         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
-        print(f"There are {len(good_audio_files)} usable files out of {len(list(Path(cfg['input_audio']).iterdir()))} total files")
+        print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
     if cfg['input_audio'].is_file():
         recover_folder = cfg['input_audio'].parts[-3]
         recover_date = recover_folder.split('-')[1]
@@ -653,12 +656,12 @@ def run_pipeline(cfg):
         good_audio_files = [cfg['input_audio']]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
-        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
+        field_records = get_field_records(Path(__file__).parent / "/../field_records/ubna_2022b.csv")
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
-        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        field_records = get_field_records(Path(__file__).parent / "/../field_records/ubna_2023.csv")
     site_name = get_site_name(field_records, recover_date, audiomoth_unit)
     print(f"Looking at data from {site_name}...")
-
+ 
     if site_name != "(Site not found in Field Records)":
         output_dir = cfg["output_dir"] /site_name
     else:
@@ -672,14 +675,25 @@ def run_pipeline(cfg):
     bd_dets = pd.DataFrame()
 
     if (cfg['run_model']):
-        segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
-        file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-        if (cfg["num_processes"] <= 6):
-            bd_preds = run_models(file_path_mappings)
+        if (cfg['individual_files']):
+            for good_audio_file in good_audio_files:
+                segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
+                file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+                if (cfg["num_processes"] <= 6):
+                    bd_preds = run_models(file_path_mappings)
+                else:
+                    bd_preds = apply_models(file_path_mappings, cfg)
+                _save_predictions(bd_preds, cfg)
+                delete_segments(segmented_file_paths)
         else:
-            bd_preds = apply_models(file_path_mappings, cfg)
-        _save_predictions(bd_preds, cfg)
-        delete_segments(segmented_file_paths)
+            segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
+            file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+            if (cfg["num_processes"] <= 6):
+                bd_preds = run_models(file_path_mappings)
+            else:
+                bd_preds = apply_models(file_path_mappings, cfg)
+            _save_predictions(bd_preds, cfg)
+            delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig'] and cfg['input_dir'].is_dir()):
         activity_df = construct_activity_grid(cfg['csv_filename'], ref_audio_files, good_audio_files, output_dir)
