@@ -629,8 +629,8 @@ def run_pipeline(cfg):
 
     if not output_dir.is_dir():
         output_dir.mkdir(parents=True, exist_ok=True)
-    if not cfg['temp_dir'].is_dir():
-        cfg['temp_dir'].mkdir(parents=True, exist_ok=True)
+    if not cfg['tmp_dir'].is_dir():
+        cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
     bd_dets = pd.DataFrame()
 
