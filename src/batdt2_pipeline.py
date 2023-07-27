@@ -666,7 +666,7 @@ def run_pipeline(args):
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         # bd_dets = run_models(file_path_mappings, cfg, args['csv_filename'])
         bd_dets = tqdm(
-            process_pool.imap(apply_model, file_path_mappings, chunksize=1), 
+            process_pool.imap(apply_model, file_path_mappings, chunksize=10), 
             desc=f"Applying BatDetect2",
             total=len(file_path_mappings),
         )
