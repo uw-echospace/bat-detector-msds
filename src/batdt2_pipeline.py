@@ -546,7 +546,7 @@ def construct_cumulative_activity(cfg, resample_tag):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(Path(__file__).parent / f"/../output_dir/recover-2023*/{cfg['site']}/activity__*.csv").compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{cfg['site']}/activity__*.csv").compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
     new_df = new_df.replace(0, -1)
@@ -561,7 +561,7 @@ def construct_cumulative_activity(cfg, resample_tag):
     activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
 
     activity_df = pd.DataFrame(activity, index=dt_hourmin_info, columns=dates)
-    activity_df.to_csv(Path(__file__).parent / f'/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.csv')
+    activity_df.to_csv(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.csv')
 
     return activity_df
 
@@ -598,7 +598,7 @@ def plot_cumulative_activity(activity_df, cfg, resample_tag):
     plt.colorbar()
     plt.tight_layout()
 
-    plt.savefig(Path(__file__).parent / f'/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.png')
+    plt.savefig(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.png')
     plt.show()
 
 def delete_segments(necessary_paths):
@@ -661,9 +661,9 @@ def run_pipeline(cfg):
         good_audio_files = [cfg['input_audio']]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
-        field_records = get_field_records(Path(__file__).parent / "/../field_records/ubna_2022b.csv")
+        field_records = get_field_records(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv")
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
-        field_records = get_field_records(Path(__file__).parent / "/../field_records/ubna_2023.csv")
+        field_records = get_field_records(f"{Path(__file__).parent}/../field_records/ubna_2023.csv")
     site_name = get_site_name(field_records, recover_date, audiomoth_unit)
     cfg["site"] = site_name
     print(f"Looking at data from {cfg['site']}...")
