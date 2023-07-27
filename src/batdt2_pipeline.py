@@ -21,6 +21,7 @@ sys.path.append(str(Path.joinpath(Path.cwd(), "src/models/bat_call_detector/batd
 
 from cfg import get_config
 from pipeline import pipeline
+from utils.utils import gen_empty_df, convert_df_ravenpro
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
@@ -669,12 +670,14 @@ def run_pipeline(args):
             desc=f"Applying BatDetect2",
             total=len(file_path_mappings),
         )
+        agg_df = gen_empty_df() 
+        agg_df = pd.concat(bd_dets, ignore_index=True)
         if (Path(args['input_dir']).is_file()):
             date_of_file = input_filename.split('.')[0].split('_')[0]
             time_of_file = input_filename.split('.')[0].split('_')[-1]
-            _generate_csv(bd_dets, "bd2", f"{audiomoth_folder}_{date_of_file}_{time_of_file}", Path(output_dir), args['csv'])
+            _generate_csv(agg_df, "bd2", f"{audiomoth_folder}_{date_of_file}_{time_of_file}", Path(output_dir), args['csv'])
         if (Path(args['input_dir']).is_dir()):
-            _generate_csv(bd_dets, "bd2", f"{recover_folder}_{audiomoth_folder}", Path(output_dir), args['csv'])
+            _generate_csv(agg_df, "bd2", f"{recover_folder}_{audiomoth_folder}", Path(output_dir), args['csv'])
         delete_segments(segmented_file_paths)
 
     if (args['generate_fig'] and Path(args['input_dir']).is_dir()):
