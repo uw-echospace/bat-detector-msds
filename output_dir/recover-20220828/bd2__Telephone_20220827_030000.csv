@@ -1,0 +1,10 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+1783.6285,1783.6393,27187.0,35204.0,Echolocation,Eptesicus serotinus,0.376,0.522,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1783.7515,1783.7626,26328.0,33630.0,Echolocation,Nyctalus leisleri,0.291,0.572,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1783.8815,1783.8914,26328.0,35607.0,Echolocation,Eptesicus serotinus,0.339,0.608,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1784.0085,1784.02,26328.0,33301.0,Echolocation,Nyctalus leisleri,0.23,0.521,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1784.2765,1784.289,24609.0,36553.0,Echolocation,Eptesicus serotinus,0.477,0.68,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1784.4145,1784.425,25468.0,34380.0,Echolocation,Eptesicus serotinus,0.381,0.66,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1784.5635,1784.5748,25468.0,33082.0,Echolocation,Nyctalus leisleri,0.349,0.603,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1784.7035,1784.7143,26328.0,36936.0,Echolocation,Eptesicus serotinus,0.431,0.676,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field
+1784.9855,1784.9984,24609.0,32804.0,Echolocation,Eptesicus serotinus,0.312,0.521,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220827_030000.WAV,recover-20220828,UBNA_007,Telephone Field

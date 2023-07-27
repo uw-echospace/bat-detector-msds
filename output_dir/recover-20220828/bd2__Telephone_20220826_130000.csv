@@ -1,0 +1,3 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+675.1915,675.1965,41796.0,51475.0,Echolocation,Pipistrellus nathusii,0.309,0.515,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220826_130000.WAV,recover-20220828,UBNA_007,Telephone Field
+675.8475,675.854,40937.0,58421.0,Echolocation,Pipistrellus nathusii,0.277,0.517,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220826_130000.WAV,recover-20220828,UBNA_007,Telephone Field
