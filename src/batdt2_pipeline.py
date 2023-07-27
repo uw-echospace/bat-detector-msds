@@ -375,7 +375,7 @@ def _save_predictions(annotation_df, cfg):
     extension = ".csv"
     sep = ","
 
-    if not cfg["csv"]:
+    if not cfg["should_csv"]:
         extension = ".txt"
         sep = "\t"
         annotation_df = convert_df_ravenpro(annotation_df)
