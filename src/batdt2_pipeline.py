@@ -451,7 +451,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     activity_times = (activity_datetimes_for_plot).strftime("%H:%M").unique()
     activity_dates = (activity_datetimes_for_plot).strftime("%m/%d/%y").unique()
 
-    dets = pd.read_csv(f'{output_dir}/{csv_name}')
+    dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
     dets_per_file = dets.groupby(['input_file'])['input_file'].count()
 
     activity = []
@@ -472,7 +472,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
     plot_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
-    plot_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}")
+    plot_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}.csv")
 
     return plot_df
 
