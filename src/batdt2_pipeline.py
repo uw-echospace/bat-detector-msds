@@ -708,7 +708,7 @@ def run_pipeline(cfg):
             _save_predictions(bd_preds, cfg)
             delete_segments(segmented_file_paths)
 
-    if (cfg['generate_fig'] and cfg['input_dir'].is_dir()):
+    if (cfg['generate_fig'] and cfg['input_audio'].is_dir()):
         activity_df = construct_activity_grid(cfg['csv_filename'], ref_audio_files, good_audio_files, output_dir)
         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, cfg['site'], save=True)
         cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
