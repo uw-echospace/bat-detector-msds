@@ -467,7 +467,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     activity = np.array(activity)
 
     activity_df = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
-    activity_df.to_csv(f"{output_dir}/activity__{csv_tag}")
+    activity_df.to_csv(f"{output_dir}/activity__{csv_tag}.csv")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
