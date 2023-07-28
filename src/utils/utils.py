@@ -11,8 +11,11 @@ def gen_empty_df():
             "end_time": [],
             "low_freq": [],
             "high_freq": [],
-            "detection_confidence":[],
             "event": [],
+            "class": [], 
+            "class_prob": [],
+            "det_prob": [],
+            "individual": []
         })
 
 def convert_df_ravenpro(df: pd.DataFrame):

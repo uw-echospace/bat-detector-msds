@@ -71,6 +71,7 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         
         op_path = output_dir / op_file
         output_files.append({
+            "input_filepath": audio_file,
             "audio_file": op_path, 
             "offset":  start_time + (sub_start/sampling_rate),
         })
@@ -258,7 +259,7 @@ def initialize_mappings(necessary_paths, cfg):
     l_for_mapping = [{
         'audio_seg': audio_seg, 
         'model': cfg['models'][0],
-        'original_file_name': f"{audio_seg['audio_file'].name.split('__')[0]}.WAV",
+        'original_file_name': audio_seg["input_filepath"],
         } for audio_seg in necessary_paths]
 
     return l_for_mapping
@@ -383,7 +384,9 @@ def _save_predictions(annotation_df, cfg):
         sep = "\t"
         annotation_df = convert_df_ravenpro(annotation_df)
 
-    csv_path = cfg["output_dir"] / f"{cfg['csv_filename']}{extension}"
+    filename = f"{cfg['csv_filename']}{extension}"
+
+    csv_path = cfg["output_dir"] / filename
     annotation_df.to_csv(csv_path, sep=sep, index=False)
     return csv_path
 
@@ -402,7 +405,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
         "event": "Annotation",
     }, inplace=True)
 
-    ravenpro_df["Selection"] = pd.Series(range(1, df.shape[0]))
+    ravenpro_df["Selection"] = pd.Series(range(1, df.shape[0]), dtype='float64')
     ravenpro_df["View"] = "Waveform 1"
     ravenpro_df["Channel"] = "1"
 
@@ -517,7 +520,7 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
     plt.tight_layout()
     plt.show()
 
-def construct_cumulative_activity(output_dir, site, resample_tag):
+def construct_cumulative_activity(cfg, resample_tag):
     """
     Constructs a cumulative appended DataFrame grid using dask.dataframe.
     This DataFrame gathers all detected activity contained in output_dir for a given site.
@@ -541,7 +544,7 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(Path(__file__).parent / f"/../output_dir/recover-2023*/{site}/activity__*.csv").compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{cfg['site']}/activity__*.csv").compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
     new_df = new_df.replace(0, -1)
@@ -556,11 +559,11 @@ def construct_cumulative_activity(output_dir, site, resample_tag):
     activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
 
     activity_df = pd.DataFrame(activity, index=dt_hourmin_info, columns=dates)
-    activity_df.to_csv(Path(__file__).parent / f'/../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.csv')
+    activity_df.to_csv(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.csv')
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, output_dir, site, resample_tag):
+def plot_cumulative_activity(activity_df, cfg, resample_tag):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
@@ -584,7 +587,7 @@ def plot_cumulative_activity(activity_df, output_dir, site, resample_tag):
 
     plt.rcParams.update({'font.size': 18})
     plt.figure(figsize=(24, 10))
-    plt.title(f"Activity from {site}", loc='center', y=1.05)
+    plt.title(f"Activity from {cfg['site']}", loc='center', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(activity_df.index))-0.5, activity_df.index, rotation=45)
     plt.xticks(np.arange(0, len(activity_df.columns))-0.5, activity_df.columns, rotation=45)
@@ -593,7 +596,7 @@ def plot_cumulative_activity(activity_df, output_dir, site, resample_tag):
     plt.colorbar()
     plt.tight_layout()
 
-    plt.savefig(Path(__file__).parent / f'/../output_dir/cumulative_plots/cumulative_activity__{site.split()[0]}_{resample_tag}.png')
+    plt.savefig(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.png')
     plt.show()
 
 def delete_segments(necessary_paths):
@@ -643,7 +646,7 @@ def run_pipeline(cfg):
         recover_date = recover_folder.split('-')[1]
         audiomoth_folder = cfg['input_audio'].parts[-1]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
-        start_time, end_time = get_recording_period(cfg['input_audio'])
+        start_time, end_time = get_recording_period(cfg)
         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
@@ -656,14 +659,15 @@ def run_pipeline(cfg):
         good_audio_files = [cfg['input_audio']]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
-        field_records = get_field_records(Path(__file__).parent / "/../field_records/ubna_2022b.csv")
+        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
-        field_records = get_field_records(Path(__file__).parent / "/../field_records/ubna_2023.csv")
+        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
     site_name = get_site_name(field_records, recover_date, audiomoth_unit)
-    print(f"Looking at data from {site_name}...")
+    cfg["site"] = site_name
+    print(f"Looking at data from {cfg['site']}...")
  
-    if site_name != "(Site not found in Field Records)":
-        output_dir = cfg["output_dir"] /site_name
+    if cfg["site"] != "(Site not found in Field Records)":
+        output_dir = cfg["output_dir"] / cfg["site"]
     else:
         output_dir = cfg["output_dir"] / audiomoth_folder
 
@@ -677,13 +681,18 @@ def run_pipeline(cfg):
     if (cfg['run_model']):
         if (cfg['individual_files']):
             for good_audio_file in good_audio_files:
-                print(f"Generating detections for {good_audio_file.name}")
+                cfg["audio_filename"] = good_audio_file.name
+                cfg["csv_filename"] = f"bd2__{cfg['site'].split()[0]}_{cfg['audio_filename'].split('.')[0]}"
+                print(f"Generating detections for {cfg['audio_filename']}")
                 segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
                 if (cfg["num_processes"] <= 6):
                     bd_preds = run_models(file_path_mappings)
                 else:
                     bd_preds = apply_models(file_path_mappings, cfg)
+                bd_preds["Recover Folder"] = recover_folder
+                bd_preds["SD Card"] = audiomoth_folder
+                bd_preds["Site name"] = cfg['site']
                 _save_predictions(bd_preds, cfg)
                 delete_segments(segmented_file_paths)
         else:
@@ -693,14 +702,17 @@ def run_pipeline(cfg):
                 bd_preds = run_models(file_path_mappings)
             else:
                 bd_preds = apply_models(file_path_mappings, cfg)
+            bd_preds["Recover Folder"] = recover_folder
+            bd_preds["SD Card"] = audiomoth_folder
+            bd_preds["Site name"] = cfg['site']
             _save_predictions(bd_preds, cfg)
             delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig'] and cfg['input_dir'].is_dir()):
         activity_df = construct_activity_grid(cfg['csv_filename'], ref_audio_files, good_audio_files, output_dir)
-        plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, site_name, save=True)
-        cumulative_activity_df = construct_cumulative_activity(cfg["output_dir"], site_name, "30T")
-        plot_cumulative_activity(cumulative_activity_df, cfg["output_dir"], site_name, "30T")
+        plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, cfg['site'], save=True)
+        cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
+        plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
 
 
     return bd_dets

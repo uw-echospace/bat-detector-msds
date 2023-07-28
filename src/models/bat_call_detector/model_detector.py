@@ -72,8 +72,8 @@ class BatCallDetector(DetectionInterface):
         out_df = gen_empty_df()
         if annotations:
             out_df = pd.DataFrame.from_records(annotations) 
-            out_df['detection_confidence'] = out_df['det_prob']
-            out_df.drop(columns = ['class', 'class_prob', 'det_prob','individual'], inplace=True)
+            # out_df['detection_confidence'] = out_df['det_prob']
+            # out_df.drop(columns = ['class', 'class_prob', 'det_prob','individual'], inplace=True)
         return out_df
     
     def _run_feedbuzz(self, audio_file) -> pd.DataFrame: # TODO: type annotations
