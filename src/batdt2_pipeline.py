@@ -371,7 +371,7 @@ def apply_model(file_mapping):
 
     return corrected_bd_dets
 
-def _save_predictions(annotation_df, cfg):
+def _save_predictions(annotation_df, output_dir, cfg):
     """
     Saves a dataframe to the format that user desires: ravenpro .txt or .csv
     """
@@ -386,7 +386,7 @@ def _save_predictions(annotation_df, cfg):
 
     filename = f"{cfg['csv_filename']}{extension}"
 
-    csv_path = cfg["output_dir"] / filename
+    csv_path = output_dir / filename
     annotation_df.to_csv(csv_path, sep=sep, index=False)
     return csv_path
 
@@ -693,7 +693,7 @@ def run_pipeline(cfg):
                 bd_preds["Recover Folder"] = recover_folder
                 bd_preds["SD Card"] = audiomoth_folder
                 bd_preds["Site name"] = cfg['site']
-                _save_predictions(bd_preds, cfg)
+                _save_predictions(bd_preds, output_dir, cfg)
                 delete_segments(segmented_file_paths)
         else:
             segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
