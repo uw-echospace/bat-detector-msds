@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+333.2265,333.2433,22890.0,25943.0,Echolocation,Nyctalus leisleri,0.603,0.622,-1,/mnt/ubna_data_01/recover-20220828/UBNA_007/20220829_123000.WAV,recover-20220828,UBNA_007,Telephone Field
