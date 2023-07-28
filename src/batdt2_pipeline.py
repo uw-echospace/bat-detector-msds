@@ -711,8 +711,9 @@ def run_pipeline(cfg):
     if (cfg['generate_fig'] and cfg['input_audio'].is_dir()):
         activity_df = construct_activity_grid(cfg['csv_filename'], ref_audio_files, good_audio_files, output_dir)
         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, cfg['site'], save=True)
-        cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
-        plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
+        if cfg["site"] != "(Site not found in Field Records)":
+            cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
+            plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
 
 
     return bd_dets
