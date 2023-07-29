@@ -1,0 +1,16 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+996.3905,996.3956,46953.0,66562.0,Echolocation,Pipistrellus pipistrellus,0.499,0.61,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+996.6445,996.6497,46953.0,69838.0,Echolocation,Pipistrellus pipistrellus,0.611,0.68,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+996.8945,996.8997,46953.0,69671.0,Echolocation,Pipistrellus pipistrellus,0.478,0.553,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.0735,997.079,46953.0,72330.0,Echolocation,Pipistrellus pipistrellus,0.419,0.523,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.1575,997.1627,44375.0,68211.0,Echolocation,Pipistrellus pipistrellus,0.532,0.62,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.2415,997.2469,44375.0,63432.0,Echolocation,Pipistrellus pipistrellus,0.502,0.543,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.4165,997.4229,46953.0,63058.0,Echolocation,Pipistrellus pipistrellus,0.485,0.61,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.5015,997.5066,46953.0,64119.0,Echolocation,Pipistrellus pipistrellus,0.43,0.582,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.6085,997.6148,45234.0,61573.0,Echolocation,Pipistrellus pipistrellus,0.389,0.573,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.6795,997.6851,46953.0,63482.0,Echolocation,Pipistrellus pipistrellus,0.505,0.632,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.8445,997.8502,46953.0,63249.0,Echolocation,Pipistrellus pipistrellus,0.486,0.55,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+997.9285,997.9342,46093.0,62683.0,Echolocation,Pipistrellus pipistrellus,0.488,0.633,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+998.0955,998.1029,46093.0,59283.0,Echolocation,Pipistrellus pipistrellus,0.44,0.536,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+998.2695,998.2757,46093.0,58280.0,Echolocation,Pipistrellus pipistrellus,0.463,0.526,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond
+998.6215,998.6283,46953.0,56943.0,Echolocation,Pipistrellus pipistrellus,0.457,0.524,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220828_113000.WAV,recover-20220828,UBNA_010,Central Pond

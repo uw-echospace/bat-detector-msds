@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+1560.9035,1560.9125,39218.0,45578.0,Echolocation,Pipistrellus nathusii,0.48,0.507,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_093000.WAV,recover-20220828,UBNA_010,Central Pond

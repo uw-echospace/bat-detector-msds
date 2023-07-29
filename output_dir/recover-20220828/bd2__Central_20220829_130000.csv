@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+91.1945,91.2157,16015.0,20425.0,Echolocation,Nyctalus noctula,0.446,0.558,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_130000.WAV,recover-20220828,UBNA_010,Central Pond

@@ -1,0 +1,27 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+316.6605,316.6683,39218.0,45813.0,Echolocation,Pipistrellus nathusii,0.567,0.593,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+317.5585,317.5688,38359.0,47852.0,Echolocation,Pipistrellus nathusii,0.467,0.522,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+317.6725,317.6816,39218.0,45727.0,Echolocation,Pipistrellus nathusii,0.511,0.543,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+317.7835,317.7933,38359.0,51283.0,Echolocation,Pipistrellus nathusii,0.596,0.641,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+318.0835,318.0912,38359.0,49673.0,Echolocation,Pipistrellus nathusii,0.619,0.664,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+318.1865,318.1945,38359.0,50182.0,Echolocation,Pipistrellus nathusii,0.569,0.613,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+319.0765,319.0862,39218.0,47725.0,Echolocation,Pipistrellus nathusii,0.627,0.654,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+819.6125,819.6227,39218.0,48233.0,Echolocation,Pipistrellus nathusii,0.446,0.539,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+819.9205,819.93,39218.0,51404.0,Echolocation,Pipistrellus nathusii,0.515,0.594,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1332.3735,1332.3867,43515.0,50502.0,Echolocation,Pipistrellus pipistrellus,0.314,0.532,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1332.4425,1332.4518,44375.0,52550.0,Echolocation,Pipistrellus pipistrellus,0.404,0.576,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1332.7245,1332.7332,42656.0,56583.0,Echolocation,Pipistrellus nathusii,0.357,0.557,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1332.8195,1332.8293,42656.0,57021.0,Echolocation,Pipistrellus pipistrellus,0.352,0.615,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1333.0195,1333.0272,41796.0,60766.0,Echolocation,Pipistrellus nathusii,0.301,0.551,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1333.4225,1333.4317,41796.0,58318.0,Echolocation,Pipistrellus nathusii,0.289,0.543,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1333.5105,1333.519,41796.0,63309.0,Echolocation,Pipistrellus pipistrellus,0.229,0.541,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1333.6055,1333.6143,41796.0,56361.0,Echolocation,Pipistrellus nathusii,0.233,0.551,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1333.7015,1333.71,41796.0,57339.0,Echolocation,Pipistrellus nathusii,0.302,0.529,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1334.1135,1334.1233,40078.0,62611.0,Echolocation,Pipistrellus nathusii,0.401,0.518,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1334.2175,1334.2281,41796.0,66826.0,Echolocation,Pipistrellus nathusii,0.305,0.501,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1334.4305,1334.4397,41796.0,63567.0,Echolocation,Pipistrellus nathusii,0.254,0.509,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1335.1805,1335.189,42656.0,58563.0,Echolocation,Pipistrellus nathusii,0.207,0.594,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1335.3855,1335.3942,40937.0,58734.0,Echolocation,Pipistrellus nathusii,0.471,0.539,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1335.8105,1335.819,40937.0,56749.0,Echolocation,Pipistrellus nathusii,0.478,0.568,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1336.1085,1336.117,40937.0,55426.0,Echolocation,Pipistrellus nathusii,0.401,0.557,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
+1336.3215,1336.3311,40078.0,49793.0,Echolocation,Pipistrellus nathusii,0.471,0.56,-1,/mnt/ubna_data_01/recover-20220828/UBNA_010/20220829_083000.WAV,recover-20220828,UBNA_010,Central Pond
