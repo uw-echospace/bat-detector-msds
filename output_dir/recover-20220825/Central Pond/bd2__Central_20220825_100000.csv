@@ -1,0 +1,24 @@
+start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,input_file,Recover Folder,SD Card,Site name
+26.6265,26.6365,39218.0,45560.0,Pipistrellus nathusii,0.484,0.538,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+100.1255,100.1575,16875.0,20438.0,Nyctalus noctula,0.494,0.619,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+100.6405,100.6644,16875.0,20664.0,Nyctalus noctula,0.311,0.502,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+101.3565,101.3824,17734.0,19991.0,Nyctalus noctula,0.467,0.629,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+212.8645,212.883,23750.0,28301.0,Nyctalus leisleri,0.442,0.543,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+214.6545,214.6718,24609.0,27341.0,Nyctalus leisleri,0.538,0.628,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+215.8245,215.8419,24609.0,28280.0,Nyctalus leisleri,0.377,0.558,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+216.6525,216.6703,24609.0,28543.0,Nyctalus leisleri,0.292,0.504,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1474.8205,1474.8397,22031.0,25490.0,Nyctalus leisleri,0.441,0.515,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1482.6455,1482.6607,23750.0,27598.0,Nyctalus leisleri,0.405,0.566,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1489.8605,1489.8784,22890.0,27488.0,Nyctalus leisleri,0.364,0.531,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1490.7385,1490.7612,22031.0,27283.0,Nyctalus noctula,0.357,0.515,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1492.3625,1492.382,22890.0,26419.0,Nyctalus leisleri,0.426,0.506,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1494.3465,1494.3649,22031.0,26640.0,Nyctalus leisleri,0.444,0.537,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1718.7295,1718.7466,24609.0,28766.0,Nyctalus leisleri,0.386,0.513,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1723.1165,1723.1318,25468.0,28606.0,Nyctalus leisleri,0.449,0.552,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1725.5135,1725.5314,25468.0,29453.0,Nyctalus leisleri,0.402,0.542,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1729.6845,1729.7009,24609.0,29628.0,Nyctalus leisleri,0.296,0.504,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1794.2285,1794.2336,36640.0,54490.0,Myotis daubentonii,0.293,0.51,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1794.4885,1794.4937,35781.0,54648.0,Myotis daubentonii,0.379,0.527,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1794.6315,1794.6368,34062.0,55613.0,Myotis daubentonii,0.423,0.535,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1794.7175,1794.7222,36640.0,52522.0,Myotis daubentonii,0.314,0.508,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
+1794.9295,1794.9352,34062.0,53049.0,Myotis daubentonii,0.426,0.53,-1,Echolocation,/mnt/ubna_data_01/recover-20220825/UBNA_008/20220825_100000.WAV,recover-20220825,UBNA_008,Central Pond
