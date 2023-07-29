@@ -705,7 +705,7 @@ def run_pipeline(cfg):
             bd_preds["Recover Folder"] = recover_folder
             bd_preds["SD Card"] = audiomoth_folder
             bd_preds["Site name"] = cfg['site']
-            _save_predictions(bd_preds, cfg)
+            _save_predictions(bd_preds, output_dir, cfg)
             delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig'] and cfg['input_audio'].is_dir()):
