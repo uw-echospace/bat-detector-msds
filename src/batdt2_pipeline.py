@@ -371,7 +371,7 @@ def apply_model(file_mapping):
 
     return corrected_bd_dets
 
-def _save_predictions(annotation_df, cfg):
+def _save_predictions(annotation_df, output_dir, cfg):
     """
     Saves a dataframe to the format that user desires: ravenpro .txt or .csv
     """
@@ -386,7 +386,7 @@ def _save_predictions(annotation_df, cfg):
 
     filename = f"{cfg['csv_filename']}{extension}"
 
-    csv_path = cfg["output_dir"] / filename
+    csv_path = output_dir / filename
     annotation_df.to_csv(csv_path, sep=sep, index=False)
     return csv_path
 
@@ -451,7 +451,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     activity_times = (activity_datetimes_for_plot).strftime("%H:%M").unique()
     activity_dates = (activity_datetimes_for_plot).strftime("%m/%d/%y").unique()
 
-    dets = pd.read_csv(f'{output_dir}/{csv_name}')
+    dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
     dets_per_file = dets.groupby(['input_file'])['input_file'].count()
 
     activity = []
@@ -467,12 +467,12 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     activity = np.array(activity)
 
     activity_df = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
-    activity_df.to_csv(f"{output_dir}/activity__{csv_tag}")
+    activity_df.to_csv(f"{output_dir}/activity__{csv_tag}.csv")
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
     plot_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
-    plot_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}")
+    plot_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}.csv")
 
     return plot_df
 
@@ -693,7 +693,7 @@ def run_pipeline(cfg):
                 bd_preds["Recover Folder"] = recover_folder
                 bd_preds["SD Card"] = audiomoth_folder
                 bd_preds["Site name"] = cfg['site']
-                _save_predictions(bd_preds, cfg)
+                _save_predictions(bd_preds, output_dir, cfg)
                 delete_segments(segmented_file_paths)
         else:
             segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
@@ -705,14 +705,15 @@ def run_pipeline(cfg):
             bd_preds["Recover Folder"] = recover_folder
             bd_preds["SD Card"] = audiomoth_folder
             bd_preds["Site name"] = cfg['site']
-            _save_predictions(bd_preds, cfg)
+            _save_predictions(bd_preds, output_dir, cfg)
             delete_segments(segmented_file_paths)
 
-    if (cfg['generate_fig'] and cfg['input_dir'].is_dir()):
+    if (cfg['generate_fig'] and cfg['input_audio'].is_dir()):
         activity_df = construct_activity_grid(cfg['csv_filename'], ref_audio_files, good_audio_files, output_dir)
         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, cfg['site'], save=True)
-        cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
-        plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
+        if cfg["site"] != "(Site not found in Field Records)":
+            cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
+            plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
 
 
     return bd_dets
