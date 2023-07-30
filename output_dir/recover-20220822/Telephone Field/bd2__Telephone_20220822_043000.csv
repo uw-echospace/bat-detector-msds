@@ -1,0 +1,17 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+212.7995,212.8177,23750.0,27180.0,Echolocation,Nyctalus leisleri,0.452,0.516,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+216.9605,216.9769,22890.0,27489.0,Echolocation,Nyctalus leisleri,0.373,0.517,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+217.9155,217.9311,23750.0,27629.0,Echolocation,Nyctalus leisleri,0.416,0.518,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+218.8355,218.8524,22890.0,27488.0,Echolocation,Nyctalus leisleri,0.48,0.579,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+219.1585,219.1729,23750.0,27606.0,Echolocation,Nyctalus leisleri,0.473,0.577,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+219.7785,219.7933,22890.0,28117.0,Echolocation,Nyctalus leisleri,0.428,0.619,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+220.5865,220.6057,22031.0,27845.0,Echolocation,Nyctalus noctula,0.211,0.502,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+221.7095,221.7275,22031.0,26942.0,Echolocation,Nyctalus leisleri,0.408,0.565,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+323.04449999999997,323.0552,26328.0,32232.0,Echolocation,Nyctalus leisleri,0.33,0.601,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+803.0405,803.0571,22031.0,25524.0,Echolocation,Nyctalus leisleri,0.543,0.608,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+803.3145,803.332,22031.0,26266.0,Echolocation,Nyctalus leisleri,0.53,0.602,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+805.1285,805.1439,22031.0,25876.0,Echolocation,Nyctalus leisleri,0.454,0.551,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+848.1845,848.1974,24609.0,30924.0,Echolocation,Nyctalus leisleri,0.494,0.674,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+1088.0175,1088.026,41796.0,53872.0,Echolocation,Pipistrellus nathusii,0.303,0.538,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+1088.3745,1088.381,41796.0,52597.0,Echolocation,Pipistrellus nathusii,0.412,0.503,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field
+1173.8695,1173.8743,43515.0,52007.0,Echolocation,Pipistrellus pipistrellus,0.518,0.557,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220822_043000.WAV,recover-20220822,UBNA_001,Telephone Field

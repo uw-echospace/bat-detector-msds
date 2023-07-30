@@ -1,0 +1,10 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+495.6835,495.7041,18593.0,23094.0,Echolocation,Nyctalus noctula,0.353,0.501,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+496.1145,496.1349,18593.0,22443.0,Echolocation,Nyctalus noctula,0.408,0.511,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+497.2005,497.2128,20312.0,27962.0,Echolocation,Nyctalus noctula,0.459,0.733,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+497.4915,497.5118,20312.0,24966.0,Echolocation,Nyctalus noctula,0.411,0.508,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+497.7685,497.7827,20312.0,26392.0,Echolocation,Nyctalus noctula,0.511,0.707,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+497.9365,497.9461,25468.0,34798.0,Echolocation,Eptesicus serotinus,0.26,0.65,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+498.0725,498.0816,22890.0,35607.0,Echolocation,Eptesicus serotinus,0.334,0.696,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+498.2135,498.2212,26328.0,34336.0,Echolocation,Eptesicus serotinus,0.325,0.579,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
+498.3515,498.362,23750.0,34435.0,Echolocation,Eptesicus serotinus,0.35,0.598,-1,/mnt/ubna_data_01/recover-20220822/UBNA_001/20220819_060000.WAV,recover-20220822,UBNA_001,Telephone Field
