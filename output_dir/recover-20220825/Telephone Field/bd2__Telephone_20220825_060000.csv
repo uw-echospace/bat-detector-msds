@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+1438.5035,1438.5261,18593.0,20482.0,Echolocation,Nyctalus noctula,0.39,0.536,-1,/mnt/ubna_data_01/recover-20220825/UBNA_002/20220825_060000.WAV,recover-20220825,UBNA_002,Telephone Field

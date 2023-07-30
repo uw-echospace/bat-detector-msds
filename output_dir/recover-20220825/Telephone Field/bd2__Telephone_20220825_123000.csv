@@ -1,0 +1,6 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+1405.5185,1405.5288,25468.0,31080.0,Echolocation,Nyctalus leisleri,0.301,0.543,-1,/mnt/ubna_data_01/recover-20220825/UBNA_002/20220825_123000.WAV,recover-20220825,UBNA_002,Telephone Field
+1454.0535,1454.065,24609.0,31995.0,Echolocation,Nyctalus leisleri,0.314,0.645,-1,/mnt/ubna_data_01/recover-20220825/UBNA_002/20220825_123000.WAV,recover-20220825,UBNA_002,Telephone Field
+1457.9675,1457.9799,23750.0,30769.0,Echolocation,Nyctalus leisleri,0.301,0.595,-1,/mnt/ubna_data_01/recover-20220825/UBNA_002/20220825_123000.WAV,recover-20220825,UBNA_002,Telephone Field
+1477.1625,1477.1743,23750.0,30083.0,Echolocation,Nyctalus leisleri,0.222,0.518,-1,/mnt/ubna_data_01/recover-20220825/UBNA_002/20220825_123000.WAV,recover-20220825,UBNA_002,Telephone Field
+1477.4125,1477.4245,23750.0,29895.0,Echolocation,Nyctalus leisleri,0.271,0.573,-1,/mnt/ubna_data_01/recover-20220825/UBNA_002/20220825_123000.WAV,recover-20220825,UBNA_002,Telephone Field
