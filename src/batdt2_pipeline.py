@@ -457,10 +457,9 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
 
     activity = []
     for ref_file in ref_audio_files:
-        file = ref_file.name
         if ref_file in good_audio_files:
-            if (file in dets_per_file.index):
-                activity += [dets_per_file[file]]
+            if (ref_file in dets_per_file.index):
+                activity += [dets_per_file[ref_file]]
             else:
                 activity += [1]
         else:
