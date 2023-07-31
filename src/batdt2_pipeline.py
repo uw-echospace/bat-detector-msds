@@ -453,6 +453,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
 
     dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
     dets_per_file = dets.groupby(['input_file'])['input_file'].count()
+    print(dets_per_file)
 
     activity = []
     for ref_file in ref_audio_files:
