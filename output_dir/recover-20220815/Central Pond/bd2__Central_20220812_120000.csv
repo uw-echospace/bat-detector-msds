@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+497.2375,497.2542,22031.0,25337.0,Echolocation,Nyctalus leisleri,0.404,0.521,-1,/mnt/ubna_data_01/recover-20220815/UBNA_008/20220812_120000.WAV,recover-20220815,UBNA_008,Central Pond
