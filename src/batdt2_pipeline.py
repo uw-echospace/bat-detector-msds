@@ -510,8 +510,8 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
     plt.figure(figsize=(12, 8))
     plt.title(f"Activity from {site_name}", loc='left', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(plot_df.index), 2)-0.5, plot_df.index[::2], rotation=30)
-    plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_df.columns, rotation=30)
+    plt.yticks(np.arange(0, len(plot_df.index), 2)-0.5, plot_df.index[::2], rotation=45)
+    plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_df.columns, rotation=45)
     plt.ylabel('UTC Time (HH:MM)')
     if show_PST:
         plt.ylabel('PST Time (HH:MM)')
