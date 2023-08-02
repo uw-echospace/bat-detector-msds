@@ -454,9 +454,10 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     dets_per_file = dets.groupby(['ref_time'])['ref_time'].count()
-    print(dets_per_file.index)
-    print(ref_audio_files)
     good_datetimes = pd.to_datetime(good_audio_files, format="%Y%m%d_%H%M%S", exact=False)
+    print(dets_per_file.index)
+    print(activity_datetimes_for_file)
+    print(good_datetimes)
 
     activity = []
     for ref_datetime in activity_datetimes_for_file:
