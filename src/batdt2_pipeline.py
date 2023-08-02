@@ -443,7 +443,8 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     """
     csv_tag = csv_name.split('__')[-1]
 
-    activity_datetimes_for_file = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S", exact=False).tz_localize('UTC')
+    ref_datetimes = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S", exact=False)
+    activity_datetimes_for_file = ref_datetimes.tz_localize('UTC')
     activity_datetimes_for_plot = activity_datetimes_for_file
     if show_PST:
         activity_datetimes_for_plot = activity_datetimes_for_plot.tz_convert(tz='US/Pacific')
@@ -460,7 +461,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     print(good_datetimes)
 
     activity = []
-    for ref_datetime in activity_datetimes_for_file:
+    for ref_datetime in ref_datetimes:
         if ref_datetime in good_datetimes:
             if (ref_datetime in dets_per_file.index):
                 activity += [dets_per_file[ref_datetime]]
