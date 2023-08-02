@@ -443,7 +443,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     """
     csv_tag = csv_name.split('__')[-1]
 
-    activity_datetimes_for_file = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S.WAV", exact=False).tz_localize('UTC')
+    activity_datetimes_for_file = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S", exact=False).tz_localize('UTC')
     activity_datetimes_for_plot = activity_datetimes_for_file
     if show_PST:
         activity_datetimes_for_plot = activity_datetimes_for_plot.tz_convert(tz='US/Pacific')
@@ -452,16 +452,17 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     activity_dates = (activity_datetimes_for_plot).strftime("%m/%d/%y").unique()
 
     dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
-    dets_per_file = dets.groupby(['input_file'])['input_file'].count()
+    dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
+    dets_per_file = dets.groupby(['ref_time'])['ref_time'].count()
     print(dets_per_file.index)
     print(ref_audio_files)
+    good_datetimes = pd.to_datetime(good_audio_files, format="%Y%m%d_%H%M%S", exact=False)
 
     activity = []
-    for ref_file in ref_audio_files:
-        file = str(ref_file)
-        if ref_file in good_audio_files:
-            if (file in dets_per_file.index):
-                activity += [dets_per_file[file]]
+    for ref_datetime in activity_datetimes_for_file:
+        if ref_datetime in good_datetimes:
+            if (ref_datetime in dets_per_file.index):
+                activity += [dets_per_file[ref_datetime]]
             else:
                 activity += [1]
         else:
