@@ -456,10 +456,7 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     dets_per_file = dets.groupby(['ref_time'])['ref_time'].count()
     good_datetimes = pd.to_datetime(good_audio_files, format="%Y%m%d_%H%M%S", exact=False)
-    print(dets_per_file.index)
-    print(activity_datetimes_for_file)
-    print(good_datetimes)
-
+    
     activity = []
     for ref_datetime in ref_datetimes:
         if ref_datetime in good_datetimes:
