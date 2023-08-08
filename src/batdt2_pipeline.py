@@ -165,7 +165,8 @@ def get_files_for_pipeline(reference_filepaths):
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
     df_comments = pd.DataFrame(comments)
     print(f"There are {len(audio_files)} audio files that passed 1st level of filtering!")
-    good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
+    condition_for_good_files = np.logical_and(~df_comments['RIFF:Comment'].str.contains("microphone"), ~df_comments['RIFF:Comment'].str.contains("voltage"))
+    good_audio_files = df_comments.loc[condition_for_good_files]['SourceFile'].values
 
     for i in range(len(good_audio_files)):
         good_audio_files[i] = Path(good_audio_files[i])
@@ -652,6 +653,7 @@ def run_pipeline(cfg):
         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
+        print(good_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
     if cfg['input_audio'].is_file():
         recover_folder = cfg['input_audio'].parts[-3]
