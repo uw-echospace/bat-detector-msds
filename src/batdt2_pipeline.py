@@ -192,7 +192,7 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
 
-    all_dates = pd.Index([])
+    all_dates = pd.DatetimeIndex([])
     for date in dates:
         date_range = pd.date_range(dt.datetime.strptime(f'{date}_{start_time}', "%Y%m%d_%H:%M"), dt.datetime.strptime(f'{date}_{end_time}', "%Y%m%d_%H:%M"), freq="30T", inclusive='left')
         all_dates = all_dates.append(date_range)
