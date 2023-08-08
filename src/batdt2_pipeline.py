@@ -192,7 +192,7 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
 
-    all_dates = pd.DatetimeIndex([])
+    all_dates = pd.Index([])
     for date in dates:
         date_range = pd.date_range(dt.datetime.strptime(f'{date}_{start_time}', "%Y%m%d_%H:%M"), dt.datetime.strptime(f'{date}_{end_time}', "%Y%m%d_%H:%M"), freq="30T", inclusive='left')
         all_dates = all_dates.append(date_range)
@@ -653,7 +653,6 @@ def run_pipeline(cfg):
         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
-        print(good_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
     if cfg['input_audio'].is_file():
         recover_folder = cfg['input_audio'].parts[-3]
