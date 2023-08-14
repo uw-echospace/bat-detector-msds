@@ -646,7 +646,8 @@ def run_pipeline(cfg):
 
     if cfg['input_audio'].is_dir():
         recover_folder = cfg['input_audio'].parts[-2]
-        recover_date = recover_folder.split('-')[1]
+        recover_date_unclean = recover_folder.split('-')[1]
+        recover_date = recover_date_unclean.split('_')[0]
         audiomoth_folder = cfg['input_audio'].parts[-1]
         audiomoth_unit = audiomoth_folder.split('_')[-1]
         start_time, end_time = get_recording_period(cfg)
