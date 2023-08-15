@@ -196,8 +196,8 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
 
     start_datetime_of_recording = dt.datetime.strptime(f'{dates[0]}_{start_time}', "%Y%m%d_%H:%M")
     end_datetime_of_recording = dt.datetime.strptime(f'{dates[-1]}_{end_time}', "%Y%m%d_%H:%M")
-    date_range = pd.date_range(start_datetime_of_recording, end_datetime_of_recording, freq="30T", inclusive='left')
-    all_dates = date_range[date_range.indexer_between_time(start_time, end_time)]
+    date_range = pd.date_range(start_datetime_of_recording, end_datetime_of_recording, freq="30T")
+    all_dates = date_range[date_range.indexer_between_time(start_time, end_time, include_end=False)]
     all_filenames = all_dates.strftime("%Y%m%d_%H%M%S.WAV")
 
     ref_filepaths = []
