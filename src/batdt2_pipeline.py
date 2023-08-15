@@ -653,6 +653,9 @@ def run_pipeline(cfg):
         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
         good_audio_files = get_files_for_pipeline(ref_audio_files)
+        print(f"{cfg['input_audio']} has {len(list(cfg['input_audio'].iterdir()))} total files")
+        print("THESE ARE THE GOOD ONES")
+        print(good_audio_file)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
     if cfg['input_audio'].is_file():
         recover_folder = cfg['input_audio'].parts[-3]
