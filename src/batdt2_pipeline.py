@@ -655,7 +655,7 @@ def run_pipeline(cfg):
         good_audio_files = get_files_for_pipeline(ref_audio_files)
         print(f"{cfg['input_audio']} has {len(list(cfg['input_audio'].iterdir()))} total files")
         print("THESE ARE THE GOOD ONES")
-        print(good_audio_file)
+        print(good_audio_files)
         print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
     if cfg['input_audio'].is_file():
         recover_folder = cfg['input_audio'].parts[-3]
