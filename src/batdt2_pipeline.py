@@ -165,7 +165,9 @@ def get_files_for_pipeline(reference_filepaths):
     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
     df_comments = pd.DataFrame(comments)
     print(f"There are {len(audio_files)} audio files that passed 1st level of filtering!")
-    condition_for_good_files = np.logical_and(~df_comments['RIFF:Comment'].str.contains("microphone"), ~df_comments['RIFF:Comment'].str.contains("voltage"))
+    files_with_microphone_error = df_comments['RIFF:Comment'].str.contains("microphone")
+    files_with_battery_error = df_comments['RIFF:Comment'].str.contains("voltage")
+    condition_for_good_files = np.logical_and(~files_with_microphone_error, ~files_with_battery_error)
     good_audio_files = df_comments.loc[condition_for_good_files]['SourceFile'].values
 
     for i in range(len(good_audio_files)):
@@ -192,10 +194,10 @@ def get_files_to_reference(input_dir, dates, start_time, end_time):
         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
     """
 
-    all_dates = pd.Index([])
-    for date in dates:
-        date_range = pd.date_range(dt.datetime.strptime(f'{date}_{start_time}', "%Y%m%d_%H:%M"), dt.datetime.strptime(f'{date}_{end_time}', "%Y%m%d_%H:%M"), freq="30T", inclusive='left')
-        all_dates = all_dates.append(date_range)
+    start_datetime_of_recording = dt.datetime.strptime(f'{dates[0]}_{start_time}', "%Y%m%d_%H:%M")
+    end_datetime_of_recording = dt.datetime.strptime(f'{dates[-1]}_{end_time}', "%Y%m%d_%H:%M")
+    date_range = pd.date_range(start_datetime_of_recording, end_datetime_of_recording, freq="30T", inclusive='left')
+    all_dates = date_range[date_range.indexer_between_time(start_time, end_time)]
     all_filenames = all_dates.strftime("%Y%m%d_%H%M%S.WAV")
 
     ref_filepaths = []
@@ -588,12 +590,12 @@ def plot_cumulative_activity(activity_df, cfg, resample_tag):
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red')
 
-    plt.rcParams.update({'font.size': 18})
+    plt.rcParams.update({'font.size': 3*len(activity_df.columns)**0.5})
     plt.figure(figsize=(24, 10))
     plt.title(f"Activity from {cfg['site']}", loc='center', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(activity_df.index))-0.5, activity_df.index, rotation=45)
-    plt.xticks(np.arange(0, len(activity_df.columns))-0.5, activity_df.columns, rotation=45)
+    plt.yticks(np.arange(0, len(activity_df.index), 2)-0.5, activity_df.index[::2], rotation=45)
+    plt.xticks(np.arange(0, len(activity_df.columns), 2)-0.5, activity_df.columns[::2], rotation=45)
     plt.ylabel('UTC Time (HH:MM)')
     plt.xlabel('Date (MM-DD-YY)')
     plt.colorbar()
@@ -646,10 +648,7 @@ def run_pipeline(cfg):
 
     if cfg['input_audio'].is_dir():
         recover_folder = cfg['input_audio'].parts[-2]
-        recover_date_unclean = recover_folder.split('-')[1]
-        recover_date = recover_date_unclean.split('_')[0]
         audiomoth_folder = cfg['input_audio'].parts[-1]
-        audiomoth_unit = audiomoth_folder.split('_')[-1]
         start_time, end_time = get_recording_period(cfg)
         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
@@ -657,11 +656,12 @@ def run_pipeline(cfg):
         print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
     if cfg['input_audio'].is_file():
         recover_folder = cfg['input_audio'].parts[-3]
-        recover_date_unclean = recover_folder.split('-')[1]
-        recover_date = recover_date_unclean.split('_')[0]
         audiomoth_folder = cfg['input_audio'].parts[-2]
-        audiomoth_unit = audiomoth_folder.split('_')[-1]
         good_audio_files = [cfg['input_audio']]
+
+    audiomoth_unit = audiomoth_folder.split('_')[-1]
+    recover_date_unclean = recover_folder.split('-')[1]
+    recover_date = recover_date_unclean.split('_')[0]
 
     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2021":
         field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
