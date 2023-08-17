@@ -757,7 +757,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
 
     if (cfg['run_model']):
         for file in data_params['good_audio_files']:
-            data_params["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
+            cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
             print(f"Generating detections for {file.name}")
             segmented_file_paths = generate_segmented_paths([file], cfg)
             file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
@@ -765,8 +765,6 @@ def run_pipeline_for_individual_files_with_df(cfg):
                 bd_preds = run_models(file_path_mappings)
             else:
                 bd_preds = apply_models(file_path_mappings, cfg)
-            bd_preds["Recover Folder"] = data_params['recover_folder']
-            bd_preds["SD Card"] = data_params["audiomoth_folder"]
             bd_preds["Site name"] = data_params['site']
             _save_predictions(bd_preds, data_params['output_dir'], cfg)
             delete_segments(segmented_file_paths)
@@ -817,6 +815,7 @@ def filter_df_with_location(ubna_data_df, site_name):
 def run_pipeline_for_session_with_df(cfg):
 
     data_params = get_params_relevant_to_data(cfg)
+    cfg["csv_filename"] = f"bd2__{data_params['recover_folder']}_{data_params['audiomoth_folder']}"
 
     bd_dets = pd.DataFrame()
 
@@ -883,8 +882,6 @@ def get_params_relevant_to_data(cfg):
         print("All files from deployment session good!")
     else:
         print("Error files exist!")
-
-    data_params["csv_filename"] = f"bd2__{data_params['recover_folder']}_{data_params['audiomoth_folder']}"
 
     return data_params
 
