@@ -750,6 +750,11 @@ def run_pipeline_for_session_with_df(cfg):
 
     bd_dets = pd.DataFrame()
 
+    if not data_params['output_dir'].is_dir():
+        data_params['output_dir'].mkdir(parents=True, exist_ok=True)
+    if not cfg['tmp_dir'].is_dir():
+        cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
+
     if (cfg['run_model']):
         segmented_file_paths = generate_segmented_paths(data_params['good_audio_files'], cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
