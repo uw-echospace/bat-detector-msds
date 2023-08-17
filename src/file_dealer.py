@@ -97,7 +97,7 @@ def generate_files_df(cfg):
                 no_audiomoth_comment = "File has no Audiomoth-related comment"
 
                 if "Composite:Duration" in datapoint.keys():
-                    durations += [int(datapoint["Composite:Duration"])]
+                    durations += [int(float(datapoint["Composite:Duration"]))]
                 else:
                     durations += [no_audiomoth_comment]
 
