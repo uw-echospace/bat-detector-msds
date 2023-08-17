@@ -755,21 +755,21 @@ def run_pipeline_for_individual_files_with_df(cfg):
     if not cfg['tmp_dir'].is_dir():
         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
-    # if (cfg['run_model']):
-    #     for file in data_params['good_audio_files']:
-    #         data_params["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
-    #         print(f"Generating detections for {file.name}")
-    #         segmented_file_paths = generate_segmented_paths([file], cfg)
-    #         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-    #         if (cfg["num_processes"] <= 6):
-    #             bd_preds = run_models(file_path_mappings)
-    #         else:
-    #             bd_preds = apply_models(file_path_mappings, cfg)
-    #         bd_preds["Recover Folder"] = data_params['recover_folder']
-    #         bd_preds["SD Card"] = data_params["audiomoth_folder"]
-    #         bd_preds["Site name"] = data_params['site']
-    #         _save_predictions(bd_preds, data_params['output_dir'], cfg)
-    #         delete_segments(segmented_file_paths)
+    if (cfg['run_model']):
+        for file in data_params['good_audio_files']:
+            data_params["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
+            print(f"Generating detections for {file.name}")
+            segmented_file_paths = generate_segmented_paths([file], cfg)
+            file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+            if (cfg["num_processes"] <= 6):
+                bd_preds = run_models(file_path_mappings)
+            else:
+                bd_preds = apply_models(file_path_mappings, cfg)
+            bd_preds["Recover Folder"] = data_params['recover_folder']
+            bd_preds["SD Card"] = data_params["audiomoth_folder"]
+            bd_preds["Site name"] = data_params['site']
+            _save_predictions(bd_preds, data_params['output_dir'], cfg)
+            delete_segments(segmented_file_paths)
 
     return bd_dets
 
@@ -797,9 +797,6 @@ def get_params_relevant_to_data_at_location(cfg):
         print("All files from deployment session good!")
     else:
         print("Error files exist!")
-
-    print(f"Ref Audio Files: {(pd.to_datetime(data_params['ref_audio_files'], format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV')}")
-    print(f"Good Audio Files: {(pd.to_datetime(data_params['good_audio_files'], format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV')}")
 
     return data_params
 
