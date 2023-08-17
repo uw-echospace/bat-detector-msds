@@ -756,6 +756,8 @@ def run_pipeline_with_df(cfg):
             cur_data_records = ubna_data_01_df
         if cfg["recover_folder"] in ubna_data_02_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_02_df["SD card #"].values:
             cur_data_records = ubna_data_02_df
+        cur_data_records["Datetime UTC"] = pd.DatetimeIndex(cur_data_records["Datetime UTC"])
+        cur_data_records.set_index("Datetime UTC", inplace=True) 
         
         files_from_deployment_session = filter_df_with_deployment_session(cur_data_records, cfg["recover_folder"], cfg["sd_unit"])
         site_name = files_from_deployment_session["Site name"].values[0]
