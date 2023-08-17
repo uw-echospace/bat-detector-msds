@@ -751,34 +751,17 @@ def run_pipeline_for_session_with_df(cfg):
     bd_dets = pd.DataFrame()
 
     if (cfg['run_model']):
-        if (cfg['individual_files']):
-            for good_audio_file in data_params['good_audio_files']:
-                data_params["audio_filename"] = good_audio_file.name
-                data_params["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{data_params['audio_filename'].split('.')[0]}"
-                print(f"Generating detections for {data_params['audio_filename']}")
-                segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
-                file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-                if (cfg["num_processes"] <= 6):
-                    bd_preds = run_models(file_path_mappings)
-                else:
-                    bd_preds = apply_models(file_path_mappings, cfg)
-                bd_preds["Recover Folder"] = data_params['recover_folder']
-                bd_preds["SD Card"] = data_params["audiomoth_folder"]
-                bd_preds["Site name"] = data_params['site']
-                _save_predictions(bd_preds, data_params['output_dir'], cfg)
-                delete_segments(segmented_file_paths)
+        segmented_file_paths = generate_segmented_paths(data_params['good_audio_files'], cfg)
+        file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+        if (cfg["num_processes"] <= 6):
+            bd_preds = run_models(file_path_mappings)
         else:
-            segmented_file_paths = generate_segmented_paths(data_params['good_audio_files'], cfg)
-            file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-            if (cfg["num_processes"] <= 6):
-                bd_preds = run_models(file_path_mappings)
-            else:
-                bd_preds = apply_models(file_path_mappings, cfg)
-            bd_preds["Recover Folder"] = data_params['recover_folder']
-            bd_preds["SD Card"] = data_params["audiomoth_folder"]
-            bd_preds["Site name"] = data_params['site']
-            _save_predictions(bd_preds, data_params['output_dir'], cfg)
-            delete_segments(segmented_file_paths)
+            bd_preds = apply_models(file_path_mappings, cfg)
+        bd_preds["Recover Folder"] = data_params['recover_folder']
+        bd_preds["SD Card"] = data_params["audiomoth_folder"]
+        bd_preds["Site name"] = data_params['site']
+        _save_predictions(bd_preds, data_params['output_dir'], cfg)
+        delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig']):
         activity_df = construct_activity_grid(data_params["csv_filename"], data_params['ref_audio_files'], data_params['good_audio_files'], data_params['output_dir'])
