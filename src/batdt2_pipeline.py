@@ -936,12 +936,12 @@ def parse_args():
         type=str,
         help="The SD card # we have saved files into"
     )
-    parser.add_argument(
-        "csv_filename",
-        type=str,
-        help="the file name of the .csv file",
-        default="output.csv",
-    )
+    # parser.add_argument(
+    #     "csv_filename",
+    #     type=str,
+    #     help="the file name of the .csv file",
+    #     default="output.csv",
+    # )
     parser.add_argument(
         "output_directory",
         type=str,
@@ -994,7 +994,7 @@ if __name__ == "__main__":
     cfg["recover_folder"] = args["recover_folder"]
     cfg["sd_unit"] = args["sd_unit"]
     # cfg["input_audio"] = Path(args["input_audio"])
-    cfg["csv_filename"] = args["csv_filename"]
+    # cfg["csv_filename"] = args["csv_filename"]
     cfg["output_dir"] = Path(args["output_directory"])
     cfg["tmp_dir"] = Path(args["tmp_directory"])
     cfg["run_model"] = args["run_model"]
