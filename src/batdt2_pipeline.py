@@ -747,7 +747,7 @@ def generate_detection_plots(cfg):
 def run_pipeline_with_df(cfg):
     if cfg["recover_folder"] and cfg["sd_unit"]:
         print(f"Searching for files from {cfg['recover_folder']} and UBNA_{cfg['sd_unit']}")
-        
+
         ubna_data_01_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_01_collected_audio_records.csv')
         ubna_data_02_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_02_collected_audio_records.csv')
 
@@ -934,7 +934,7 @@ if __name__ == "__main__":
     # cfg["input_audio"] = Path(args["input_audio"])
     # cfg["csv_filename"] = args["csv_filename"]
     cfg["output_dir"] = Path(args["output_directory"])
-    # cfg["tmp_dir"] = Path(args["tmp_directory"])
+    cfg["tmp_dir"] = Path(args["tmp_directory"])
     # cfg["run_model"] = args["run_model"]
     # cfg["generate_fig"] = args["generate_fig"]
     # cfg["should_csv"] = args["csv"]
