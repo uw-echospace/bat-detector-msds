@@ -81,34 +81,51 @@ def generate_files_df(cfg):
     print(f"Created sample rate column!")
     files_df["Audiomoth artist ID"] = files_df["File path"].apply(lambda x : get_file_comment(x))
     print(f"Created Audiomoth artist ID column!")
+    files_df["File duration"] = files_df["File path"].apply(lambda x : get_file_comment(x))
+    print(f"Created file duration column!")
 
     with exiftool.ExifToolHelper() as et:
         good_paths = list(files_df.loc[files_df["File metadata"] == "good!"]["File path"].values)
         comments = []
         sample_rates = []
         artists = []
+        durations = []
         for path in good_paths:
             try:
                 raw_data = et.get_metadata(path)
                 datapoint = raw_data[0]
+                no_audiomoth_comment = "File has no Audiomoth-related comment"
+
+                if "Composite:Duration" in datapoint.keys():
+                    durations += [datapoint["Composite:Duration"]]
+                else:
+                    durations += [no_audiomoth_comment]
+
                 if "RIFF:SampleRate" in datapoint.keys():
                     sample_rates += [datapoint["RIFF:SampleRate"]]
+                else:
+                    sample_rates += [no_audiomoth_comment]
+
                 if "RIFF:Comment" in datapoint.keys():
                     comments += [datapoint["RIFF:Comment"]]
+                else:
+                    comments += [no_audiomoth_comment]
+
                 if "RIFF:Artist" in datapoint.keys():
                     artists += [datapoint["RIFF:Artist"]]
                 else:
-                    artists += ["File has no Audiomoth-related comment"]
-                    sample_rates += ["File has no Audiomoth-related comment"]
-                    comments += ["File has no Audiomoth-related comment"]
+                    artists += [no_audiomoth_comment]
             except exiftool.exceptions.ExifToolExecuteError:
-                artists += ["File has no comment due to error!"]
-                sample_rates += ["File has no comment due to error!"]
-                comments += ["File has no comment due to error!"]
+                error_comment = "File has no comment due to error!"
+                artists += [error_comment]
+                sample_rates += [error_comment]
+                comments += [error_comment]
+                durations += [error_comment]
 
         files_df["File metadata"].loc[files_df["File metadata"] == "good!"] = comments
         files_df["Sample rate"].loc[files_df["Sample rate"] == "good!"] = sample_rates
         files_df["Audiomoth artist ID"].loc[files_df["Audiomoth artist ID"] == "good!"] = artists
+        files_df["File duration"].loc[files_df["File duration"] == "good!"] = durations
     
     print(f"Updated file metadata info using Audiomoth metadata comments!")
     files_df.insert(2, "Audiomoth battery", files_df["File metadata"].apply(lambda x : get_file_battery(x)))
