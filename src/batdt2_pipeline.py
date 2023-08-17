@@ -1074,8 +1074,8 @@ if __name__ == "__main__":
     # run_detection_pipeline(cfg)
     # generate_detection_plots(cfg)
 
-    if cfg["recover_folder"] and cfg["sd_unit"]:
+    if cfg["recover_folder"]!="none" and cfg["sd_unit"]!="none":
         run_pipeline_for_session_with_df(cfg)
 
-    if cfg['site'] and cfg["hard_drive"]:
+    if cfg['site']!="none" and cfg["hard_drive"]!="none":
         run_pipeline_for_individual_files_with_df(cfg)
