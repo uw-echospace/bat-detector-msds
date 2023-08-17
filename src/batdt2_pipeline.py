@@ -986,25 +986,21 @@ def parse_args():
     parser.add_argument(
         "recover_folder",
         type=str,
-        required=False,
         help="The recover-DATE folder we have saved files into"
     )
     parser.add_argument(
         "sd_unit",
         type=str,
-        required=False,
         help="The SD card # we have saved files into"
     )
     parser.add_argument(
         "site",
         type=str,
-        required=False,
         help="The site we have collected files from"
     )
     parser.add_argument(
         "hard_drive",
         type=str,
-        required=False,
         help="The hard_drive we have stored files in"
     )
     # parser.add_argument(
