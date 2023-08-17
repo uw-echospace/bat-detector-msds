@@ -776,8 +776,13 @@ def run_pipeline_with_df(cfg):
         good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
         good_audio_files = sorted(list(good_deploy_session_df["File path"].values))
 
-        print(f"Ref Audio Filenames: {list((pd.to_datetime(ref_audio_files, format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV'))}")
-        print(f"Good Audio Filenames: {list((pd.to_datetime(good_audio_files, format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV'))}")
+        if good_audio_files == ref_audio_files:
+            print("All files from deployment session good!")
+        else:
+            print("Error files exist!")
+
+        # print(f"Ref Audio Filenames: {list((pd.to_datetime(ref_audio_files, format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV'))}")
+        # print(f"Good Audio Filenames: {list((pd.to_datetime(good_audio_files, format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV'))}")
 
     return True
 
