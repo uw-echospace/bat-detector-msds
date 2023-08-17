@@ -801,11 +801,11 @@ def get_params_relevant_to_data(cfg):
         data_params['output_dir'] = cfg["output_dir"] / f"UBNA_{cfg['sd_unit']}"
     print(f"Will save csv file to {data_params['output_dir']}")
 
-    data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["File path"].values))
+    data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["File path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_deployment_session["File status"] == "Usable for detection"
     file_duration_cond = files_from_deployment_session["File duration"] == "1795"
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
-    data_params['good_audio_files'] = sorted(list(good_deploy_session_df["File path"].values))
+    data_params['good_audio_files'] = sorted(list(good_deploy_session_df["File path"].apply(lambda x : Path(x)).values))
 
     if data_params['good_audio_files'] == data_params['ref_audio_files']:
         print("All files from deployment session good!")
