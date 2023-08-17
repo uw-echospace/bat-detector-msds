@@ -757,7 +757,7 @@ def run_pipeline_with_df(cfg):
         if cfg["recover_folder"] in ubna_data_02_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_02_df["SD card #"].values:
             cur_data_records = ubna_data_02_df
         
-        files_from_deployment_session = filter_df_with_deployment_session(cur_data_records)
+        files_from_deployment_session = filter_df_with_deployment_session(cur_data_records, cfg["recover_folder"], cfg["sd_unit"])
         site_name = files_from_deployment_session["Site name"].values[0]
         print(f"Looking at data from {site_name}...")
         cfg["site"] = site_name
