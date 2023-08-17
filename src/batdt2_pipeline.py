@@ -790,7 +790,7 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['ref_audio_files'] = sorted(list(files_from_location["File path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_location["File status"] == "Usable for detection"
     file_duration_cond = files_from_location["File duration"] == "1795"
-    good_deploy_session_df = files_from_location.loc[file_status_cond & file_duration_cond]
+    good_deploy_session_df = files_from_location.loc[file_status_cond&file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_deploy_session_df["File path"].apply(lambda x : Path(x)).values))
 
     if data_params['good_audio_files'] == data_params['ref_audio_files']:
@@ -804,10 +804,11 @@ def get_params_relevant_to_data_at_location(cfg):
 def filter_df_with_location(ubna_data_df, site_name):
     site_name_cond = ubna_data_df["Site name"] == site_name
 
+    file_year_cond = ubna_data_df.index.year == 2022
     minute_cond = np.logical_or((ubna_data_df.index).minute == 30, (ubna_data_df.index).minute == 0)
     datetime_cond = np.logical_and((ubna_data_df.index).second == 0, minute_cond)
 
-    filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond].sort_index()
+    filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond&file_year_cond].sort_index()
     filtered_location_nightly_df = filtered_location_df.between_time("03:00", "13:30", inclusive="left")
 
     return filtered_location_nightly_df
