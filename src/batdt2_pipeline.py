@@ -664,16 +664,8 @@ def run_pipeline(cfg):
 
     audiomoth_unit = audiomoth_folder.split('_')[-1]
     recover_date_unclean = recover_folder.split('-')[1]
-    recover_date = recover_date_unclean.split('_')[0]
 
-    if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2021":
-        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
-    if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
-        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
-        field_records = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
-
-    site_name = get_site_name(field_records, recover_date_unclean, audiomoth_unit)
+    site_name = get_site_name(recover_date_unclean, audiomoth_unit)
     cfg["site"] = site_name
     print(f"Looking at data from {cfg['site']}...")
  
@@ -759,15 +751,12 @@ def get_field_records(path_to_records):
     return df_fr
 
 
-def get_site_name(df_fr, DATE, SD_CARD_NUM):
+def get_site_name(DATE, SD_CARD_NUM):
     """Gets the location where an AudioMoth was deployed at a certain date using the deployment field records.
     Will be used to plot activity with the right location label so user can tell location of activity by plots.
 
     Parameters
     ------------
-    df_fr : `pandas.DataFrame`
-        - DataFrame table that matches the information in the .md file 
-        - stored as `repo_root_level/field_records/ubna_2022b.md`
     DATE : `str`
         The date when an AudioMoth was deployed
     SD_CARD_NUM : `str`
@@ -780,6 +769,16 @@ def get_site_name(df_fr, DATE, SD_CARD_NUM):
         according to the field records.
         - If the deployment is not recorded, site_name will be "(Site not found in Field Records)"
     """
+
+
+    recover_date = DATE.split('_')[0]
+
+    if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2021":
+        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
+    if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
+        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
+    if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
+        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     cond2 =  df_fr["SD card #"]==f"{SD_CARD_NUM}"
