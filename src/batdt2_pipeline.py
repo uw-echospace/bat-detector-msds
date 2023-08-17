@@ -746,7 +746,8 @@ def generate_detection_plots(cfg):
 
 def run_pipeline_with_df(cfg):
     if cfg["recover_folder"] and cfg["sd_unit"]:
-        print(f"Searching for files from {cfg['recover_folder']} and UBNA_{cfg['sd_unit']}")
+        audiomoth_folder = f"UBNA_{cfg['sd_unit']}"
+        print(f"Searching for files from {cfg['recover_folder']} and {audiomoth_folder}")
 
         ubna_data_01_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_01_collected_audio_records.csv')
         ubna_data_02_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_02_collected_audio_records.csv')
@@ -761,16 +762,22 @@ def run_pipeline_with_df(cfg):
         
         files_from_deployment_session = filter_df_with_deployment_session(cur_data_records, cfg["recover_folder"], cfg["sd_unit"])
         site_name = files_from_deployment_session["Site name"].values[0]
-        print(f"Looking at data from {site_name}...")
         cfg["site"] = site_name
         print(f"Looking at data from {cfg['site']}...")
-    
         if cfg["site"] != "(Site not found in Field Records)":
             output_dir = cfg["output_dir"] / cfg["site"]
         else:
             output_dir = cfg["output_dir"] / f"UBNA_{cfg['sd_unit']}"
-
         print(f"Will save csv file to {output_dir}")
+
+        ref_audio_files = sorted(list(files_from_deployment_session["File path"].values))
+        file_status_cond = files_from_deployment_session["File status"] == "Usable for detection"
+        file_duration_cond = files_from_deployment_session["File duration"] == "1795"
+        good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
+        good_audio_files = sorted(list(good_deploy_session_df["File path"].values))
+
+        print(f"Ref Audio Filenames: {(pd.to_datetime(ref_audio_files, '%Y%m%d_%H%M%S', exact=False)).stftime('%Y%m%d_%H%M%S.WAV')}")
+        print(f"Good Audio Filenames: {(pd.to_datetime(good_audio_files, '%Y%m%d_%H%M%S', exact=False)).stftime('%Y%m%d_%H%M%S.WAV')}")
 
     return True
 
