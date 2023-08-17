@@ -799,7 +799,6 @@ def get_params_relevant_to_data(cfg):
     files_from_deployment_session = filter_df_with_deployment_session(cur_data_records, data_params['recover_folder'], cfg["sd_unit"])
     site_name = files_from_deployment_session["Site name"].values[0]
     data_params["site"] = site_name
-    print(f"Looking at data from {data_params['site']}...")
     if data_params["site"] != "(Site not found in Field Records)":
         data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     else:
