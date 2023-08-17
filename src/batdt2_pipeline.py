@@ -752,9 +752,9 @@ def run_pipeline_with_df(cfg):
         ubna_data_02_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_02_collected_audio_records.csv')
 
         cur_data_records = pd.DataFrame()
-        if cfg["recover_folder"] in ubna_data_01_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_01_df["SD card#"].values:
+        if cfg["recover_folder"] in ubna_data_01_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_01_df["SD card #"].values:
             cur_data_records = ubna_data_01_df
-        if cfg["recover_folder"] in ubna_data_02_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_02_df["SD card#"].values:
+        if cfg["recover_folder"] in ubna_data_02_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_02_df["SD card #"].values:
             cur_data_records = ubna_data_02_df
         
         files_from_deployment_session = filter_df_with_deployment_session(cur_data_records)
