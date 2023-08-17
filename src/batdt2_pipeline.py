@@ -744,6 +744,78 @@ def generate_detection_plots(cfg):
             plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
 
 
+def run_pipeline_for_individual_files_with_df(cfg):
+
+    data_params = get_params_relevant_to_data_at_location(cfg)
+
+    bd_dets = pd.DataFrame()
+
+    if not data_params['output_dir'].is_dir():
+        data_params['output_dir'].mkdir(parents=True, exist_ok=True)
+    if not cfg['tmp_dir'].is_dir():
+        cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
+
+    # if (cfg['run_model']):
+    #     for file in data_params['good_audio_files']:
+    #         data_params["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
+    #         print(f"Generating detections for {file.name}")
+    #         segmented_file_paths = generate_segmented_paths([file], cfg)
+    #         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+    #         if (cfg["num_processes"] <= 6):
+    #             bd_preds = run_models(file_path_mappings)
+    #         else:
+    #             bd_preds = apply_models(file_path_mappings, cfg)
+    #         bd_preds["Recover Folder"] = data_params['recover_folder']
+    #         bd_preds["SD Card"] = data_params["audiomoth_folder"]
+    #         bd_preds["Site name"] = data_params['site']
+    #         _save_predictions(bd_preds, data_params['output_dir'], cfg)
+    #         delete_segments(segmented_file_paths)
+
+    return bd_dets
+
+
+def get_params_relevant_to_data_at_location(cfg):
+    data_params = dict()
+    data_params['site'] = cfg['site']
+    print(f"Searching for files from {cfg['site']} in {cfg['hard_drive']}")
+
+    hard_drive_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/{cfg["hard_drive"]}_collected_audio_records.csv')
+    hard_drive_df["Datetime UTC"] = pd.DatetimeIndex(hard_drive_df["Datetime UTC"])
+    hard_drive_df.set_index("Datetime UTC", inplace=True)
+    
+    files_from_location = filter_df_with_location(hard_drive_df, data_params['site'])
+    data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
+    print(f"Will save csv file to {data_params['output_dir']}")
+
+    data_params['ref_audio_files'] = sorted(list(files_from_location["File path"].apply(lambda x : Path(x)).values))
+    file_status_cond = files_from_location["File status"] == "Usable for detection"
+    file_duration_cond = files_from_location["File duration"] == "1795"
+    good_deploy_session_df = files_from_location.loc[file_status_cond & file_duration_cond]
+    data_params['good_audio_files'] = sorted(list(good_deploy_session_df["File path"].apply(lambda x : Path(x)).values))
+
+    if data_params['good_audio_files'] == data_params['ref_audio_files']:
+        print("All files from deployment session good!")
+    else:
+        print("Error files exist!")
+
+    print(f"Ref Audio Files: {(pd.to_datetime(data_params['ref_audio_files'], format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV')}")
+    print(f"Good Audio Files: {(pd.to_datetime(data_params['good_audio_files'], format='%Y%m%d_%H%M%S', exact=False)).strftime('%Y%m%d_%H%M%S.WAV')}")
+
+    return data_params
+
+
+def filter_df_with_location(ubna_data_df, site_name):
+    site_name_cond = ubna_data_df["Site name"] == site_name
+
+    minute_cond = np.logical_or((ubna_data_df.index).minute == 30, (ubna_data_df.index).minute == 0)
+    datetime_cond = np.logical_and((ubna_data_df.index).second == 0, minute_cond)
+
+    filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond].sort_index()
+    filtered_location_nightly_df = filtered_location_df.between_time("03:00", "13:30", inclusive="left")
+
+    return filtered_location_nightly_df
+
+
 def run_pipeline_for_session_with_df(cfg):
 
     data_params = get_params_relevant_to_data(cfg)
@@ -775,9 +847,7 @@ def run_pipeline_for_session_with_df(cfg):
             cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
             plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
 
-        return bd_dets
-    
-    return False
+    return bd_dets
 
 def get_params_relevant_to_data(cfg):
     data_params = dict()
@@ -916,12 +986,26 @@ def parse_args():
     parser.add_argument(
         "recover_folder",
         type=str,
+        required=False,
         help="The recover-DATE folder we have saved files into"
     )
     parser.add_argument(
         "sd_unit",
         type=str,
+        required=False,
         help="The SD card # we have saved files into"
+    )
+    parser.add_argument(
+        "site",
+        type=str,
+        required=False,
+        help="The site we have collected files from"
+    )
+    parser.add_argument(
+        "hard_drive",
+        type=str,
+        required=False,
+        help="The hard_drive we have stored files in"
     )
     # parser.add_argument(
     #     "csv_filename",
@@ -980,6 +1064,8 @@ if __name__ == "__main__":
     cfg = get_config()
     cfg["recover_folder"] = args["recover_folder"]
     cfg["sd_unit"] = args["sd_unit"]
+    cfg["site"] = args["site"]
+    cfg['hard_drive'] = args['hard_drive']
     # cfg["input_audio"] = Path(args["input_audio"])
     # cfg["csv_filename"] = args["csv_filename"]
     cfg["output_dir"] = Path(args["output_directory"])
@@ -996,3 +1082,6 @@ if __name__ == "__main__":
 
     if cfg["recover_folder"] and cfg["sd_unit"]:
         run_pipeline_for_session_with_df(cfg)
+
+    if cfg['site'] and cfg["hard_drive"]:
+        run_pipeline_for_individual_files_with_df(cfg)
