@@ -871,12 +871,12 @@ def parse_args():
     #     default="output.csv",
     # )
     parser.add_argument(
-        "recover_folder"
+        "recover_folder",
         type=str,
         help="The recover-DATE folder we have saved files into"
     )
     parser.add_argument(
-        "sd_unit"
+        "sd_unit",
         type=str,
         help="The SD card # we have saved files into"
     )
