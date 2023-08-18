@@ -490,7 +490,7 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
     plt.tight_layout()
     plt.show()
 
-def construct_cumulative_activity(cfg, resample_tag):
+def construct_cumulative_activity(site_name, resample_tag):
     """
     Constructs a cumulative appended DataFrame grid using dask.dataframe.
     This DataFrame gathers all detected activity contained in output_dir for a given site.
@@ -514,7 +514,7 @@ def construct_cumulative_activity(cfg, resample_tag):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{cfg['site']}/activity__*.csv").compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{site_name}/activity__*.csv").compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
     new_df = new_df.replace(0, -1)
@@ -529,11 +529,11 @@ def construct_cumulative_activity(cfg, resample_tag):
     activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
 
     activity_df = pd.DataFrame(activity, index=dt_hourmin_info, columns=dates)
-    activity_df.to_csv(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.csv')
+    activity_df.to_csv(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site_name.split()[0]}_{resample_tag}.csv')
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, cfg, resample_tag):
+def plot_cumulative_activity(activity_df, site_name, resample_tag):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
@@ -557,7 +557,7 @@ def plot_cumulative_activity(activity_df, cfg, resample_tag):
 
     plt.rcParams.update({'font.size': 3*len(activity_df.columns)**0.5})
     plt.figure(figsize=(24, 10))
-    plt.title(f"Activity from {cfg['site']}", loc='center', y=1.05)
+    plt.title(f"Activity from {site_name}", loc='center', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(activity_df.index), 2)-0.5, activity_df.index[::2], rotation=45)
     plt.xticks(np.arange(0, len(activity_df.columns), 2)-0.5, activity_df.columns[::2], rotation=45)
@@ -566,7 +566,7 @@ def plot_cumulative_activity(activity_df, cfg, resample_tag):
     plt.colorbar()
     plt.tight_layout()
 
-    plt.savefig(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{cfg["site"].split()[0]}_{resample_tag}.png')
+    plt.savefig(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site_name.split()[0]}_{resample_tag}.png')
     plt.show()
 
 def delete_segments(necessary_paths):
@@ -807,9 +807,9 @@ def run_pipeline_for_session_with_df(cfg):
     if (cfg['generate_fig']):
         activity_df = construct_activity_grid(cfg["csv_filename"], data_params['ref_audio_files'], data_params['good_audio_files'], data_params['output_dir'])
         plot_activity_grid(activity_df, data_params['output_dir'], data_params['recover_folder'], data_params["audiomoth_folder"], data_params['site'], save=True)
-        if cfg["site"] != "(Site not found in Field Records)":
-            cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
-            plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
+        if data_params["site"] != "(Site not found in Field Records)":
+            cumulative_activity_df = construct_cumulative_activity(data_params["site"], "30T")
+            plot_cumulative_activity(cumulative_activity_df, data_params["site"], "30T")
 
     return bd_dets
 
