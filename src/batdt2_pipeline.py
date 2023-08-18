@@ -858,10 +858,10 @@ def filter_df_with_deployment_session(ubna_data_df, recover_folder, sd_unit):
     filtered_location_df = ubna_data_df.loc[recover_folder_cond&sd_unit_cond].sort_index()
 
     start_time, end_time = get_recording_period(Path(filtered_location_df['File path'].values[0]).parent)
-    file_minutes = pd.to_datetime(ubna_data_df.index.minute, format="%M")
+    file_minutes = pd.to_datetime(filtered_location_df.index.minute, format="%M")
     offset_from_config = dt.timedelta(minutes=dt.datetime.strptime(start_time, "%H:%M").minute)
     corrected_minutes = (file_minutes - offset_from_config).minute
-    datetime_cond = np.logical_and(np.mod(corrected_minutes, 30) == 0, ubna_data_df.index.second == 0)
+    datetime_cond = np.logical_and(np.mod(corrected_minutes, 30) == 0, filtered_location_df.index.second == 0)
     filtered_location_df = filtered_location_df.loc[datetime_cond].sort_index()
     filtered_location_nightly_df = filtered_location_df.between_time(start_time, end_time, inclusive="left")
 
