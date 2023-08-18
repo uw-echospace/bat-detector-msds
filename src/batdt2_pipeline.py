@@ -750,6 +750,8 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
+    no_case_audiomoths = files_from_location["Deployment notes"] != "Case"
+    files_from_location = files_from_location.loc[no_case_audiomoths]
     data_params['ref_audio_files'] = sorted(list(files_from_location["File path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_location["File status"] == "Usable for detection"
     file_duration_cond = files_from_location["File duration"] == "1795"
