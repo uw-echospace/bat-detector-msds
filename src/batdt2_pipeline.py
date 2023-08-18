@@ -857,7 +857,7 @@ def filter_df_with_deployment_session(ubna_data_df, recover_folder, sd_unit):
     sd_unit_cond = ubna_data_df["SD card #"] == sd_unit
     filtered_location_df = ubna_data_df.loc[recover_folder_cond&sd_unit_cond].sort_index()
 
-    start_time, end_time = get_recording_period(filtered_location_df['File path'].values[0].parent)
+    start_time, end_time = get_recording_period(Path(filtered_location_df['File path'].values[0]).parent)
     file_minutes = pd.to_datetime(ubna_data_df.index.minute, format="%M")
     offset_from_config = dt.timedelta(minutes=dt.datetime.strptime(start_time, "%H:%M").minute)
     corrected_minutes = (file_minutes - offset_from_config).minute
