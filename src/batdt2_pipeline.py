@@ -856,7 +856,7 @@ def get_params_relevant_to_data(cfg):
 
 def filter_df_with_deployment_session(ubna_data_df, recover_folder, sd_unit):
     recover_folder_cond = ubna_data_df["Recover folder"] == recover_folder
-    sd_unit_cond = ubna_data_df["SD card #"] == sd_unit
+    sd_unit_cond = np.logical_or(ubna_data_df["SD card #"] == sd_unit, ubna_data_df["SD card #"] == "(Site not found in Field Records)")
     filtered_location_df = ubna_data_df.loc[recover_folder_cond&sd_unit_cond].sort_index()
 
     start_time, end_time = get_recording_period(Path(filtered_location_df['File path'].values[0]).parent)
