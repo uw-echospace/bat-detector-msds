@@ -530,7 +530,7 @@ def get_params_relevant_to_data_at_location(cfg):
     hard_drive_df["Datetime UTC"] = pd.DatetimeIndex(hard_drive_df["Datetime UTC"])
     hard_drive_df.set_index("Datetime UTC", inplace=True)
     
-    files_from_location = filter_df_with_location(hard_drive_df, data_params['site'], cfg['start_time'], cfg['end_time'])
+    files_from_location = filter_df_with_location(hard_drive_df, data_params['site'], cfg['recording_start'], cfg['recording_end'])
     data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
@@ -560,7 +560,7 @@ def filter_df_with_location(ubna_data_df, site_name, start_time, end_time):
     datetime_cond = np.logical_and((ubna_data_df.index).second == 0, minute_cond)
 
     filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond&file_year_cond].sort_index()
-    filtered_location_nightly_df = filtered_location_df.between_time("03:00", "13:30", inclusive="left")
+    filtered_location_nightly_df = filtered_location_df.between_time(start_time, end_time, inclusive="left")
 
     return filtered_location_nightly_df
 
@@ -718,12 +718,12 @@ def parse_args():
         help="The hard_drive we have stored files in"
     )
     parser.add_argument(
-        "start_time",
+        "recording_start",
         type=str,
         help="The start time of files to look at (inclusive)"
     )
     parser.add_argument(
-        "end_time",
+        "recording_end",
         type=str,
         help="The end time of files to look at (non-inclusive)"
     )
@@ -770,8 +770,8 @@ if __name__ == "__main__":
     cfg["sd_unit"] = args["sd_unit"]
     cfg["site"] = args["site"]
     cfg['hard_drive'] = args['hard_drive']
-    cfg['start_time'] = args['start_time']
-    cfg['end_time'] = args['end_time']
+    cfg['recording_start'] = args['recording_start']
+    cfg['recording_end'] = args['recording_end']
     cfg["output_dir"] = Path(args["output_directory"])
     cfg["tmp_dir"] = Path(args["tmp_directory"])
     cfg["run_model"] = args["run_model"]
