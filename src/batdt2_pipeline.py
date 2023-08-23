@@ -84,95 +84,6 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
 
     return output_files 
 
-# def get_dates_of_deployment(input_dir):
-#     """
-#     Gets dates which Audiomoth recorded from Audiomoth deployment directory.
-
-#     Parameters
-#     ------------
-#     input_dir : `str`
-#         - The directory of Audiomoth recordings + CONFIG.TXT corresponding to a deployment session.
-
-#     Returns
-#     ------------
-#     dates_from_dir : `List`
-#         - List of file-related dates in format "YYYYMMDD".
-#     """
-    
-#     datetimes_from_dir = pd.to_datetime(list(input_dir.iterdir()), format="%Y%m%d_%H%M%S.WAV", errors='coerce', exact=False).dropna()
-#     dates_from_dir = sorted(datetimes_from_dir.strftime("%Y%m%d").unique())
-#     return dates_from_dir
-
-# def get_files_for_pipeline(reference_filepaths):
-#     """
-#     Filters out a list of audio files that are good to be fed into the MSDS pipeline
-
-#     Parameters
-#     ------------
-#     input_dir : `str`
-#         - The provided path to a directory consisting of audio files the user wants to feed into our pipeline.
-
-#     Returns
-#     ------------
-#     good_audio_files : `List`
-#         - A list of pathlib.Path objects to all usable audio files existing in input_dir
-#         - Files are checked as candidates if they first exist and are not empty.
-#         - Then they must be .wav or .WAV files, as those are the files recorded by Audiomoths
-#         - This set is finally filtered using exiftool comments to find files with no Audiomoth error.
-#     """
-
-#     audio_files = []
-#     good_audio_files = []
-#     for file in reference_filepaths:
-#         if (file.exists() and not(file.stat().st_size == 0)):
-#             audio_files.append(file)
-
-#     comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
-#     df_comments = pd.DataFrame(comments)
-#     print(f"There are {len(audio_files)} audio files that passed 1st level of filtering!")
-#     files_with_microphone_error = df_comments['RIFF:Comment'].str.contains("microphone")
-#     files_with_battery_error = df_comments['RIFF:Comment'].str.contains("voltage")
-#     condition_for_good_files = np.logical_and(~files_with_microphone_error, ~files_with_battery_error)
-#     good_audio_files = df_comments.loc[condition_for_good_files]['SourceFile'].values
-
-#     for i in range(len(good_audio_files)):
-#         good_audio_files[i] = Path(good_audio_files[i])
-
-#     print(f"There are {len(good_audio_files)} audio files that passed 2nd level of filtering!")
-                
-#     return good_audio_files
-
-# def get_files_to_reference(input_dir, dates, start_time, end_time):
-#     """
-#     Assembles a list of audio files existing in the input directory that should be error-free and contain calls.
-
-#     Parameters
-#     ------------
-#     input_dir : `str`
-#         - The provided path to a directory consisting of audio files the user wants to feed into our pipeline.
-
-#     Returns
-#     ------------
-#     ref_filepaths : `List`
-#         - A list of pathlib.Path objects to all usable audio files existing in input_dir
-#         - Audio .WAV files are artificially assembled using CONFIG.TXT information: these files should exist in our directory.
-#         - Files are not filtered for emptiness or error as we just want the filenames for time reference.
-#     """
-
-#     start_datetime_of_recording = dt.datetime.strptime(f'{dates[0]}_{start_time}', "%Y%m%d_%H:%M")
-#     end_datetime_of_recording = dt.datetime.strptime(f'{dates[-1]}_{end_time}', "%Y%m%d_%H:%M")
-#     date_range = pd.date_range(start_datetime_of_recording, end_datetime_of_recording, freq="30T")
-#     all_dates = date_range[date_range.indexer_between_time(start_time, end_time, include_end=False)]
-#     all_filenames = all_dates.strftime("%Y%m%d_%H%M%S.WAV")
-
-#     ref_filepaths = []
-#     for file in all_filenames:
-#         ref_filepath = input_dir / file
-#         if (ref_filepath.exists()):
-#             ref_filepaths += [ref_filepath]
-
-#     return ref_filepaths
-
 def generate_segmented_paths(audio_files, cfg):
     """
     Generates and returns a list of segments using provided cfg parameters for each audio file in audio_files.
@@ -582,133 +493,6 @@ def delete_segments(necessary_paths):
     for path in necessary_paths:
         path['audio_file'].unlink(missing_ok=False)
 
-# def run_detection_pipeline(cfg):
-#     """Runs the batdetect2 pipeline on provided directory of audio files and saves detections and activity plot in output directory
-
-#     Parameters
-#     ------------
-#     input_dir : `str`
-#         - String-based path to the directory of audio files which our pipeline will be fed to generate detections
-#     csv_name : `str`
-#         - The name of the csv that our detections generated from the audio files in input_dir will be saved in.
-#     output_dir : `str`
-#         - String-based path to the directory that will store the outputs: detections and the plot
-#     tmp_dir : `str`
-#         - String-based path to the directory that will temporarily store our generated segments to feed into batdetect2
-#     run_model : `boolean`
-#         - A flag for whether the user wants to run the batdetect2 model to generate detections
-#         - Can be false if user wants to just generate / update plot
-#     generate_fig : `boolean`
-#         - A flag for whether the user wants to generate the activty plot from a saved .csv corresponding to the input_dir
-#         - Can be false if user wants to just generate detections knowing the figure will not be up-to-date    
-
-#     Returns
-#     ------------
-#     bd_dets : `pandas.DataFrame`
-#         - A DataFrame of detections that will also be saved in the provided output_dir under the above csv_name
-#         - 7 columns in this DataFrame: start_time, end_time, low_freq, high_freq, detection_confidence, event, input_file
-#         - Detections are always specified w.r.t their input_file; earliest start_time can be 0 and latest end_time can be 1795.
-#         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
-#     """
-#     if cfg['input_audio'].is_dir():
-#         recover_folder = cfg['input_audio'].parts[-2]
-#         audiomoth_folder = cfg['input_audio'].parts[-1]
-#         start_time, end_time = get_recording_period(cfg)
-#         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
-#         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
-#         good_audio_files = get_files_for_pipeline(ref_audio_files)
-#         print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
-#     if cfg['input_audio'].is_file():
-#         recover_folder = cfg['input_audio'].parts[-3]
-#         audiomoth_folder = cfg['input_audio'].parts[-2]
-#         good_audio_files = [cfg['input_audio']]
-
-#     audiomoth_unit = audiomoth_folder.split('_')[-1]
-#     recover_date_unclean = recover_folder.split('-')[1]
-
-#     site_name = get_site_name(recover_date_unclean, audiomoth_unit)
-#     cfg["site"] = site_name
-#     print(f"Looking at data from {cfg['site']}...")
- 
-#     if cfg["site"] != "(Site not found in Field Records)":
-#         output_dir = cfg["output_dir"] / cfg["site"]
-#     else:
-#         output_dir = cfg["output_dir"] / audiomoth_folder
-
-#     if not output_dir.is_dir():
-#         output_dir.mkdir(parents=True, exist_ok=True)
-#     if not cfg['tmp_dir'].is_dir():
-#         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
-
-#     bd_dets = pd.DataFrame()
-
-#     if (cfg['run_model']):
-#         if (cfg['individual_files']):
-#             for good_audio_file in good_audio_files:
-#                 cfg["audio_filename"] = good_audio_file.name
-#                 cfg["csv_filename"] = f"bd2__{cfg['site'].split()[0]}_{cfg['audio_filename'].split('.')[0]}"
-#                 print(f"Generating detections for {cfg['audio_filename']}")
-#                 segmented_file_paths = generate_segmented_paths([good_audio_file], cfg)
-#                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-#                 if (cfg["num_processes"] <= 6):
-#                     bd_preds = run_models(file_path_mappings)
-#                 else:
-#                     bd_preds = apply_models(file_path_mappings, cfg)
-#                 bd_preds["Recover Folder"] = recover_folder
-#                 bd_preds["SD Card"] = audiomoth_folder
-#                 bd_preds["Site name"] = cfg['site']
-#                 _save_predictions(bd_preds, output_dir, cfg)
-#                 delete_segments(segmented_file_paths)
-#         else:
-#             segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
-#             file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-#             if (cfg["num_processes"] <= 6):
-#                 bd_preds = run_models(file_path_mappings)
-#             else:
-#                 bd_preds = apply_models(file_path_mappings, cfg)
-#             bd_preds["Recover Folder"] = recover_folder
-#             bd_preds["SD Card"] = audiomoth_folder
-#             bd_preds["Site name"] = cfg['site']
-#             _save_predictions(bd_preds, output_dir, cfg)
-#             delete_segments(segmented_file_paths)
-
-#     return bd_dets
-
-# def generate_detection_plots(cfg):
-
-#     if cfg['input_audio'].is_dir():
-#         recover_folder = cfg['input_audio'].parts[-2]
-#         audiomoth_folder = cfg['input_audio'].parts[-1]
-#         start_time, end_time = get_recording_period(cfg)
-#         dates_from_dir = get_dates_of_deployment(cfg['input_audio'])
-#         ref_audio_files = get_files_to_reference(cfg['input_audio'], dates_from_dir, start_time, end_time)
-#         good_audio_files = get_files_for_pipeline(ref_audio_files)
-#         print(f"There are {len(good_audio_files)} usable files out of {len(list(cfg['input_audio'].iterdir()))} total files")
-#     if cfg['input_audio'].is_file():
-#         recover_folder = cfg['input_audio'].parts[-3]
-#         audiomoth_folder = cfg['input_audio'].parts[-2]
-#         good_audio_files = [cfg['input_audio']]
-
-#     audiomoth_unit = audiomoth_folder.split('_')[-1]
-#     recover_date_unclean = recover_folder.split('-')[1]
-
-#     site_name = get_site_name(recover_date_unclean, audiomoth_unit)
-#     cfg["site"] = site_name
-#     print(f"Looking at data from {cfg['site']}...")
- 
-#     if cfg["site"] != "(Site not found in Field Records)":
-#         output_dir = cfg["output_dir"] / cfg["site"]
-#     else:
-#         output_dir = cfg["output_dir"] / audiomoth_folder
-
-#     if (cfg['generate_fig'] and cfg['input_audio'].is_dir()):
-#         activity_df = construct_activity_grid(cfg['csv_filename'], ref_audio_files, good_audio_files, output_dir)
-#         plot_activity_grid(activity_df, output_dir, recover_folder, audiomoth_folder, cfg['site'], save=True)
-#         if cfg["site"] != "(Site not found in Field Records)":
-#             cumulative_activity_df = construct_cumulative_activity(cfg, "30T")
-#             plot_cumulative_activity(cumulative_activity_df, cfg, "30T")
-
-
 def run_pipeline_for_individual_files_with_df(cfg):
 
     data_params = get_params_relevant_to_data_at_location(cfg)
@@ -746,7 +530,7 @@ def get_params_relevant_to_data_at_location(cfg):
     hard_drive_df["Datetime UTC"] = pd.DatetimeIndex(hard_drive_df["Datetime UTC"])
     hard_drive_df.set_index("Datetime UTC", inplace=True)
     
-    files_from_location = filter_df_with_location(hard_drive_df, data_params['site'])
+    files_from_location = filter_df_with_location(hard_drive_df, data_params['site'], cfg['start_time'], cfg['end_time'])
     data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
@@ -768,7 +552,7 @@ def get_params_relevant_to_data_at_location(cfg):
     return data_params
 
 
-def filter_df_with_location(ubna_data_df, site_name):
+def filter_df_with_location(ubna_data_df, site_name, start_time, end_time):
     site_name_cond = ubna_data_df["Site name"] == site_name
 
     file_year_cond = ubna_data_df.index.year == 2022
@@ -902,77 +686,6 @@ def get_recording_period(audio_dir):
 
     return start_time, end_time
 
-
-# def get_field_records(path_to_records):
-#     """Extracts .csv field records from given path and converts it to DataFrame object.
-
-#     Parameters
-#     ------------
-#     path_to_records : `pathlib.Path`
-#         - Path to the location of .csv file field records
-
-#     Returns
-#     ------------
-#     fr : `pandas.DataFrame`
-#         - DataFrame table that matches the information in the .csv file 
-#         - stored as `repo_root_level/field_records/{.csv}`
-#     """
-
-#     if (path_to_records.is_file()):
-#         df_fr = pd.read_csv(path_to_records, sep=',') 
-
-#         df_fr.columns = df_fr.columns.str.strip()
-#         for col in df_fr.columns:
-#             df_fr[col] = df_fr[col].astype(str).str.strip()
-
-#         for i in range(len(df_fr["SD card #"].values)):
-#             df_fr["SD card #"].values[i] = df_fr["SD card #"].values[i].zfill(3)
-#     else:
-#         df_fr = pd.DataFrame()
-
-#     return df_fr
-
-
-# def get_site_name(DATE, SD_CARD_NUM):
-#     """Gets the location where an AudioMoth was deployed at a certain date using the deployment field records.
-#     Will be used to plot activity with the right location label so user can tell location of activity by plots.
-
-#     Parameters
-#     ------------
-#     DATE : `str`
-#         The date when an AudioMoth was deployed
-#     SD_CARD_NUM : `str`
-#         The SD card inside the AudioMoth to identify which AudioMoth the user wants.
-
-#     Returns
-#     ------------
-#     site_name : `str`
-#         - Name of the location where the Audiomoth was deployed at that date
-#         according to the field records.
-#         - If the deployment is not recorded, site_name will be "(Site not found in Field Records)"
-#     """
-
-
-#     recover_date = DATE.split('_')[0]
-
-#     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2021":
-#         df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
-#     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2022":
-#         df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-#     if str(dt.datetime.strptime(recover_date, "%Y%m%d").year) == "2023":
-#         df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
-
-#     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
-#     cond2 =  df_fr["SD card #"]==f"{SD_CARD_NUM}"
-#     site = df_fr.loc[cond1&cond2, "Site"]
-    
-#     if (site.empty):
-#         site_name = "(Site not found in Field Records)"
-#     else:
-#         site_name = site.item()
-    
-#     return site_name
-
 def parse_args():
     """
     Defines the command line interface for the pipeline.
@@ -1004,12 +717,16 @@ def parse_args():
         type=str,
         help="The hard_drive we have stored files in"
     )
-    # parser.add_argument(
-    #     "csv_filename",
-    #     type=str,
-    #     help="the file name of the .csv file",
-    #     default="output.csv",
-    # )
+    parser.add_argument(
+        "start_time",
+        type=str,
+        help="The start time of files to look at (inclusive)"
+    )
+    parser.add_argument(
+        "end_time",
+        type=str,
+        help="The end time of files to look at (non-inclusive)"
+    )
     parser.add_argument(
         "output_directory",
         type=str,
@@ -1042,16 +759,6 @@ def parse_args():
         type=int,
         default=4,
     )
-    # parser.add_argument(
-    #     "--night_only",
-    #     action="store_true",
-    #     help="Sets recording period from 03:00 to 13:30 UTC"
-    # )
-    # parser.add_argument(
-    #     "--individual_files",
-    #     action="store_true",
-    #     help="Saves individual csv files for each audio file"
-    # )
     return vars(parser.parse_args())
 
 
@@ -1063,19 +770,14 @@ if __name__ == "__main__":
     cfg["sd_unit"] = args["sd_unit"]
     cfg["site"] = args["site"]
     cfg['hard_drive'] = args['hard_drive']
-    # cfg["input_audio"] = Path(args["input_audio"])
-    # cfg["csv_filename"] = args["csv_filename"]
+    cfg['start_time'] = args['start_time']
+    cfg['end_time'] = args['end_time']
     cfg["output_dir"] = Path(args["output_directory"])
     cfg["tmp_dir"] = Path(args["tmp_directory"])
     cfg["run_model"] = args["run_model"]
     cfg["generate_fig"] = args["generate_fig"]
     cfg["should_csv"] = args["csv"]
     cfg["num_processes"] = args["num_processes"]
-    # cfg['night'] = args["night_only"]
-    # cfg['individual_files'] = args["individual_files"]
-
-    # run_detection_pipeline(cfg)
-    # generate_detection_plots(cfg)
 
     if cfg["recover_folder"]!="none" and cfg["sd_unit"]!="none":
         run_pipeline_for_session_with_df(cfg)
