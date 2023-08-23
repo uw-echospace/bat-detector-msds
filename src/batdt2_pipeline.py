@@ -742,7 +742,7 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['site'] = cfg['site']
     print(f"Searching for files from {cfg['site']} in {cfg['hard_drive']}")
 
-    hard_drive_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/{cfg["hard_drive"]}_collected_audio_records.csv')
+    hard_drive_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/{cfg["hard_drive"]}_collected_audio_records.csv', dtype=str, index_col=0)
     hard_drive_df["Datetime UTC"] = pd.DatetimeIndex(hard_drive_df["Datetime UTC"])
     hard_drive_df.set_index("Datetime UTC", inplace=True)
     
@@ -821,8 +821,8 @@ def get_params_relevant_to_data(cfg):
     data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
-    ubna_data_01_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_01_collected_audio_records.csv')
-    ubna_data_02_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_02_collected_audio_records.csv')
+    ubna_data_01_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_01_collected_audio_records.csv', dtype=str, index_col=0)
+    ubna_data_02_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_02_collected_audio_records.csv', dtype=str, index_col=0)
 
     cur_data_records = pd.DataFrame()
     if data_params['recover_folder'] in ubna_data_01_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_01_df["SD card #"].values:
