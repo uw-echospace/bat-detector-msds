@@ -648,10 +648,9 @@ def filter_df_with_deployment_session(ubna_data_df, recover_folder, cfg):
     offset_from_config = dt.timedelta(minutes=dt.datetime.strptime(start_time, "%H:%M").minute)
     corrected_minutes = (file_minutes - offset_from_config).minute
     datetime_cond = np.logical_and(np.mod(corrected_minutes, 30) == 0, filtered_location_df.index.second == 0)
-    filtered_location_df = filtered_location_df.loc[datetime_cond]
-    file_error_cond = np.logical_and((ubna_data_df["File duration"]!='File has no comment due to error!'), (ubna_data_df["File duration"]!='File has no Audiomoth-related comment'))
-    all_errors_cond = np.logical_and((ubna_data_df["File duration"]!='Is empty!'), file_error_cond)
-    filtered_location_df = filtered_location_df.loc[all_errors_cond].sort_index()
+    file_error_cond = np.logical_and((filtered_location_df["File duration"]!='File has no comment due to error!'), (filtered_location_df["File duration"]!='File has no Audiomoth-related comment'))
+    all_errors_cond = np.logical_and((filtered_location_df["File duration"]!='Is empty!'), file_error_cond)
+    filtered_location_df = filtered_location_df.loc[datetime_cond&all_errors_cond].sort_index()
     filtered_location_nightly_df = filtered_location_df.between_time(cfg['recording_start'], cfg['recording_end'], inclusive="left")
 
     return filtered_location_nightly_df
