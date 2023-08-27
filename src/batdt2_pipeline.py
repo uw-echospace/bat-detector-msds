@@ -507,7 +507,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
     if (cfg['run_model']):
-        for file in enumerate(data_params['good_audio_files']):
+        for file in data_params['good_audio_files']:
             cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
             print(f"Generating detections for {file.name}")
             segmented_file_paths = generate_segmented_paths([file], cfg)
@@ -538,15 +538,13 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
-    data_params['ref_audio_files'] = files_from_location["File path"].apply(lambda x : Path(x)).values
+    data_params['ref_audio_files'] = sorted(list(files_from_location["File path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_location["File status"] == "Usable for detection"
     file_duration_cond = np.isclose(files_from_location["File duration"].astype('float'), 1795)
     good_location_df = files_from_location.loc[file_status_cond&file_duration_cond]
-    data_params['good_audio_files'] = good_location_df["File path"].apply(lambda x : Path(x)).values
-    data_params['recover_folder'] = good_location_df["Recover folder"].values
-    data_params['audiomoth_folder'] = good_location_df["SD card #"].values
+    data_params['good_audio_files'] = sorted(list(good_location_df["File path"].apply(lambda x : Path(x)).values))
 
-    if list(data_params['good_audio_files']) == list(data_params['ref_audio_files']):
+    if data_params['good_audio_files'] == data_params['ref_audio_files']:
         print("All files from deployment session good!")
     else:
         print("Error files exist!")
