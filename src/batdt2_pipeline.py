@@ -425,21 +425,21 @@ def construct_cumulative_activity(site_name, resample_tag):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{site_name}/activity__*.csv").compute()
+    new_df = dd.read_csv(f"../output_dir/recover-2023*/{site_name}/activity__*.csv").compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
-    new_df = new_df.replace(0, -1)
 
-    resampled_df = new_df.resample(resample_tag, on="date_and_time_UTC").sum()
-    selected_time_df = resampled_df.replace(0, np.nan)
-    selected_time_df = selected_time_df.dropna()
-    selected_time_df = selected_time_df.replace(-1, 0)
+    dt_hourmin_info = sorted((pd.DatetimeIndex(new_df["date_and_time_UTC"]).strftime("%H:%M")).unique())
+    start_time, end_time = dt_hourmin_info[0], dt_hourmin_info[-1]
 
-    dt_hourmin_info = sorted(((selected_time_df.index).strftime("%H:%M")).unique())
-    dates = (pd.date_range(selected_time_df.index[0], selected_time_df.index[-1], freq="D")).strftime("%m-%d-%y")
-    activity = (selected_time_df["num_of_detections"].values).reshape(len(dates), len(dt_hourmin_info)).T
+    resampled_df = new_df.resample(resample_tag, on="date_and_time_UTC").sum().between_time(start_time, end_time, inclusive='left')
 
-    activity_df = pd.DataFrame(activity, index=dt_hourmin_info, columns=dates)
+    activity_datetimes = pd.to_datetime(resampled_df.index.values)
+    raw_dates = activity_datetimes.strftime("%m/%d/%y")
+    raw_times = activity_datetimes.strftime("%H:%M")
+    data = list(zip(raw_dates, raw_times, resampled_df['num_of_detections']))
+    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", 'num_of_detections'])
+    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values='num_of_detections')
     activity_df.to_csv(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site_name.split()[0]}_{resample_tag}.csv')
 
     return activity_df
@@ -465,15 +465,17 @@ def plot_cumulative_activity(activity_df, site_name, resample_tag):
     masked_array_for_nodets = np.ma.masked_where(activity_df.values==0, activity_df.values)
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red')
+    plot_dates = [''] * len(activity_df.columns)
+    plot_dates[::7] = activity_df.columns[::7]
 
     plt.rcParams.update({'font.size': 3*len(activity_df.columns)**0.5})
-    plt.figure(figsize=(24, 10))
+    plt.figure(figsize=(32, 8))
     plt.title(f"Activity from {site_name}", loc='center', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(activity_df.index), 2)-0.5, activity_df.index[::2], rotation=45)
-    plt.xticks(np.arange(0, len(activity_df.columns), 2)-0.5, activity_df.columns[::2], rotation=45)
+    plt.yticks(np.arange(0, len(activity_df.index), 2)-0.5, activity_df.index[::2], rotation=30)
+    plt.xticks(np.arange(0, len(activity_df.columns))-0.5, plot_dates, rotation=30)
     plt.ylabel('UTC Time (HH:MM)')
-    plt.xlabel('Date (MM-DD-YY)')
+    plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     plt.tight_layout()
 
@@ -505,7 +507,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
     if (cfg['run_model']):
-        for file in data_params['good_audio_files']:
+        for i, file in enumerate(data_params['good_audio_files']):
             cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
             print(f"Generating detections for {file.name}")
             segmented_file_paths = generate_segmented_paths([file], cfg)
@@ -515,6 +517,8 @@ def run_pipeline_for_individual_files_with_df(cfg):
             else:
                 bd_preds = apply_models(file_path_mappings, cfg)
             bd_preds["Site name"] = data_params['site']
+            bd_preds["Recover Folder"] = data_params['recover_folder']
+            bd_preds["SD Card"] = data_params["audiomoth_folder"]
             _save_predictions(bd_preds, data_params['output_dir'], cfg)
             delete_segments(segmented_file_paths)
 
@@ -534,11 +538,13 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
-    data_params['ref_audio_files'] = sorted(list(files_from_location["File path"].apply(lambda x : Path(x)).values))
+    data_params['ref_audio_files'] = files_from_location["File path"].apply(lambda x : Path(x)).values
     file_status_cond = files_from_location["File status"] == "Usable for detection"
     file_duration_cond = np.isclose(files_from_location["File duration"].astype('float'), 1795)
     good_deploy_session_df = files_from_location.loc[file_status_cond&file_duration_cond]
-    data_params['good_audio_files'] = sorted(list(good_deploy_session_df["File path"].apply(lambda x : Path(x)).values))
+    data_params['good_audio_files'] = good_deploy_session_df["File path"].apply(lambda x : Path(x)).values
+    data_params['recover_folder'] = good_deploy_session_df["Recover folder"].values
+    data_params['audiomoth_folder'] = good_deploy_session_df["SD card #"].values
 
     if data_params['good_audio_files'] == data_params['ref_audio_files']:
         print("All files from deployment session good!")
