@@ -510,6 +510,9 @@ def run_pipeline_for_individual_files_with_df(cfg):
         for file in data_params['good_audio_files']:
             cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
             print(f"Generating detections for {file.name}")
+            recover_folder = good_location_df.loc[good_location_df['File path'] == str(file), 'Recover folder']
+            audiomoth_folder = good_location_df.loc[good_location_df['File path'] == str(file), "SD card #"]
+            print(f"This file exists under {recover_folder}/{audiomoth_folder}")
             segmented_file_paths = generate_segmented_paths([file], cfg)
             file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
             if (cfg["num_processes"] <= 6):
@@ -517,8 +520,8 @@ def run_pipeline_for_individual_files_with_df(cfg):
             else:
                 bd_preds = apply_models(file_path_mappings, cfg)
             bd_preds["Site name"] = data_params['site']
-            bd_preds["Recover Folder"] = good_location_df.loc[good_location_df['File path'] == str(file), "Recover folder"]
-            bd_preds["SD Card"] = good_location_df.loc[good_location_df['File path'] == str(file), "SD card #"]
+            bd_preds["Recover Folder"] = recover_folder
+            bd_preds["SD Card"] = audiomoth_folder
             _save_predictions(bd_preds, data_params['output_dir'], cfg)
             delete_segments(segmented_file_paths)
 
