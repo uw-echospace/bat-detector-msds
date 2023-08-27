@@ -546,7 +546,7 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['recover_folder'] = good_deploy_session_df["Recover folder"].values
     data_params['audiomoth_folder'] = good_deploy_session_df["SD card #"].values
 
-    if data_params['good_audio_files'] == data_params['ref_audio_files']:
+    if list(data_params['good_audio_files']) == list(data_params['ref_audio_files']):
         print("All files from deployment session good!")
     else:
         print("Error files exist!")
