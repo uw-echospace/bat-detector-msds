@@ -497,7 +497,7 @@ def delete_segments(necessary_paths):
 
 def run_pipeline_for_individual_files_with_df(cfg):
 
-    data_params = get_params_relevant_to_data_at_location(cfg)
+    good_location_df, data_params = get_params_relevant_to_data_at_location(cfg)
 
     bd_dets = pd.DataFrame()
 
@@ -507,7 +507,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
     if (cfg['run_model']):
-        for i, file in enumerate(data_params['good_audio_files']):
+        for file in enumerate(data_params['good_audio_files']):
             cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
             print(f"Generating detections for {file.name}")
             segmented_file_paths = generate_segmented_paths([file], cfg)
@@ -517,8 +517,8 @@ def run_pipeline_for_individual_files_with_df(cfg):
             else:
                 bd_preds = apply_models(file_path_mappings, cfg)
             bd_preds["Site name"] = data_params['site']
-            bd_preds["Recover Folder"] = data_params['recover_folder']
-            bd_preds["SD Card"] = data_params["audiomoth_folder"]
+            bd_preds["Recover Folder"] = good_location_df.loc[good_location_df['File path'] == str(file), "Recover folder"]
+            bd_preds["SD Card"] = good_location_df.loc[good_location_df['File path'] == str(file), "SD card #"]
             _save_predictions(bd_preds, data_params['output_dir'], cfg)
             delete_segments(segmented_file_paths)
 
@@ -541,10 +541,10 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['ref_audio_files'] = files_from_location["File path"].apply(lambda x : Path(x)).values
     file_status_cond = files_from_location["File status"] == "Usable for detection"
     file_duration_cond = np.isclose(files_from_location["File duration"].astype('float'), 1795)
-    good_deploy_session_df = files_from_location.loc[file_status_cond&file_duration_cond]
-    data_params['good_audio_files'] = good_deploy_session_df["File path"].apply(lambda x : Path(x)).values
-    data_params['recover_folder'] = good_deploy_session_df["Recover folder"].values
-    data_params['audiomoth_folder'] = good_deploy_session_df["SD card #"].values
+    good_location_df = files_from_location.loc[file_status_cond&file_duration_cond]
+    data_params['good_audio_files'] = good_location_df["File path"].apply(lambda x : Path(x)).values
+    data_params['recover_folder'] = good_location_df["Recover folder"].values
+    data_params['audiomoth_folder'] = good_location_df["SD card #"].values
 
     if list(data_params['good_audio_files']) == list(data_params['ref_audio_files']):
         print("All files from deployment session good!")
@@ -553,7 +553,7 @@ def get_params_relevant_to_data_at_location(cfg):
 
     print(f"Will be looking at {len(data_params['good_audio_files'])} files from {data_params['site']}")
 
-    return data_params
+    return good_location_df, data_params
 
 
 def filter_df_with_location(ubna_data_df, site_name, start_time, end_time):
