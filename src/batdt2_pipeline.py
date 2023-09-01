@@ -481,15 +481,8 @@ def delete_segments(necessary_paths):
         path['audio_file'].unlink(missing_ok=False)
 
 
-def run_pipeline_on_file(filepath):
-    cfg = get_config()
-    cfg['input_audio'] = Path(filepath)
-    cfg['tmp_dir'] = Path('../output')
-    cfg['output_dir'] = Path('../output_dir')
-    cfg['run_model'] = True
-    cfg['should_csv'] = True
-
-    bd_dets = pd.DataFrame()
+def run_pipeline_on_file(file, cfg):
+    bd_preds = pd.DataFrame()
 
     if not cfg['output_dir'].is_dir():
         cfg['output_dir'].mkdir(parents=True, exist_ok=True)
@@ -497,23 +490,23 @@ def run_pipeline_on_file(filepath):
         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
     if (cfg['run_model']):
-        file = cfg['input_audio']
         cfg["csv_filename"] = f"batdetect2_pipeline_{file.name.split('.')[0]}"
         print(f"Generating detections for {file.name}")
         segmented_file_paths = generate_segmented_paths([file], cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_preds = run_models(file_path_mappings)
-        _save_predictions(bd_preds, cfg['output_dir'], cfg)
+        if cfg['save']:
+            _save_predictions(bd_preds, cfg['output_dir'], cfg)
         delete_segments(segmented_file_paths)
 
-    return bd_dets
+    return bd_preds
 
 
 def run_pipeline_for_individual_files_with_df(cfg):
 
     good_location_df, data_params = get_params_relevant_to_data_at_location(cfg)
 
-    bd_dets = pd.DataFrame()
+    bd_preds = pd.DataFrame()
 
     if not data_params['output_dir'].is_dir():
         data_params['output_dir'].mkdir(parents=True, exist_ok=True)
@@ -539,7 +532,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
             _save_predictions(bd_preds, data_params['output_dir'], cfg)
             delete_segments(segmented_file_paths)
 
-    return bd_dets
+    return bd_preds
 
 
 def get_params_relevant_to_data_at_location(cfg):
@@ -591,7 +584,7 @@ def run_pipeline_for_session_with_df(cfg):
     data_params = get_params_relevant_to_data(cfg)
     cfg["csv_filename"] = f"bd2__{data_params['recover_folder']}_{data_params['audiomoth_folder']}"
 
-    bd_dets = pd.DataFrame()
+    bd_preds = pd.DataFrame()
 
     if not data_params['output_dir'].is_dir():
         data_params['output_dir'].mkdir(parents=True, exist_ok=True)
@@ -618,7 +611,7 @@ def run_pipeline_for_session_with_df(cfg):
             cumulative_activity_df = construct_cumulative_activity(data_params["site"], "30T")
             plot_cumulative_activity(cumulative_activity_df, data_params["site"], "30T")
 
-    return bd_dets
+    return bd_preds
 
 def get_params_relevant_to_data(cfg):
     data_params = dict()
