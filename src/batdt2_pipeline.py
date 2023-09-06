@@ -621,12 +621,15 @@ def get_params_relevant_to_data(cfg):
 
     ubna_data_01_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_01_collected_audio_records.csv', dtype=str, index_col=0)
     ubna_data_02_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_02_collected_audio_records.csv', dtype=str, index_col=0)
+    ubna_data_03_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_03_collected_audio_records.csv', dtype=str, index_col=0)
 
     cur_data_records = pd.DataFrame()
     if data_params['recover_folder'] in ubna_data_01_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_01_df["SD card #"].values:
         cur_data_records = ubna_data_01_df
     if data_params['recover_folder'] in ubna_data_02_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_02_df["SD card #"].values:
         cur_data_records = ubna_data_02_df
+    if data_params['recover_folder'] in ubna_data_03_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_03_df["SD card #"].values:
+        cur_data_records = ubna_data_03_df
     cur_data_records["Datetime UTC"] = pd.DatetimeIndex(cur_data_records["Datetime UTC"])
     cur_data_records.set_index("Datetime UTC", inplace=True) 
     
