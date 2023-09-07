@@ -462,7 +462,7 @@ def plot_cumulative_activity(activity_df, site_name, resample_tag):
     plot_dates[::7] = activity_df.columns[::7]
 
     plt.rcParams.update({'font.size': 3*len(activity_df.columns)**0.5})
-    plt.figure(figsize=(32, 8))
+    plt.figure(figsize=(32, 10))
     plt.title(f"Activity from {site_name}", loc='center', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(activity_df.index), 2)-0.5, activity_df.index[::2], rotation=30)
