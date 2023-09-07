@@ -275,7 +275,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
 
     return ravenpro_df
 
-def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_dir, show_PST=False):
+def construct_activity_arr(csv_name, ref_audio_files, good_audio_files, output_dir, show_PST=False):
     """
     Constructs DataFrames corresponding to different important ways of storing activity for a deployment session.
     plot_df is an activity grid with date headers and time indices and number of detections as values.
@@ -309,12 +309,6 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
 
     ref_datetimes = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S", exact=False)
     activity_datetimes_for_file = ref_datetimes.tz_localize('UTC')
-    activity_datetimes_for_plot = activity_datetimes_for_file
-    if show_PST:
-        activity_datetimes_for_plot = activity_datetimes_for_plot.tz_convert(tz='US/Pacific')
-
-    activity_times = (activity_datetimes_for_plot).strftime("%H:%M").unique()
-    activity_dates = (activity_datetimes_for_plot).strftime("%m/%d/%y").unique()
 
     dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
@@ -332,15 +326,29 @@ def construct_activity_grid(csv_name, ref_audio_files, good_audio_files, output_
             activity += [0]
     activity = np.array(activity)
 
-    activity_df = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
-    activity_df.to_csv(f"{output_dir}/activity__{csv_tag}.csv")
-    
-    activity = activity.reshape((len(activity_dates), len(activity_times))).T
+    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
+    activity_arr.to_csv(f"{output_dir}/activity__{csv_tag}.csv")
 
-    plot_df = pd.DataFrame(activity, index=activity_times, columns=activity_dates)
-    plot_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}.csv")
+    return activity_arr
 
-    return plot_df
+
+def shape_activity_array_into_grid(csv_name, output_dir):
+    csv_tag = csv_name.split('__')[-1]
+
+    num_dets = pd.read_csv(f"{output_dir}/activity__{csv_tag}.csv", index_col=0)
+    num_dets.set_index('date_and_time_UTC', inplace=True)
+
+    activity_datetimes = pd.to_datetime(num_dets.index.values)
+    raw_dates = activity_datetimes.strftime("%m/%d/%y")
+    raw_times = activity_datetimes.strftime("%H:%M")
+
+    col_name = f"num_of_detections"
+    data = list(zip(raw_dates, raw_times, num_dets[col_name]))
+    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", col_name])
+    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=col_name)
+    activity_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}.csv")
+
+    return activity_df
 
 
 def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, site_name, show_PST=False, save=True):
@@ -605,7 +613,8 @@ def run_pipeline_for_session_with_df(cfg):
         delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig']):
-        activity_df = construct_activity_grid(cfg["csv_filename"], data_params['ref_audio_files'], data_params['good_audio_files'], data_params['output_dir'])
+        construct_activity_arr(cfg["csv_filename"], data_params['ref_audio_files'], data_params['good_audio_files'], data_params['output_dir'])
+        activity_df = shape_activity_array_into_grid(cfg["csv_filename"], data_params["output_dir"])
         plot_activity_grid(activity_df, data_params['output_dir'], data_params['recover_folder'], data_params["audiomoth_folder"], data_params['site'], save=True)
         if data_params["site"] != "(Site not found in Field Records)":
             cumulative_activity_df = construct_cumulative_activity(data_params["site"], "30T")
