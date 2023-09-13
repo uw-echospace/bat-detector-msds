@@ -394,7 +394,7 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
     plt.tight_layout()
     plt.show()
 
-def construct_cumulative_activity(site_name, resample_tag):
+def construct_cumulative_activity(site_name, resample_tag, cfg):
     """
     Constructs a cumulative appended DataFrame grid using dask.dataframe.
     This DataFrame gathers all detected activity contained in output_dir for a given site.
@@ -422,10 +422,7 @@ def construct_cumulative_activity(site_name, resample_tag):
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
 
-    dt_hourmin_info = sorted((pd.DatetimeIndex(new_df["date_and_time_UTC"]).strftime("%H:%M")).unique())
-    start_time, end_time = dt_hourmin_info[0], dt_hourmin_info[-1]
-
-    resampled_df = new_df.resample(resample_tag, on="date_and_time_UTC").sum().between_time(start_time, end_time, inclusive='left')
+    resampled_df = new_df.resample(resample_tag, on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.strftime("%m/%d/%y")
@@ -618,7 +615,7 @@ def run_pipeline_for_session_with_df(cfg):
         activity_df = shape_activity_array_into_grid(cfg["csv_filename"], data_params["output_dir"])
         plot_activity_grid(activity_df, data_params['output_dir'], data_params['recover_folder'], data_params["audiomoth_folder"], data_params['site'], save=True)
         if data_params["site"] != "(Site not found in Field Records)":
-            cumulative_activity_df = construct_cumulative_activity(data_params["site"], "30T")
+            cumulative_activity_df = construct_cumulative_activity(data_params["site"], "30T", cfg)
             plot_cumulative_activity(cumulative_activity_df, data_params["site"], "30T")
 
     return bd_preds
