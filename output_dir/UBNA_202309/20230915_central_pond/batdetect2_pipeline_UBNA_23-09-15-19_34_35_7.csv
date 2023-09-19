@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file
+31.2725,31.2866,39218.0,42374.0,Echolocation,Pipistrellus nathusii,0.487,0.505,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_34_35_7.wav

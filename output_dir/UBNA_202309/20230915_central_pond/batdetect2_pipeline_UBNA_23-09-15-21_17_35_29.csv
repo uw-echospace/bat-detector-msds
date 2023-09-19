@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,input_file
+16.7985,16.8456,68437.0,82328.0,Rhinolophus ferrumequinum,0.526,0.526,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_29.wav
