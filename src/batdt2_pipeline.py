@@ -546,11 +546,13 @@ def get_params_relevant_to_data_at_location(cfg):
     data_params['site'] = cfg['site']
     print(f"Searching for files from {cfg['site']} in {cfg['hard_drive']}")
 
-    hard_drive_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/{cfg["hard_drive"]}_collected_audio_records.csv', dtype=str, index_col=0)
+    hard_drive_df = dd.read_csv(f'../output_dir/ubna_data_*_collected_audio_records.csv', dtype=str).compute()
+    if 'Unnamed: 0' in hard_drive_df.columns:
+        hard_drive_df.drop(columns='Unnamed: 0', inplace=True)
     hard_drive_df["Datetime UTC"] = pd.DatetimeIndex(hard_drive_df["Datetime UTC"])
     hard_drive_df.set_index("Datetime UTC", inplace=True)
     
-    files_from_location = filter_df_with_location(hard_drive_df, data_params['site'], cfg['recording_start'], cfg['recording_end'])
+    files_from_location = filter_df_with_location(hard_drive_df, cfg)
     data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
@@ -570,17 +572,18 @@ def get_params_relevant_to_data_at_location(cfg):
     return good_location_df, data_params
 
 
-def filter_df_with_location(ubna_data_df, site_name, start_time, end_time):
-    site_name_cond = ubna_data_df["Site name"] == site_name
-
-    file_year_cond = ubna_data_df.index.year == 2022
+def filter_df_with_location(ubna_data_df, cfg):
+    site_name_cond = ubna_data_df["Site name"] == cfg['site']
+    file_year_cond = ubna_data_df.index.year == (dt.datetime.strptime(cfg['year'], '%Y')).year
+    file_month_cond = ubna_data_df.index.month == (dt.datetime.strptime(cfg['month'], '%B')).month
     minute_cond = np.logical_or((ubna_data_df.index).minute == 30, (ubna_data_df.index).minute == 0)
     datetime_cond = np.logical_and((ubna_data_df.index).second == 0, minute_cond)
     file_error_cond = np.logical_and((ubna_data_df["File duration"]!='File has no comment due to error!'), (ubna_data_df["File duration"]!='File has no Audiomoth-related comment'))
     all_errors_cond = np.logical_and((ubna_data_df["File duration"]!='Is empty!'), file_error_cond)
+    file_date_cond = np.logical_and(file_year_cond, file_month_cond)
 
-    filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond&file_year_cond&all_errors_cond].sort_index()
-    filtered_location_nightly_df = filtered_location_df.between_time(start_time, end_time, inclusive="left")
+    filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond&file_date_cond&all_errors_cond].sort_index()
+    filtered_location_nightly_df = filtered_location_df.between_time(cfg['recording_start'], cfg['recording_end'], inclusive="left")
 
     return filtered_location_nightly_df
 
@@ -739,9 +742,14 @@ def parse_args():
         help="The site we have collected files from"
     )
     parser.add_argument(
-        "hard_drive",
+        "year",
         type=str,
-        help="The hard_drive we have stored files in"
+        help="The full year from which we want files"
+    )
+    parser.add_argument(
+        "month",
+        type=str,
+        help="The month's full name from which we want files"
     )
     parser.add_argument(
         "recording_start",
@@ -796,7 +804,8 @@ if __name__ == "__main__":
     cfg["recover_folder"] = args["recover_folder"]
     cfg["sd_unit"] = args["sd_unit"]
     cfg["site"] = args["site"]
-    cfg['hard_drive'] = args['hard_drive']
+    cfg["year"] = args["year"]
+    cfg["month"] = args["month"]
     cfg['recording_start'] = args['recording_start']
     cfg['recording_end'] = args['recording_end']
     cfg["output_dir"] = Path(args["output_directory"])
@@ -807,10 +816,16 @@ if __name__ == "__main__":
     cfg["num_processes"] = args["num_processes"]
 
     if cfg['input_audio']!='none':
-        run_pipeline_on_file(cfg)
+        if Path(cfg['input_audio']).is_file():
+            run_pipeline_on_file(Path(cfg['input_audio']), cfg)
+        elif Path(cfg['input_audio']).is_dir():
+            input_dir = Path(cfg['input_audio'])
+            for file in input_dir.iterdir():
+                cfg['input_audio'] = file
+                run_pipeline_on_file(file, cfg)
 
     if cfg["recover_folder"]!="none" and cfg["sd_unit"]!="none":
         run_pipeline_for_session_with_df(cfg)
 
-    if cfg['site']!="none" and cfg["hard_drive"]!="none":
+    if cfg['site']!="none" and cfg["year"]!="none" and cfg["month"]!="none":
         run_pipeline_for_individual_files_with_df(cfg)
