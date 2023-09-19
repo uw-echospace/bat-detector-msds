@@ -501,8 +501,7 @@ def run_pipeline_on_file(file, cfg):
         segmented_file_paths = generate_segmented_paths([file], cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_preds = run_models(file_path_mappings)
-        if cfg['save']:
-            _save_predictions(bd_preds, cfg['output_dir'], cfg)
+        _save_predictions(bd_preds, cfg['output_dir'], cfg)
         delete_segments(segmented_file_paths)
 
     return bd_preds
