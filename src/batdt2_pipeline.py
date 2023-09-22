@@ -543,7 +543,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
 def get_params_relevant_to_data_at_location(cfg):
     data_params = dict()
     data_params['site'] = cfg['site']
-    print(f"Searching for files from {cfg['site']} in {cfg['hard_drive']}")
+    print(f"Searching for files from {cfg['site']} in {cfg['month']} {cfg['year']}")
 
     hard_drive_df = dd.read_csv(f'../output_dir/ubna_data_*_collected_audio_records.csv', dtype=str).compute()
     if 'Unnamed: 0' in hard_drive_df.columns:
