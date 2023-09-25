@@ -521,21 +521,24 @@ def run_pipeline_for_individual_files_with_df(cfg):
     if (cfg['run_model']):
         for file in data_params['good_audio_files']:
             cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
-            print(f"Generating detections for {file.name}")
-            recover_folder = good_location_df.loc[good_location_df['File path'] == str(file), 'Recover folder'].values[0]
-            audiomoth_folder = good_location_df.loc[good_location_df['File path'] == str(file), "SD card #"].values[0]
-            print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
-            segmented_file_paths = generate_segmented_paths([file], cfg)
-            file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-            if (cfg["num_processes"] <= 6):
-                bd_preds = run_models(file_path_mappings)
+            if cfg['skip_existing'] & (data_params['output_dir'] / f"{cfg['csv_filename']}.csv").is_file():
+                print('Detections for this file have already been generated!')
             else:
-                bd_preds = apply_models(file_path_mappings, cfg)
-            bd_preds["Site name"] = data_params['site']
-            bd_preds["Recover Folder"] = recover_folder
-            bd_preds["SD Card"] = audiomoth_folder
-            _save_predictions(bd_preds, data_params['output_dir'], cfg)
-            delete_segments(segmented_file_paths)
+                print(f"Generating detections for {file.name}")
+                recover_folder = good_location_df.loc[good_location_df['File path'] == str(file), 'Recover folder'].values[0]
+                audiomoth_folder = good_location_df.loc[good_location_df['File path'] == str(file), "SD card #"].values[0]
+                print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
+                segmented_file_paths = generate_segmented_paths([file], cfg)
+                file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
+                if (cfg["num_processes"] <= 6):
+                    bd_preds = run_models(file_path_mappings)
+                else:
+                    bd_preds = apply_models(file_path_mappings, cfg)
+                bd_preds["Site name"] = data_params['site']
+                bd_preds["Recover Folder"] = recover_folder
+                bd_preds["SD Card"] = audiomoth_folder
+                _save_predictions(bd_preds, data_params['output_dir'], cfg)
+                delete_segments(segmented_file_paths)
 
     return bd_preds
 
@@ -788,6 +791,11 @@ def parse_args():
         help="Generate CSV instead of TSV",
     )
     parser.add_argument(
+        "--skip_existing",
+        action="store_true",
+        help="skip generating detections for files if .csv already exist",
+    )
+    parser.add_argument(
         "--num_processes",
         type=int,
         default=4,
@@ -812,6 +820,7 @@ if __name__ == "__main__":
     cfg["run_model"] = args["run_model"]
     cfg["generate_fig"] = args["generate_fig"]
     cfg["should_csv"] = args["csv"]
+    cfg["skip_existing"] = args['skip_existing']
     cfg["num_processes"] = args["num_processes"]
 
     if cfg['input_audio']!='none':
