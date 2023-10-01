@@ -724,53 +724,59 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "input_audio",
+        "--input_audio",
         type=str,
-        help="the directory of WAV files to process",
+        help="the directory of WAV files to process",,
+        default="none"
     )
     parser.add_argument(
-        "recover_folder",
+        "--recover_folder",
         type=str,
-        help="The recover-DATE folder we have saved files into"
+        help="The recover-DATE folder we have saved files into",
+        default="none"
     )
     parser.add_argument(
-        "sd_unit",
+        "--sd_unit",
         type=str,
-        help="The SD card # we have saved files into"
+        help="The SD card # we have saved files into",
+        default="none"
     )
     parser.add_argument(
-        "site",
+        "--site",
         type=str,
-        help="The site we have collected files from"
+        help="The site we have collected files from",
+        default="none"
     )
     parser.add_argument(
-        "year",
+        "--year",
         type=str,
-        help="The full year from which we want files"
+        help="The full year from which we want files",
+        default="none"
     )
     parser.add_argument(
-        "month",
+        "--month",
         type=str,
-        help="The month's full name from which we want files"
+        help="The month's full name from which we want files",
+        default="none"
     )
     parser.add_argument(
-        "recording_start",
+        "--recording_start",
         type=str,
         help="The start time of files to look at (inclusive)"
     )
     parser.add_argument(
-        "recording_end",
+        "--recording_end",
         type=str,
         help="The end time of files to look at (non-inclusive)"
     )
     parser.add_argument(
-        "output_directory",
+        "--output_directory",
         type=str,
         help="the directory where the .csv file goes",
         default="output_dir",
     )
     parser.add_argument(
-        "tmp_directory",
+        "--tmp_directory",
         type=str,
         help="the temp directory where the audio segments go",
         default="output/tmp",
