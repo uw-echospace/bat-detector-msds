@@ -726,7 +726,7 @@ def parse_args():
     parser.add_argument(
         "--input_audio",
         type=str,
-        help="the directory of WAV files to process",,
+        help="the directory of WAV files to process",
         default="none"
     )
     parser.add_argument(
