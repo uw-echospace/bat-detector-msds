@@ -204,14 +204,12 @@ def get_audiomoth_sd_card(DATE, SD_CARD_NUM):
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
         notes = df_fr.loc[cond1, "SD card #"]
+        if (notes.empty):
+            notes = "(Audiomoth SD card not found in Field Records)"
+        else:
+            notes = notes.item()
     else:
-        cond2 =  df_fr["SD card #"]==f"{SD_CARD_NUM}"
-        notes = df_fr.loc[cond1&cond2, "SD card #"]
-    
-    if (notes.empty):
-        notes = "(Audiomoth SD card not found in Field Records)"
-    else:
-        notes = notes.item()
+        notes = f"{SD_CARD_NUM}"
     
     return notes
 
