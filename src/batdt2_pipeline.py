@@ -275,7 +275,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
 
     return ravenpro_df
 
-def construct_activity_arr(csv_name, ref_audio_files, good_audio_files, output_dir, show_PST=False):
+def construct_activity_arr(csv_name, data_params):
     """
     Constructs DataFrames corresponding to different important ways of storing activity for a deployment session.
     plot_df is an activity grid with date headers and time indices and number of detections as values.
@@ -307,13 +307,13 @@ def construct_activity_arr(csv_name, ref_audio_files, good_audio_files, output_d
     """
     csv_tag = csv_name.split('__')[-1]
 
-    ref_datetimes = pd.to_datetime(ref_audio_files, format="%Y%m%d_%H%M%S", exact=False)
+    ref_datetimes = pd.to_datetime(data_params['ref_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
     activity_datetimes_for_file = ref_datetimes.tz_localize('UTC')
 
-    dets = pd.read_csv(f'{output_dir}/{csv_name}.csv')
+    dets = pd.read_csv(f'{data_params["output_dir"]}/{csv_name}.csv')
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     dets_per_file = dets.groupby(['ref_time'])['ref_time'].count()
-    good_datetimes = pd.to_datetime(good_audio_files, format="%Y%m%d_%H%M%S", exact=False)
+    good_datetimes = pd.to_datetime(data_params['good_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
     
     activity = []
     for ref_datetime in ref_datetimes:
@@ -327,7 +327,7 @@ def construct_activity_arr(csv_name, ref_audio_files, good_audio_files, output_d
     activity = np.array(activity)
 
     activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
-    activity_arr.to_csv(f"{output_dir}/activity__{csv_tag}.csv")
+    activity_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
 
     return activity_arr
 
@@ -351,7 +351,7 @@ def shape_activity_array_into_grid(csv_name, output_dir):
     return activity_df
 
 
-def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, site_name, show_PST=False, save=True):
+def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
     """
     Plots the above-returned plot_df DataFrame that represents activity over a deployment session.
 
@@ -380,7 +380,7 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
 
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
-    plt.title(f"Activity from {site_name}", loc='left', y=1.05)
+    plt.title(f"Activity from {data_params['site']}", loc='left', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_df.index), 2)-0.5, plot_df.index[::2], rotation=45)
     plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_df.columns, rotation=45)
@@ -390,7 +390,7 @@ def plot_activity_grid(plot_df, output_dir, recover_folder, audiomoth_folder, si
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     if save:
-        plt.savefig(f"{output_dir}/activity_plot__{recover_folder}_{audiomoth_folder}.png", bbox_inches='tight', pad_inches=0.5)
+        plt.savefig(f"{data_params['output_dir']}/activity_plot__{data_params['recover_folder']}_{data_params['audiomoth_folder']}.png", bbox_inches='tight', pad_inches=0.5)
     plt.tight_layout()
     plt.show()
 
@@ -457,16 +457,19 @@ def plot_cumulative_activity(activity_df, site_name, resample_tag):
     cmap.set_bad(color='red')
     plot_dates = [''] * len(activity_df.columns)
     plot_dates[::7] = activity_df.columns[::7]
+    plot_times = [''] * len(activity_df.index)
+    plot_times[::2] = activity_df.index[::2]
 
-    plt.rcParams.update({'font.size': 3*len(activity_df.columns)**0.5})
-    plt.figure(figsize=(32, 10))
-    plt.title(f"Activity from {site_name}", loc='center', y=1.05)
+    plt.rcParams.update({'font.size': 4*len(plot_dates)**0.5})
+    plt.figure(figsize=(len(plot_dates)/2, len(plot_times)/2))
+    plt.title(f"Activity from {site_name}", loc='center', y=1.05, fontsize=5*len(plot_dates)**0.5)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(activity_df.index), 2)-0.5, activity_df.index[::2], rotation=30)
-    plt.xticks(np.arange(0, len(activity_df.columns))-0.5, plot_dates, rotation=30)
+    plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
+    plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
     plt.ylabel('UTC Time (HH:MM)')
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
+    plt.grid(which='both')
     plt.tight_layout()
 
     plt.savefig(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site_name.split()[0]}_{resample_tag}.png', 
@@ -537,6 +540,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
                 bd_preds["Site name"] = data_params['site']
                 bd_preds["Recover Folder"] = recover_folder
                 bd_preds["SD Card"] = audiomoth_folder
+                bd_preds["File Duration"] = f'{cfg["duration"]}'
                 _save_predictions(bd_preds, data_params['output_dir'], cfg)
                 delete_segments(segmented_file_paths)
 
@@ -560,7 +564,7 @@ def get_params_relevant_to_data_at_location(cfg):
 
     data_params['ref_audio_files'] = sorted(list(files_from_location["File path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_location["File status"] == "Usable for detection"
-    file_duration_cond = np.isclose(files_from_location["File duration"].astype('float'), 1795)
+    file_duration_cond = np.isclose(files_from_location["File duration"].astype('float'), cfg['duration'])
     good_location_df = files_from_location.loc[file_status_cond&file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_location_df["File path"].apply(lambda x : Path(x)).values))
 
@@ -616,9 +620,9 @@ def run_pipeline_for_session_with_df(cfg):
         delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig']):
-        construct_activity_arr(cfg["csv_filename"], data_params['ref_audio_files'], data_params['good_audio_files'], data_params['output_dir'])
+        construct_activity_arr(cfg["csv_filename"], data_params)
         activity_df = shape_activity_array_into_grid(cfg["csv_filename"], data_params["output_dir"])
-        plot_activity_grid(activity_df, data_params['output_dir'], data_params['recover_folder'], data_params["audiomoth_folder"], data_params['site'], save=True)
+        plot_activity_grid(activity_df, data_params, save=True)
         if data_params["site"] != "(Site not found in Field Records)":
             cumulative_activity_df = construct_cumulative_activity(data_params["site"], "30T", cfg)
             plot_cumulative_activity(cumulative_activity_df, data_params["site"], "30T")
@@ -650,13 +654,16 @@ def get_params_relevant_to_data(cfg):
     data_params["site"] = site_name
     if data_params["site"] != "(Site not found in Field Records)":
         data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
+    elif cfg['site']!='none':
+        data_params['output_dir'] = cfg["output_dir"] / cfg['site']
+        data_params['site'] = cfg['site']
     else:
         data_params['output_dir'] = cfg["output_dir"] / f"UBNA_{cfg['sd_unit']}"
     print(f"Will save csv file to {data_params['output_dir']}")
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["File path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_deployment_session["File status"] == "Usable for detection"
-    file_duration_cond = np.isclose(files_from_deployment_session["File duration"].astype('float'), 1795)
+    file_duration_cond = np.isclose(files_from_deployment_session["File duration"].astype('float'), cfg['duration'])
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_deploy_session_df["File path"].apply(lambda x : Path(x)).values))
 
@@ -770,6 +777,12 @@ def parse_args():
         help="The end time of files to look at (non-inclusive)"
     )
     parser.add_argument(
+        "--duration",
+        type=int,
+        help="The length of audio files we want to select",
+        default=1795
+    )
+    parser.add_argument(
         "--output_directory",
         type=str,
         help="the directory where the .csv file goes",
@@ -821,6 +834,7 @@ if __name__ == "__main__":
     cfg["month"] = args["month"]
     cfg['recording_start'] = args['recording_start']
     cfg['recording_end'] = args['recording_end']
+    cfg['duration'] = args['duration']
     cfg["output_dir"] = Path(args["output_directory"])
     cfg["tmp_dir"] = Path(args["tmp_directory"])
     cfg["run_model"] = args["run_model"]
