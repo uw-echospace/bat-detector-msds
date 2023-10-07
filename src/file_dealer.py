@@ -144,6 +144,7 @@ def generate_files_df(cfg):
     for path in filepaths:
         date = get_recover_DATE_from_filepath(path)
         sd_unit = get_SD_unit_from_filepath(path)
+        print(f'Looking at {date} and {sd_unit}')
         site_name = get_site_name(date, sd_unit)
         audiomoth_name = get_audiomoth_name(date, sd_unit)
         audiomoth_note = get_audiomoth_notes(date, sd_unit)
