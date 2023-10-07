@@ -145,7 +145,6 @@ def generate_files_df(cfg):
     for path in filepaths:
         date = get_recover_DATE_from_filepath(path)
         sd_unit = get_SD_unit_from_filepath(path)
-        print(f'Looking at {date} and {sd_unit}')
         site_name = get_site_name(date, sd_unit)
         audiomoth_name = get_audiomoth_name(date, sd_unit)
         audiomoth_note = get_audiomoth_notes(date, sd_unit)
@@ -154,6 +153,7 @@ def generate_files_df(cfg):
         site_names += [site_name]
         audiomoth_names += [audiomoth_name]
         audiomoth_notes += [audiomoth_note]
+        print(f'File at {path} recovered from {date} inside UBNA_{sd_unit} and Audiomoth {audiomoth_name} at {site_name}')
 
     files_df.insert(1, "SD card #", sd_cards)
     print(f"Created SD card column!")
@@ -201,7 +201,10 @@ def get_audiomoth_sd_card(DATE, SD_CARD_NUM):
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(datetime_of_recovery.year) == "2023":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        if (datetime_of_recovery.month) >= 5:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
@@ -246,7 +249,10 @@ def get_audiomoth_notes(DATE, SD_CARD_NUM):
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(datetime_of_recovery.year) == "2023":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        if (datetime_of_recovery.month) >= 5:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
@@ -293,7 +299,10 @@ def get_audiomoth_name(DATE, SD_CARD_NUM):
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(datetime_of_recovery.year) == "2023":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        if (datetime_of_recovery.month) >= 5:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
@@ -341,7 +350,10 @@ def get_site_name(DATE, SD_CARD_NUM):
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(datetime_of_recovery.year) == "2023":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        if (datetime_of_recovery.month) >= 5:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
