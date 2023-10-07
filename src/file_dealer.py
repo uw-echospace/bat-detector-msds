@@ -137,6 +137,7 @@ def generate_files_df(cfg):
     print(f"Created recover folder column!")
 
     filepaths = list(files_df["File path"].values)
+    print(f'Here are all the filepaths: {filepaths}')
     sd_cards = []
     site_names = []
     audiomoth_names = []
