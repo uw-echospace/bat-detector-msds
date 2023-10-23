@@ -71,20 +71,22 @@ def get_file_comment(filepath):
 
 def generate_files_df(cfg):
 
-    all_wav_files = sorted(list(Path(cfg['input_dir']).glob(pattern='**/*.WAV')))
-    files_df = pd.DataFrame((all_wav_files), columns=["File path"])
+    all_wav_files = sorted(list(Path(cfg['input_dir']).glob(pattern='recover-*/**/*.WAV')))
+    file_path_column_name = "file_path"
+    files_df = pd.DataFrame((all_wav_files), columns=[file_path_column_name])
     print(f"Created file paths column!")
-    files_df["File metadata"] = files_df["File path"].apply(lambda x : get_file_comment(x))
+    file_metadata_column_name = "file_metadata"
+    files_df[file_metadata_column_name] = files_df[file_path_column_name].apply(lambda x : get_file_comment(x))
     print(f"Created file metadata column!")
-    files_df["Sample rate"] = files_df["File path"].apply(lambda x : get_file_comment(x))
+    files_df["sample_rate"] = files_df[file_path_column_name].apply(lambda x : get_file_comment(x))
     print(f"Created sample rate column!")
-    files_df["Audiomoth artist ID"] = files_df["File path"].apply(lambda x : get_file_comment(x))
+    files_df["audiomoth_artist_ID"] = files_df[file_path_column_name].apply(lambda x : get_file_comment(x))
     print(f"Created Audiomoth artist ID column!")
-    files_df["File duration"] = files_df["File path"].apply(lambda x : get_file_comment(x))
+    files_df["file_duration"] = files_df[file_path_column_name].apply(lambda x : get_file_comment(x))
     print(f"Created file duration column!")
 
     with exiftool.ExifToolHelper() as et:
-        good_paths = list(files_df.loc[files_df["File metadata"] == "good!"]["File path"].values)
+        good_paths = list(files_df.loc[files_df["File metadata"] == "good!"][file_path_column_name].values)
         comments = []
         sample_rates = []
         artists = []
@@ -121,28 +123,28 @@ def generate_files_df(cfg):
                 comments += [error_comment]
                 durations += [error_comment]
 
-        files_df["File metadata"].loc[files_df["File metadata"] == "good!"] = comments
-        files_df["Sample rate"].loc[files_df["Sample rate"] == "good!"] = sample_rates
-        files_df["Audiomoth artist ID"].loc[files_df["Audiomoth artist ID"] == "good!"] = artists
-        files_df["File duration"].loc[files_df["File duration"] == "good!"] = durations
+        files_df[file_metadata_column_name].loc[files_df[file_metadata_column_name] == "good!"] = comments
+        files_df["sample_rate"].loc[files_df["Sample rate"] == "good!"] = sample_rates
+        files_df["audiomoth_artist_ID"].loc[files_df["Audiomoth artist ID"] == "good!"] = artists
+        files_df["file_duration"].loc[files_df["File duration"] == "good!"] = durations
     
     print(f"Updated file metadata info using Audiomoth metadata comments!")
-    files_df.insert(2, "Audiomoth battery", files_df["File metadata"].apply(lambda x : get_file_battery(x)))
+    files_df.insert(2, "audiomoth_battery", files_df[file_metadata_column_name].apply(lambda x : get_file_battery(x)))
     print(f"Created Audiomoth battery column!")
-    files_df.insert(2, "Audiomoth temperature", files_df["File metadata"].apply(lambda x : get_file_temperature(x)))
+    files_df.insert(2, "audiomoth_temperature", files_df[file_metadata_column_name].apply(lambda x : get_file_temperature(x)))
     print(f"Created Audiomoth temperature column!")
-    files_df.insert(2, "File status", files_df["File metadata"].apply(lambda x : get_file_status(x)))
+    files_df.insert(2, "file_status", files_df[file_metadata_column_name].apply(lambda x : get_file_status(x)))
     print(f"Created file status column!")
-    files_df.insert(0, "Recover folder", files_df["File path"].apply(lambda x : get_recover_folder_from_filepath(x)))
+    files_df.insert(0, "recover_folder", files_df[file_path_column_name].apply(lambda x : get_recover_folder_from_filepath(x)))
     print(f"Created recover folder column!")
 
-    filepaths = list(files_df["File path"].values)
-    print(f'Here are all the filepaths: {filepaths}')
+    filepaths = list(files_df[file_path_column_name].values)
     sd_cards = []
     site_names = []
     audiomoth_names = []
     audiomoth_notes = []
     for path in filepaths:
+        print(path)
         date = get_recover_DATE_from_filepath(path)
         sd_unit = get_SD_unit_from_filepath(path)
         site_name = get_site_name(date, sd_unit)
@@ -155,15 +157,15 @@ def generate_files_df(cfg):
         audiomoth_notes += [audiomoth_note]
         print(f'File at {path} recovered from {date} inside UBNA_{sd_unit} and Audiomoth {audiomoth_name} at {site_name}')
 
-    files_df.insert(1, "SD card #", sd_cards)
+    files_df.insert(1, "sd_card_num", sd_cards)
     print(f"Created SD card column!")
     files_df["Deployment notes"] = audiomoth_notes
     print(f"Created audiomoth # column!")
-    files_df.insert(1, "AudioMoth #", audiomoth_names)
+    files_df.insert(1, "audiomoth_num", audiomoth_names)
     print(f"Created audiomoth # column!")
-    files_df.insert(0, "Site name", site_names)
+    files_df.insert(0, "site_name", site_names)
     print(f"Created site name column!")
-    files_df.insert(0, "Datetime UTC", pd.to_datetime(files_df["File path"], format="%Y%m%d_%H%M%S", exact=False))
+    files_df.insert(0, "datetime_UTC", pd.to_datetime(files_df[file_path_column_name], format="%Y%m%d_%H%M%S", exact=False))
     print(f"Created datetime column!")
 
     files_df.to_csv(cfg['output_dir'] / cfg["csv_name"])
