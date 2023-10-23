@@ -86,7 +86,7 @@ def generate_files_df(cfg):
     print(f"Created file duration column!")
 
     with exiftool.ExifToolHelper() as et:
-        good_paths = list(files_df.loc[files_df["File metadata"] == "good!"][file_path_column_name].values)
+        good_paths = list(files_df.loc[files_df[file_metadata_column_name] == "good!"][file_path_column_name].values)
         comments = []
         sample_rates = []
         artists = []
