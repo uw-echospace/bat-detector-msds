@@ -124,9 +124,9 @@ def generate_files_df(cfg):
                 durations += [error_comment]
 
         files_df[file_metadata_column_name].loc[files_df[file_metadata_column_name] == "good!"] = comments
-        files_df["sample_rate"].loc[files_df["Sample rate"] == "good!"] = sample_rates
-        files_df["audiomoth_artist_ID"].loc[files_df["Audiomoth artist ID"] == "good!"] = artists
-        files_df["file_duration"].loc[files_df["File duration"] == "good!"] = durations
+        files_df["sample_rate"].loc[files_df["sample_rate"] == "good!"] = sample_rates
+        files_df["audiomoth_artist_ID"].loc[files_df["audiomoth_artist_ID"] == "good!"] = artists
+        files_df["file_duration"].loc[files_df["file_duration"] == "good!"] = durations
     
     print(f"Updated file metadata info using Audiomoth metadata comments!")
     files_df.insert(2, "audiomoth_battery", files_df[file_metadata_column_name].apply(lambda x : get_file_battery(x)))
