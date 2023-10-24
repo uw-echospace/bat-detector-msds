@@ -635,17 +635,9 @@ def get_params_relevant_to_data(cfg):
     data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
-    ubna_data_01_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_01_collected_audio_records.csv', dtype=str, index_col=0)
-    ubna_data_02_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_02_collected_audio_records.csv', dtype=str, index_col=0)
-    ubna_data_03_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_03_collected_audio_records.csv', dtype=str, index_col=0)
-
-    cur_data_records = pd.DataFrame()
-    if data_params['recover_folder'] in ubna_data_01_df["recover_folder"].values and cfg["sd_unit"] in ubna_data_01_df["sd_card_num"].values:
-        cur_data_records = ubna_data_01_df
-    if data_params['recover_folder'] in ubna_data_02_df["recover_folder"].values and cfg["sd_unit"] in ubna_data_02_df["sd_card_num"].values:
-        cur_data_records = ubna_data_02_df
-    if data_params['recover_folder'] in ubna_data_03_df["recover_folder"].values and cfg["sd_unit"] in ubna_data_03_df["sd_card_num"].values:
-        cur_data_records = ubna_data_03_df
+    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_*_collected_audio_records.csv', dtype=str).compute()
+    if 'Unnamed: 0' in cur_data_records.columns:
+        cur_data_records.drop(columns='Unnamed: 0', inplace=True)
     cur_data_records["datetime_UTC"] = pd.DatetimeIndex(cur_data_records["datetime_UTC"])
     cur_data_records.set_index("datetime_UTC", inplace=True) 
     
