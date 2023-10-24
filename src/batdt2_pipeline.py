@@ -579,7 +579,7 @@ def get_params_relevant_to_data_at_location(cfg):
 
 
 def filter_df_with_location(ubna_data_df, cfg):
-    site_name_cond = ubna_data_df["Site name"] == cfg['site']
+    site_name_cond = ubna_data_df["site_name"] == cfg['site']
     file_year_cond = ubna_data_df.index.year == (dt.datetime.strptime(cfg['year'], '%Y')).year
     file_month_cond = ubna_data_df.index.month == (dt.datetime.strptime(cfg['month'], '%B')).month
     minute_cond = np.logical_or((ubna_data_df.index).minute == 30, (ubna_data_df.index).minute == 0)
@@ -640,11 +640,11 @@ def get_params_relevant_to_data(cfg):
     ubna_data_03_df = pd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_03_collected_audio_records.csv', dtype=str, index_col=0)
 
     cur_data_records = pd.DataFrame()
-    if data_params['recover_folder'] in ubna_data_01_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_01_df["SD card #"].values:
+    if data_params['recover_folder'] in ubna_data_01_df["recover_folder"].values and cfg["sd_unit"] in ubna_data_01_df["sd_card_num"].values:
         cur_data_records = ubna_data_01_df
-    if data_params['recover_folder'] in ubna_data_02_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_02_df["SD card #"].values:
+    if data_params['recover_folder'] in ubna_data_02_df["recover_folder"].values and cfg["sd_unit"] in ubna_data_02_df["sd_card_num"].values:
         cur_data_records = ubna_data_02_df
-    if data_params['recover_folder'] in ubna_data_03_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_03_df["SD card #"].values:
+    if data_params['recover_folder'] in ubna_data_03_df["recover_folder"].values and cfg["sd_unit"] in ubna_data_03_df["sd_card_num"].values:
         cur_data_records = ubna_data_03_df
     cur_data_records["datetime_UTC"] = pd.DatetimeIndex(cur_data_records["datetime_UTC"])
     cur_data_records.set_index("datetime_UTC", inplace=True) 
