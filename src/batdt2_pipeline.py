@@ -528,8 +528,8 @@ def run_pipeline_for_individual_files_with_df(cfg):
                 print('Detections for this file have already been generated!')
             else:
                 print(f"Generating detections for {file.name}")
-                recover_folder = good_location_df.loc[good_location_df['File path'] == str(file), 'Recover folder'].values[0]
-                audiomoth_folder = good_location_df.loc[good_location_df['File path'] == str(file), "SD card #"].values[0]
+                recover_folder = good_location_df.loc[good_location_df['file_path'] == str(file), 'recover_folder'].values[0]
+                audiomoth_folder = good_location_df.loc[good_location_df['file_path'] == str(file), "sd_card_num"].values[0]
                 print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
                 segmented_file_paths = generate_segmented_paths([file], cfg)
                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
