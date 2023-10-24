@@ -555,18 +555,18 @@ def get_params_relevant_to_data_at_location(cfg):
     hard_drive_df = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_*_collected_audio_records.csv', dtype=str).compute()
     if 'Unnamed: 0' in hard_drive_df.columns:
         hard_drive_df.drop(columns='Unnamed: 0', inplace=True)
-    hard_drive_df["Datetime UTC"] = pd.DatetimeIndex(hard_drive_df["Datetime UTC"])
-    hard_drive_df.set_index("Datetime UTC", inplace=True)
+    hard_drive_df["datetime_UTC"] = pd.DatetimeIndex(hard_drive_df["datetime_UTC"])
+    hard_drive_df.set_index("datetime_UTC", inplace=True)
     
     files_from_location = filter_df_with_location(hard_drive_df, cfg)
     data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
-    data_params['ref_audio_files'] = sorted(list(files_from_location["File path"].apply(lambda x : Path(x)).values))
-    file_status_cond = files_from_location["File status"] == "Usable for detection"
-    file_duration_cond = np.isclose(files_from_location["File duration"].astype('float'), cfg['duration'])
+    data_params['ref_audio_files'] = sorted(list(files_from_location["file_path"].apply(lambda x : Path(x)).values))
+    file_status_cond = files_from_location["file_status"] == "Usable for detection"
+    file_duration_cond = np.isclose(files_from_location["file_duration"].astype('float'), cfg['duration'])
     good_location_df = files_from_location.loc[file_status_cond&file_duration_cond]
-    data_params['good_audio_files'] = sorted(list(good_location_df["File path"].apply(lambda x : Path(x)).values))
+    data_params['good_audio_files'] = sorted(list(good_location_df["file_path"].apply(lambda x : Path(x)).values))
 
     if data_params['good_audio_files'] == data_params['ref_audio_files']:
         print("All files from deployment session good!")
@@ -584,8 +584,8 @@ def filter_df_with_location(ubna_data_df, cfg):
     file_month_cond = ubna_data_df.index.month == (dt.datetime.strptime(cfg['month'], '%B')).month
     minute_cond = np.logical_or((ubna_data_df.index).minute == 30, (ubna_data_df.index).minute == 0)
     datetime_cond = np.logical_and((ubna_data_df.index).second == 0, minute_cond)
-    file_error_cond = np.logical_and((ubna_data_df["File duration"]!='File has no comment due to error!'), (ubna_data_df["File duration"]!='File has no Audiomoth-related comment'))
-    all_errors_cond = np.logical_and((ubna_data_df["File duration"]!='Is empty!'), file_error_cond)
+    file_error_cond = np.logical_and((ubna_data_df["file_duration"]!='File has no comment due to error!'), (ubna_data_df["file_duration"]!='File has no Audiomoth-related comment'))
+    all_errors_cond = np.logical_and((ubna_data_df["file_duration"]!='Is empty!'), file_error_cond)
     file_date_cond = np.logical_and(file_year_cond, file_month_cond)
 
     filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond&file_date_cond&all_errors_cond].sort_index()
@@ -646,11 +646,11 @@ def get_params_relevant_to_data(cfg):
         cur_data_records = ubna_data_02_df
     if data_params['recover_folder'] in ubna_data_03_df["Recover folder"].values and cfg["sd_unit"] in ubna_data_03_df["SD card #"].values:
         cur_data_records = ubna_data_03_df
-    cur_data_records["Datetime UTC"] = pd.DatetimeIndex(cur_data_records["Datetime UTC"])
-    cur_data_records.set_index("Datetime UTC", inplace=True) 
+    cur_data_records["datetime_UTC"] = pd.DatetimeIndex(cur_data_records["datetime_UTC"])
+    cur_data_records.set_index("datetime_UTC", inplace=True) 
     
     files_from_deployment_session = filter_df_with_deployment_session(cur_data_records, data_params['recover_folder'], cfg)
-    site_name = files_from_deployment_session["Site name"].values[0]
+    site_name = files_from_deployment_session["site_name"].values[0]
     data_params["site"] = site_name
     if data_params["site"] != "(Site not found in Field Records)":
         data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
@@ -661,11 +661,11 @@ def get_params_relevant_to_data(cfg):
         data_params['output_dir'] = cfg["output_dir"] / f"UBNA_{cfg['sd_unit']}"
     print(f"Will save csv file to {data_params['output_dir']}")
 
-    data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["File path"].apply(lambda x : Path(x)).values))
-    file_status_cond = files_from_deployment_session["File status"] == "Usable for detection"
-    file_duration_cond = files_from_deployment_session["File duration"].astype('float') >= 900
+    data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
+    file_status_cond = files_from_deployment_session["file_status"] == "Usable for detection"
+    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= 900
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
-    data_params['good_audio_files'] = sorted(list(good_deploy_session_df["File path"].apply(lambda x : Path(x)).values))
+    data_params['good_audio_files'] = sorted(list(good_deploy_session_df["file_path"].apply(lambda x : Path(x)).values))
 
     if data_params['good_audio_files'] == data_params['ref_audio_files']:
         print("All files from deployment session good!")
@@ -675,17 +675,17 @@ def get_params_relevant_to_data(cfg):
     return data_params
 
 def filter_df_with_deployment_session(ubna_data_df, recover_folder, cfg):
-    recover_folder_cond = ubna_data_df["Recover folder"] == recover_folder
-    sd_unit_cond = ubna_data_df["SD card #"] == cfg["sd_unit"]
+    recover_folder_cond = ubna_data_df["recover_folder"] == recover_folder
+    sd_unit_cond = ubna_data_df["sd_card_num"] == cfg["sd_unit"]
     filtered_location_df = ubna_data_df.loc[recover_folder_cond&sd_unit_cond].sort_index()
 
-    start_time, end_time = get_recording_period(Path(filtered_location_df['File path'].values[0]).parent)
+    start_time, end_time = get_recording_period(Path(filtered_location_df['file_path'].values[0]).parent)
     file_minutes = pd.to_datetime(filtered_location_df.index.minute, format="%M")
     offset_from_config = dt.timedelta(minutes=dt.datetime.strptime(start_time, "%H:%M").minute)
     corrected_minutes = (file_minutes - offset_from_config).minute
     datetime_cond = np.logical_and(np.mod(corrected_minutes, 30) == 0, filtered_location_df.index.second == 0)
-    file_error_cond = np.logical_and((filtered_location_df["File duration"]!='File has no comment due to error!'), (filtered_location_df["File duration"]!='File has no Audiomoth-related comment'))
-    all_errors_cond = np.logical_and((filtered_location_df["File duration"]!='Is empty!'), file_error_cond)
+    file_error_cond = np.logical_and((filtered_location_df["file_duration"]!='File has no comment due to error!'), (filtered_location_df["file_duration"]!='File has no Audiomoth-related comment'))
+    all_errors_cond = np.logical_and((filtered_location_df["file_duration"]!='Is empty!'), file_error_cond)
     filtered_location_df = filtered_location_df.loc[datetime_cond&all_errors_cond].sort_index()
     filtered_location_nightly_df = filtered_location_df.between_time(cfg['recording_start'], cfg['recording_end'], inclusive="left")
 
