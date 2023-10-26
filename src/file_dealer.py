@@ -71,7 +71,7 @@ def get_file_comment(filepath):
 
 def generate_files_df(cfg):
 
-    all_wav_files = sorted(list(Path(cfg['input_dir']).glob(pattern='recover-*/[!.]**.WAV')))
+    all_wav_files = sorted(list(Path(cfg['input_dir']).glob(pattern='recover-*/[!.]**/*.WAV')))
     file_path_column_name = "file_path"
     files_df = pd.DataFrame((all_wav_files), columns=[file_path_column_name])
     print(f"Created file paths column!")
