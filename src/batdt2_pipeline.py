@@ -655,7 +655,7 @@ def get_params_relevant_to_data(cfg):
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_deployment_session["file_status"] == "Usable for detection"
-    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= 300
+    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= (cfg['cycle_length']*60)/2
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_deploy_session_df["file_path"].apply(lambda x : Path(x)).values))
 
@@ -675,7 +675,7 @@ def filter_df_with_deployment_session(ubna_data_df, recover_folder, cfg):
     file_minutes = pd.to_datetime(filtered_location_df.index.minute, format="%M")
     offset_from_config = dt.timedelta(minutes=dt.datetime.strptime(start_time, "%H:%M").minute)
     corrected_minutes = (file_minutes - offset_from_config).minute
-    datetime_cond = np.logical_and(np.mod(corrected_minutes, 30) == 0, filtered_location_df.index.second == 0)
+    datetime_cond = np.logical_and(np.mod(corrected_minutes, cfg['cycle_length']) == 0, filtered_location_df.index.second == 0)
     file_error_cond = np.logical_and((filtered_location_df["file_duration"]!='File has no comment due to error!'), (filtered_location_df["file_duration"]!='File has no Audiomoth-related comment'))
     all_errors_cond = np.logical_and((filtered_location_df["file_duration"]!='Is empty!'), file_error_cond)
     filtered_location_df = filtered_location_df.loc[datetime_cond&all_errors_cond].sort_index()
@@ -775,6 +775,12 @@ def parse_args():
         default=1795
     )
     parser.add_argument(
+        "--cycle_length",
+        type=int,
+        help="The time between each file",
+        default=30
+    )
+    parser.add_argument(
         "--output_directory",
         type=str,
         help="the directory where the .csv file goes",
@@ -827,6 +833,7 @@ if __name__ == "__main__":
     cfg['recording_start'] = args['recording_start']
     cfg['recording_end'] = args['recording_end']
     cfg['duration'] = args['duration']
+    cfg['cycle_length'] = args['cycle_length']
     cfg["output_dir"] = Path(args["output_directory"])
     cfg["tmp_dir"] = Path(args["tmp_directory"])
     cfg["run_model"] = args["run_model"]
