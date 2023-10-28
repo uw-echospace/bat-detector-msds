@@ -460,9 +460,9 @@ def plot_cumulative_activity(activity_df, site_name, resample_tag):
     plot_times = [''] * len(activity_df.index)
     plot_times[::2] = activity_df.index[::2]
 
-    plt.rcParams.update({'font.size': 4*len(plot_dates)**0.5})
-    plt.figure(figsize=(len(plot_dates)/2, len(plot_times)/2))
-    plt.title(f"Activity from {site_name}", loc='center', y=1.05, fontsize=5*len(plot_dates)**0.5)
+    plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
+    plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
+    plt.title(f"Activity from {site_name}", loc='center', y=1.05, fontsize=(4)*len(plot_dates)**0.5)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
@@ -655,7 +655,7 @@ def get_params_relevant_to_data(cfg):
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_deployment_session["file_status"] == "Usable for detection"
-    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= 900
+    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= 300
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_deploy_session_df["file_path"].apply(lambda x : Path(x)).values))
 
