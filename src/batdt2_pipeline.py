@@ -275,7 +275,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
 
     return ravenpro_df
 
-def construct_activity_arr(csv_name, data_params):
+def construct_activity_arr(cfg, data_params):
     """
     Constructs DataFrames corresponding to different important ways of storing activity for a deployment session.
     plot_df is an activity grid with date headers and time indices and number of detections as values.
@@ -305,12 +305,12 @@ def construct_activity_arr(csv_name, data_params):
             - Values are 0 for error-files, 1 for call-absence, number of detections otherwise.
             - Recordings where the Audiomoth experienced errors are colored red.
     """
-    csv_tag = csv_name.split('__')[-1]
+    csv_tag = cfg["csv_filename"].split('__')[-1]
 
     ref_datetimes = pd.to_datetime(data_params['ref_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
     activity_datetimes_for_file = ref_datetimes.tz_localize('UTC')
 
-    dets = pd.read_csv(f'{data_params["output_dir"]}/{csv_name}.csv')
+    dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     dets_per_file = dets.groupby(['ref_time'])['ref_time'].count()
     good_datetimes = pd.to_datetime(data_params['good_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
@@ -321,7 +321,7 @@ def construct_activity_arr(csv_name, data_params):
             if (ref_datetime in dets_per_file.index):
                 activity += [dets_per_file[ref_datetime]]
             else:
-                activity += [1]
+                activity += [cfg['cycle_length']/30]
         else:
             activity += [0]
     activity = np.array(activity)
@@ -620,7 +620,7 @@ def run_pipeline_for_session_with_df(cfg):
         delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig']):
-        construct_activity_arr(cfg["csv_filename"], data_params)
+        construct_activity_arr(cfg, data_params)
         activity_df = shape_activity_array_into_grid(cfg["csv_filename"], data_params["output_dir"])
         plot_activity_grid(activity_df, data_params, save=True)
         if data_params["site"] != "(Site not found in Field Records)":
