@@ -321,10 +321,10 @@ def construct_activity_arr(cfg, data_params):
             if (ref_datetime in dets_per_file.index):
                 activity += [dets_per_file[ref_datetime]]
             else:
-                activity += [cfg['cycle_length']/30]
+                activity += [cfg['cycle_length']/1800]
         else:
             activity += [0]
-    activity = np.array(activity)
+    activity = np.array(activity) * (cfg['cycle_length'] / cfg['duration'])
 
     activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
     activity_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
@@ -418,7 +418,7 @@ def construct_cumulative_activity(site_name, resample_tag, cfg):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{site_name}/activity__*.csv").compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{site_name}/activity__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
 
@@ -655,7 +655,7 @@ def get_params_relevant_to_data(cfg):
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_deployment_session["file_status"] == "Usable for detection"
-    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= (cfg['cycle_length']*60)/2
+    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= (cfg['cycle_length'])/2
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_deploy_session_df["file_path"].apply(lambda x : Path(x)).values))
 
@@ -675,7 +675,7 @@ def filter_df_with_deployment_session(ubna_data_df, recover_folder, cfg):
     file_minutes = pd.to_datetime(filtered_location_df.index.minute, format="%M")
     offset_from_config = dt.timedelta(minutes=dt.datetime.strptime(start_time, "%H:%M").minute)
     corrected_minutes = (file_minutes - offset_from_config).minute
-    datetime_cond = np.logical_and(np.mod(corrected_minutes, cfg['cycle_length']) == 0, filtered_location_df.index.second == 0)
+    datetime_cond = np.logical_and(np.mod(corrected_minutes, (cfg['cycle_length']/60)) == 0, filtered_location_df.index.second == 0)
     file_error_cond = np.logical_and((filtered_location_df["file_duration"]!='File has no comment due to error!'), (filtered_location_df["file_duration"]!='File has no Audiomoth-related comment'))
     all_errors_cond = np.logical_and((filtered_location_df["file_duration"]!='Is empty!'), file_error_cond)
     filtered_location_df = filtered_location_df.loc[datetime_cond&all_errors_cond].sort_index()
