@@ -335,7 +335,7 @@ def construct_activity_arr(cfg, data_params):
         activity = np.array(activity) * (cfg['cycle_length'] / cfg['duration'])
 
     activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
-    
+
 
     activity_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
 
@@ -428,7 +428,7 @@ def construct_cumulative_activity(data_params, cfg):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{data_params['resample_tag']}/activity__*.csv", assume_missing=True).compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
 
