@@ -321,10 +321,13 @@ def construct_activity_arr(cfg, data_params):
             if (ref_datetime in dets_per_file.index):
                 activity += [dets_per_file[ref_datetime]]
             else:
-                activity += [cfg['cycle_length']/1800]
+                activity += [cfg['cycle_length']/(data_params['resample_in_min']*60)]
         else:
             activity += [0]
-    activity = np.array(activity) * (cfg['cycle_length'] / cfg['duration'])
+    if (cfg['cycle_length'] - cfg['duration']) <= 5:
+        activity = np.array(activity)
+    else:
+        activity = np.array(activity) * (cfg['cycle_length'] / cfg['duration'])
 
     activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
     activity_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
@@ -394,7 +397,7 @@ def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
     plt.tight_layout()
     plt.show()
 
-def construct_cumulative_activity(site_name, resample_tag, cfg):
+def construct_cumulative_activity(data_params, cfg):
     """
     Constructs a cumulative appended DataFrame grid using dask.dataframe.
     This DataFrame gathers all detected activity contained in output_dir for a given site.
@@ -418,11 +421,11 @@ def construct_cumulative_activity(site_name, resample_tag, cfg):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{site_name}/activity__*.csv", assume_missing=True).compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{data_params['resample_tag']}/activity__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
 
-    resampled_df = new_df.resample(resample_tag, on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
+    resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.strftime("%m/%d/%y")
@@ -430,11 +433,12 @@ def construct_cumulative_activity(site_name, resample_tag, cfg):
     data = list(zip(raw_dates, raw_times, resampled_df['num_of_detections']))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", 'num_of_detections'])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values='num_of_detections')
-    activity_df.to_csv(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site_name.split()[0]}_{resample_tag}.csv')
+    cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
+    activity_df.to_csv(f'{cum_plots_dir}/cumulative_activity__{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, site_name, resample_tag):
+def plot_cumulative_activity(activity_df, data_params, site_name, resample_tag):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
@@ -462,7 +466,7 @@ def plot_cumulative_activity(activity_df, site_name, resample_tag):
 
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
-    plt.title(f"Activity from {site_name}", loc='center', y=1.05, fontsize=(4)*len(plot_dates)**0.5)
+    plt.title(f"Activity from {data_params['site']}", loc='center', y=1.05, fontsize=(4)*len(plot_dates)**0.5)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
@@ -471,8 +475,8 @@ def plot_cumulative_activity(activity_df, site_name, resample_tag):
     plt.colorbar()
     plt.grid(which='both')
     plt.tight_layout()
-
-    plt.savefig(f'{Path(__file__).parent}/../output_dir/cumulative_plots/cumulative_activity__{site_name.split()[0]}_{resample_tag}.png', 
+    cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
+    plt.savefig(f'{cum_plots_dir}/cumulative_activity__{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                 bbox_inches='tight')
     plt.show()
 
@@ -620,12 +624,14 @@ def run_pipeline_for_session_with_df(cfg):
         delete_segments(segmented_file_paths)
 
     if (cfg['generate_fig']):
+        data_params['resample_in_min'] = 30
+        data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
         construct_activity_arr(cfg, data_params)
         activity_df = shape_activity_array_into_grid(cfg["csv_filename"], data_params["output_dir"])
         plot_activity_grid(activity_df, data_params, save=True)
         if data_params["site"] != "(Site not found in Field Records)":
-            cumulative_activity_df = construct_cumulative_activity(data_params["site"], "30T", cfg)
-            plot_cumulative_activity(cumulative_activity_df, data_params["site"], "30T")
+            cumulative_activity_df = construct_cumulative_activity(data_params, cfg)
+            plot_cumulative_activity(cumulative_activity_df, data_params)
 
     return bd_preds
 
@@ -778,7 +784,7 @@ def parse_args():
         "--cycle_length",
         type=int,
         help="The time between each file",
-        default=30
+        default=1800
     )
     parser.add_argument(
         "--output_directory",
