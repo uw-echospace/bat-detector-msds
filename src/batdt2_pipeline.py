@@ -321,7 +321,7 @@ def construct_activity_arr(cfg, data_params):
             if (ref_datetime in dets_per_file.index):
                 activity += [dets_per_file[ref_datetime]]
             else:
-                activity += [cfg['cycle_length']/(data_params['resample_in_min']*60)]
+                activity += [(cfg['cycle_length'] / cfg['duration'])/(data_params['resample_in_min']*60)]
         else:
             activity += [0]
     if (cfg['cycle_length'] - cfg['duration']) <= 5:
