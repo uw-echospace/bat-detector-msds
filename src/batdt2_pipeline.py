@@ -445,7 +445,7 @@ def construct_cumulative_activity(data_params, cfg):
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, data_params, site_name, resample_tag):
+def plot_cumulative_activity(activity_df, data_params):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
