@@ -314,6 +314,11 @@ def construct_activity_arr(cfg, data_params):
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     dets_per_file = dets.groupby(['ref_time'])['ref_time'].count()
     good_datetimes = pd.to_datetime(data_params['good_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
+
+    if (cfg['cycle_length'] - cfg['duration']) <= 5:
+        nodets = 1
+    else:
+        nodets = (cfg['duration'])/((data_params['resample_in_min']*60))
     
     activity = []
     for ref_datetime in ref_datetimes:
@@ -321,7 +326,7 @@ def construct_activity_arr(cfg, data_params):
             if (ref_datetime in dets_per_file.index):
                 activity += [dets_per_file[ref_datetime]]
             else:
-                activity += [(cfg['cycle_length'] / cfg['duration'])/(data_params['resample_in_min']*60)]
+                activity += [nodets]
         else:
             activity += [0]
     if (cfg['cycle_length'] - cfg['duration']) <= 5:
