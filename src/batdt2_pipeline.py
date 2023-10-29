@@ -335,6 +335,8 @@ def construct_activity_arr(cfg, data_params):
         activity = np.array(activity) * (cfg['cycle_length'] / cfg['duration'])
 
     activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
+    
+
     activity_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
 
     return activity_arr
