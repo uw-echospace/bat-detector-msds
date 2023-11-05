@@ -593,13 +593,11 @@ def filter_df_with_location(ubna_data_df, cfg):
     site_name_cond = ubna_data_df["site_name"] == cfg['site']
     file_year_cond = ubna_data_df.index.year == (dt.datetime.strptime(cfg['year'], '%Y')).year
     file_month_cond = ubna_data_df.index.month == (dt.datetime.strptime(cfg['month'], '%B')).month
-    minute_cond = np.logical_or((ubna_data_df.index).minute == 30, (ubna_data_df.index).minute == 0)
-    datetime_cond = np.logical_and((ubna_data_df.index).second == 0, minute_cond)
     file_error_cond = np.logical_and((ubna_data_df["file_duration"]!='File has no comment due to error!'), (ubna_data_df["file_duration"]!='File has no Audiomoth-related comment'))
     all_errors_cond = np.logical_and((ubna_data_df["file_duration"]!='Is empty!'), file_error_cond)
     file_date_cond = np.logical_and(file_year_cond, file_month_cond)
 
-    filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond&file_date_cond&all_errors_cond].sort_index()
+    filtered_location_df = ubna_data_df.loc[site_name_cond&file_date_cond&all_errors_cond].sort_index()
     filtered_location_nightly_df = filtered_location_df.between_time(cfg['recording_start'], cfg['recording_end'], inclusive="left")
 
     return filtered_location_nightly_df
