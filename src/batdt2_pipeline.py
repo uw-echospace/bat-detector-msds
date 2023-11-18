@@ -342,21 +342,25 @@ def construct_activity_arr(cfg, data_params):
     return activity_arr
 
 
-def shape_activity_array_into_grid(csv_name, output_dir):
-    csv_tag = csv_name.split('__')[-1]
+def shape_activity_array_into_grid(cfg, data_params):
 
-    num_dets = pd.read_csv(f"{output_dir}/activity__{csv_tag}.csv", index_col=0)
+    csv_tag = cfg['csv_filename'].split('__')[-1]
+
+    num_dets = pd.read_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv", index_col=0)
+    num_dets['date_and_time_UTC'] = pd.DatetimeIndex(num_dets['date_and_time_UTC'])
     num_dets.set_index('date_and_time_UTC', inplace=True)
 
-    activity_datetimes = pd.to_datetime(num_dets.index.values)
+    resampled_df = num_dets.resample(data_params["resample_tag"]).sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
+
+    activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.strftime("%m/%d/%y")
     raw_times = activity_datetimes.strftime("%H:%M")
 
     col_name = f"num_of_detections"
-    data = list(zip(raw_dates, raw_times, num_dets[col_name]))
+    data = list(zip(raw_dates, raw_times, resampled_df[col_name]))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", col_name])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=col_name)
-    activity_df.to_csv(f"{output_dir}/activity_plot__{csv_tag}.csv")
+    activity_df.to_csv(f"{data_params['output_dir']}/activity_plot__{csv_tag}.csv")
 
     return activity_df
 
@@ -393,7 +397,7 @@ def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
     plt.title(f"Activity from {data_params['site']}", loc='left', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_df.index), 2)-0.5, plot_df.index[::2], rotation=45)
-    plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_df.columns, rotation=45)
+    plt.xticks(np.arange(0, len(plot_df.columns), 2)-0.5, plot_df.columns[::2], rotation=45)
     plt.ylabel('UTC Time (HH:MM)')
     if show_PST:
         plt.ylabel('PST Time (HH:MM)')
@@ -634,7 +638,7 @@ def run_pipeline_for_session_with_df(cfg):
         data_params['resample_in_min'] = 30
         data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
         construct_activity_arr(cfg, data_params)
-        activity_df = shape_activity_array_into_grid(cfg["csv_filename"], data_params["output_dir"])
+        activity_df = shape_activity_array_into_grid(cfg, data_params)
         plot_activity_grid(activity_df, data_params, save=True)
         if data_params["site"] != "(Site not found in Field Records)":
             cumulative_activity_df = construct_cumulative_activity(data_params, cfg)
