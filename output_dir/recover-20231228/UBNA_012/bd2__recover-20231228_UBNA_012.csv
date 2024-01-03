@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+235.0355,235.0489,23750.0,28189.0,Echolocation,Nyctalus leisleri,0.331,0.501,-1,/mnt/ubna_data_03/recover-20231228/UBNA_012/20231215_010000.WAV,recover-20231228,UBNA_012,(Site not found in Field Records)
