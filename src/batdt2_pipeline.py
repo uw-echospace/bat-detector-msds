@@ -353,13 +353,14 @@ def shape_activity_array_into_grid(cfg, data_params):
     resampled_df = num_dets.resample(data_params["resample_tag"]).sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
-    raw_dates = activity_datetimes.strftime("%m/%d/%y")
+    raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
 
     col_name = f"num_of_detections"
     data = list(zip(raw_dates, raw_times, resampled_df[col_name]))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", col_name])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=col_name)
+    activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
     activity_df.to_csv(f"{data_params['output_dir']}/activity_plot__{csv_tag}.csv")
 
     return activity_df
@@ -432,18 +433,19 @@ def construct_cumulative_activity(data_params, cfg):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2023*/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-202[3|4]*/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df.pop(new_df.columns[0])
 
     resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
-    raw_dates = activity_datetimes.strftime("%m/%d/%y")
+    raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
     data = list(zip(raw_dates, raw_times, resampled_df['num_of_detections']))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", 'num_of_detections'])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values='num_of_detections')
+    activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
     activity_df.to_csv(f'{cum_plots_dir}/cumulative_activity__{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
