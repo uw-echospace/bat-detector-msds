@@ -392,13 +392,18 @@ def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
     masked_array_for_nodets = np.ma.masked_where(plot_df.values==0, plot_df.values)
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red', alpha=1.0)
+    plot_dates = [''] * len(plot_df.columns)
+    plot_dates[::3] = plot_df.columns[::3]
+    plot_times = [''] * len(plot_df.index)
+    plot_times[::3] = plot_df.index[::3]
 
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
     plt.title(f"Activity from {data_params['site']}", loc='left', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
-    plt.yticks(np.arange(0, len(plot_df.index), 2)-0.5, plot_df.index[::2], rotation=45)
-    plt.xticks(np.arange(0, len(plot_df.columns), 2)-0.5, plot_df.columns[::2], rotation=45)
+    plt.yticks(np.arange(0, len(plot_df.index))-0.5, plot_times, rotation=45)
+    plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_dates, rotation=45)
+    plt.grid(which='both')
     plt.ylabel('UTC Time (HH:MM)')
     if show_PST:
         plt.ylabel('PST Time (HH:MM)')
@@ -475,7 +480,7 @@ def plot_cumulative_activity(activity_df, data_params):
     plot_dates = [''] * len(activity_df.columns)
     plot_dates[::7] = activity_df.columns[::7]
     plot_times = [''] * len(activity_df.index)
-    plot_times[::2] = activity_df.index[::2]
+    plot_times[::3] = activity_df.index[::3]
 
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
