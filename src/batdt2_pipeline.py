@@ -269,7 +269,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
         "event": "Annotation",
     }, inplace=True)
 
-    ravenpro_df["Selection"] = pd.Series(range(1, df.shape[0]), dtype='float64')
+    ravenpro_df["Selection"] = np.arange(0, df.shape[0]).astype('int') + 1
     ravenpro_df["View"] = "Waveform 1"
     ravenpro_df["Channel"] = "1"
 
@@ -521,7 +521,8 @@ def run_pipeline_on_file(file, cfg):
         segmented_file_paths = generate_segmented_paths([file], cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_preds = run_models(file_path_mappings)
-        _save_predictions(bd_preds, cfg['output_dir'], cfg)
+        if cfg['save']:
+            _save_predictions(bd_preds, cfg['output_dir'], cfg)
         delete_segments(segmented_file_paths)
 
     return bd_preds
