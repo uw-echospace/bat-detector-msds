@@ -475,20 +475,28 @@ def plot_cumulative_activity(activity_df, data_params):
     """
 
     masked_array_for_nodets = np.ma.masked_where(activity_df.values==0, activity_df.values)
+
+    activity_times = pd.DatetimeIndex(activity_df.index).tz_localize('UTC')
+    ylabel = 'UTC'
+    if data_params["show_PST"]:
+        activity_times = activity_times.tz_convert(tz='US/Pacific')
+        ylabel = 'PST'
+    activity_times = activity_times.strftime("%H:%M")
+
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red')
     plot_dates = [''] * len(activity_df.columns)
     plot_dates[::7] = activity_df.columns[::7]
-    plot_times = [''] * len(activity_df.index)
-    plot_times[::3] = activity_df.index[::3]
+    plot_times = [''] * len(activity_times)
+    plot_times[::3] = activity_times[::3]
 
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
-    plt.title(f"Activity from {data_params['site']}", loc='center', y=1.05, fontsize=(4)*len(plot_dates)**0.5)
+    plt.title(f"Activity (# of calls) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
-    plt.ylabel('UTC Time (HH:MM)')
+    plt.ylabel(f'{ylabel} Time (HH:MM)')
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     plt.grid(which='both')
@@ -650,6 +658,7 @@ def run_pipeline_for_session_with_df(cfg):
         plot_activity_grid(activity_df, data_params, save=True)
         if data_params["site"] != "(Site not found in Field Records)":
             cumulative_activity_df = construct_cumulative_activity(data_params, cfg)
+            data_params['show_PST'] = False
             plot_cumulative_activity(cumulative_activity_df, data_params)
 
     return bd_preds
