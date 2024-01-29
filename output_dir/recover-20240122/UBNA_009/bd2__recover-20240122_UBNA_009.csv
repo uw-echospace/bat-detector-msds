@@ -1,0 +1,7 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+155.7745,155.7851,46953.0,49759.0,Echolocation,Pipistrellus pipistrellus,0.346,0.527,-1,/mnt/ubna_data_03/recover-20240122/UBNA_009/20240115_234000.WAV,recover-20240122,UBNA_009,(Site not found in Field Records)
+33.9345,33.9387,20312.0,68444.0,Echolocation,Myotis nattereri,0.48,0.503,-1,/mnt/ubna_data_03/recover-20240122/UBNA_009/20240116_000000.WAV,recover-20240122,UBNA_009,(Site not found in Field Records)
+107.7245,107.7399,11718.0,17077.0,Echolocation,Nyctalus leisleri,0.349,0.526,-1,/mnt/ubna_data_03/recover-20240122/UBNA_009/20240117_155000.WAV,recover-20240122,UBNA_009,(Site not found in Field Records)
+202.1555,202.1743,17734.0,21941.0,Echolocation,Nyctalus noctula,0.381,0.502,-1,/mnt/ubna_data_03/recover-20240122/UBNA_009/20240119_213000.WAV,recover-20240122,UBNA_009,(Site not found in Field Records)
+34.6775,34.6932,11718.0,16836.0,Echolocation,Nyctalus leisleri,0.48,0.579,-1,/mnt/ubna_data_03/recover-20240122/UBNA_009/20240121_003000.WAV,recover-20240122,UBNA_009,(Site not found in Field Records)
+68.1075,68.1225,11718.0,18291.0,Echolocation,Nyctalus leisleri,0.425,0.567,-1,/mnt/ubna_data_03/recover-20240122/UBNA_009/20240121_003000.WAV,recover-20240122,UBNA_009,(Site not found in Field Records)
