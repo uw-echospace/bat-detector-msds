@@ -413,7 +413,7 @@ def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
     plt.tight_layout()
     plt.show()
 
-def construct_cumulative_activity(data_params, cfg):
+def construct_cumulative_activity(data_params, cfg, group):
     """
     Constructs a cumulative appended DataFrame grid using dask.dataframe.
     This DataFrame gathers all detected activity contained in output_dir for a given site.
@@ -446,16 +446,16 @@ def construct_cumulative_activity(data_params, cfg):
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
-    data = list(zip(raw_dates, raw_times, resampled_df['num_of_detections']))
-    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", 'num_of_detections'])
-    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values='num_of_detections')
+    data = list(zip(raw_dates, raw_times, resampled_df[f'{group}num_of_detections']))
+    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", f'{group}num_of_detections'])
+    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}num_of_detections')
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
-    activity_df.to_csv(f'{cum_plots_dir}/cumulative_activity__{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
+    activity_df.to_csv(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, data_params):
+def plot_cumulative_activity(activity_df, data_params, group):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
@@ -473,6 +473,9 @@ def plot_cumulative_activity(activity_df, data_params):
         - The resample_tag associated with resampling: choose above 30T like 1H, 2H or D.
     """
 
+    plot_title = group
+    if plot_title!='':
+        plot_title = group.upper().replace('_', ' ')
     masked_array_for_nodets = np.ma.masked_where(activity_df.values==0, activity_df.values)
 
     activity_times = pd.DatetimeIndex(activity_df.index).tz_localize('UTC')
@@ -491,7 +494,7 @@ def plot_cumulative_activity(activity_df, data_params):
 
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
-    plt.title(f"Activity (# of calls) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
+    plt.title(f"{plot_title}Activity (# of calls) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
@@ -501,7 +504,7 @@ def plot_cumulative_activity(activity_df, data_params):
     plt.grid(which='both')
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
-    plt.savefig(f'{cum_plots_dir}/cumulative_activity__{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
+    plt.savefig(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                 bbox_inches='tight')
     plt.show()
 
@@ -653,12 +656,13 @@ def run_pipeline_for_session_with_df(cfg):
         data_params['resample_in_min'] = 30
         data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
         construct_activity_arr(cfg, data_params)
-        activity_df = shape_activity_array_into_grid(cfg, data_params)
-        plot_activity_grid(activity_df, data_params, save=True)
-        if data_params["site"] != "(Site not found in Field Records)":
-            cumulative_activity_df = construct_cumulative_activity(data_params, cfg)
-            data_params['show_PST'] = False
-            plot_cumulative_activity(cumulative_activity_df, data_params)
+        for group in FREQ_GROUPS.keys():
+            activity_df = shape_activity_array_into_grid(cfg, data_params, group)
+            plot_activity_grid(activity_df, data_params, group, save=True)
+            if data_params["site"] != "(Site not found in Field Records)":
+                cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                data_params['show_PST'] = False
+                plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
