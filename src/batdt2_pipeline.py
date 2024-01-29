@@ -23,6 +23,10 @@ from cfg import get_config
 from pipeline import pipeline
 from utils.utils import gen_empty_df, convert_df_ravenpro
 
+
+FREQ_GROUPS = {'':[0,96000], 'LF_':[13000,50000], 'HF_':[34000,96000]}
+
+
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
     Segments audio file into clips of duration length and saves them to output/tmp folder.
@@ -305,50 +309,42 @@ def construct_activity_arr(cfg, data_params):
             - Values are 0 for error-files, 1 for call-absence, number of detections otherwise.
             - Recordings where the Audiomoth experienced errors are colored red.
     """
-    csv_tag = cfg["csv_filename"].split('__')[-1]
 
+    csv_tag = cfg["csv_filename"].split('__')[-1]
     ref_datetimes = pd.to_datetime(data_params['ref_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
     activity_datetimes_for_file = ref_datetimes.tz_localize('UTC')
-
-    dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
-    dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
-    dets_per_file = dets.groupby(['ref_time'])['ref_time'].count()
     good_datetimes = pd.to_datetime(data_params['good_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
-
     if (cfg['cycle_length'] - cfg['duration']) <= 5:
         nodets = 1
     else:
         nodets = (cfg['duration'])/((data_params['resample_in_min']*60))
-    
-    activity = []
-    for ref_datetime in ref_datetimes:
-        if ref_datetime in good_datetimes:
-            if (ref_datetime in dets_per_file.index):
-                activity += [dets_per_file[ref_datetime]]
-            else:
-                activity += [nodets]
-        else:
-            activity += [0]
-    if (cfg['cycle_length'] - cfg['duration']) <= 5:
-        activity = np.array(activity)
-    else:
-        activity = np.array(activity) * (cfg['cycle_length'] / cfg['duration'])
 
-    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", "num_of_detections"])
+    dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
+    dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
+    activity_dets_arr = pd.DataFrame()
 
+    for group in FREQ_GROUPS.keys():
+        freq_group_df = dets.loc[(dets['low_freq']>=FREQ_GROUPS[group][0])&(dets['high_freq']<=FREQ_GROUPS[group][1])].copy()
+        dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
+        activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
 
-    activity_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
+        if (cfg['cycle_length'] - cfg['duration']) > 5:
+            activity = activity *(cfg['cycle_length'] / cfg['duration'])
+        activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
+        activity_arr = activity_arr.set_index("date_and_time_UTC")
+        activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
 
-    return activity_arr
+    activity_dets_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
+
+    return activity_dets_arr
 
 
-def shape_activity_array_into_grid(cfg, data_params):
+def shape_activity_array_into_grid(cfg, data_params, group):
 
     csv_tag = cfg['csv_filename'].split('__')[-1]
 
     num_dets = pd.read_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv", index_col=0)
-    num_dets['date_and_time_UTC'] = pd.DatetimeIndex(num_dets['date_and_time_UTC'])
-    num_dets.set_index('date_and_time_UTC', inplace=True)
+    num_dets.index = pd.DatetimeIndex(num_dets.index)
 
     resampled_df = num_dets.resample(data_params["resample_tag"]).sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
@@ -356,17 +352,17 @@ def shape_activity_array_into_grid(cfg, data_params):
     raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
 
-    col_name = f"num_of_detections"
+    col_name = f"{group}num_of_detections"
     data = list(zip(raw_dates, raw_times, resampled_df[col_name]))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", col_name])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=col_name)
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
-    activity_df.to_csv(f"{data_params['output_dir']}/activity_plot__{csv_tag}.csv")
+    activity_df.to_csv(f"{data_params['output_dir']}/activity_plot__{group}{csv_tag}.csv")
 
     return activity_df
 
 
-def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
+def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
     """
     Plots the above-returned plot_df DataFrame that represents activity over a deployment session.
 
@@ -389,6 +385,9 @@ def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
         - For example, today's 03:00 UTC will become yesterday's 20:00 PST (-7 hrs)
     """
 
+    plot_title = group
+    if plot_title!='':
+        plot_title = group.upper().replace('_', ' ')
     masked_array_for_nodets = np.ma.masked_where(plot_df.values==0, plot_df.values)
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red', alpha=1.0)
@@ -399,7 +398,7 @@ def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
 
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
-    plt.title(f"Activity from {data_params['site']}", loc='left', y=1.05)
+    plt.title(f"{plot_title}Activity from {data_params['site']}", loc='left', y=1.05)
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_df.index))-0.5, plot_times, rotation=45)
     plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_dates, rotation=45)
@@ -410,7 +409,7 @@ def plot_activity_grid(plot_df, data_params, show_PST=False, save=True):
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     if save:
-        plt.savefig(f"{data_params['output_dir']}/activity_plot__{data_params['recover_folder']}_{data_params['audiomoth_folder']}.png", bbox_inches='tight', pad_inches=0.5)
+        plt.savefig(f"{data_params['output_dir']}/activity_plot__{group}{data_params['recover_folder']}_{data_params['audiomoth_folder']}.png", bbox_inches='tight', pad_inches=0.5)
     plt.tight_layout()
     plt.show()
 
