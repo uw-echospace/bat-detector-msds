@@ -556,7 +556,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
         for file in data_params['good_audio_files']:
             cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
             if cfg['skip_existing'] & (data_params['output_dir'] / f"{cfg['csv_filename']}.csv").is_file():
-                print('Detections for this file have already been generated!')
+                print(f'Detections for this {file.name} have already been generated!')
             else:
                 print(f"Generating detections for {file.name}")
                 recover_folder = good_location_df.loc[good_location_df['file_path'] == str(file), 'recover_folder'].values[0]
