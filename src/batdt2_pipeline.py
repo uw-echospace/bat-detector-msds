@@ -24,7 +24,32 @@ from pipeline import pipeline
 from utils.utils import gen_empty_df, convert_df_ravenpro
 
 
-FREQ_GROUPS = {'':[0,96000], 'LF_':[13000,50000], 'HF_':[34000,96000]}
+
+FREQ_GROUPS = {
+                'E18 Bridge' : {'': [0, 96000],
+                          'LF1_': [13000, 50000],
+                          'HF1_': [34000, 74000],
+                          'HF2_': [42000, 96000]},
+                'Carp Pond' : {'': [0, 96000],
+                          'LF1_': [13000, 50000],
+                          'HF1_': [34000, 74000],
+                          'HF1_': [42000, 96000]},
+
+                'Foliage' : {'': [0, 96000],
+                          'LF1_': [13000, 50000],
+                          'HF1_': [34000, 74000],
+                          'HF2_': [42000, 96000]},
+
+                'Telephone Field' : {'': [0, 96000],
+                          'LF1_': [13000, 50000],
+                          'HF1_': [30000, 78000],
+                          'HF2_': [41000, 102000]},
+
+                'Central Pond' : {'': [0, 96000],
+                          'LF1_': [13000, 50000],
+                          'HF1_': [34000, 74000],
+                          'HF2_': [42000, 96000]}
+                }
 
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
@@ -322,17 +347,58 @@ def construct_activity_arr(cfg, data_params):
     dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     activity_dets_arr = pd.DataFrame()
+    groups_in_site = FREQ_GROUPS[cfg['site']]
 
-    for group in FREQ_GROUPS.keys():
-        freq_group_df = dets.loc[(dets['low_freq']>=FREQ_GROUPS[group][0])&(dets['high_freq']<=FREQ_GROUPS[group][1])].copy()
-        dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
-        activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
+    group = ''
+    all_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
+    freq_group_df = dets.loc[all_condition].copy()
+    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
+    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
 
-        if (cfg['cycle_length'] - cfg['duration']) > 5:
-            activity = activity *(cfg['cycle_length'] / cfg['duration'])
-        activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
-        activity_arr = activity_arr.set_index("date_and_time_UTC")
-        activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
+    if (cfg['cycle_length'] - cfg['duration']) > 5:
+        activity = activity *(cfg['cycle_length'] / cfg['duration'])
+    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
+    activity_arr = activity_arr.set_index("date_and_time_UTC")
+    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
+
+
+    group = 'HF2_'
+    hf2_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
+    freq_group_df = dets.loc[hf2_condition].copy()
+    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
+    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
+
+    if (cfg['cycle_length'] - cfg['duration']) > 5:
+        activity = activity *(cfg['cycle_length'] / cfg['duration'])
+    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
+    activity_arr = activity_arr.set_index("date_and_time_UTC")
+    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
+
+
+    group = 'HF1_'
+    hf1_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
+    freq_group_df = dets.loc[hf1_condition&(~hf2_condition)].copy()
+    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
+    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
+
+    if (cfg['cycle_length'] - cfg['duration']) > 5:
+        activity = activity *(cfg['cycle_length'] / cfg['duration'])
+    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
+    activity_arr = activity_arr.set_index("date_and_time_UTC")
+    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
+
+
+    group = 'LF1_'
+    lf1_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
+    freq_group_df = dets.loc[lf1_condition&(~hf1_condition)&(~hf2_condition)].copy()
+    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
+    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
+
+    if (cfg['cycle_length'] - cfg['duration']) > 5:
+        activity = activity *(cfg['cycle_length'] / cfg['duration'])
+    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
+    activity_arr = activity_arr.set_index("date_and_time_UTC")
+    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
 
     activity_dets_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
 
@@ -439,7 +505,6 @@ def construct_cumulative_activity(data_params, cfg, group):
 
     new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-202[3|4]*/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
-    new_df.pop(new_df.columns[0])
 
     resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
