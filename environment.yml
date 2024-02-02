@@ -4,5 +4,6 @@ channels:
 dependencies:
   - python=3.9
   - ipykernel
+  - exiftool
   - dask
 prefix: /Users/adityakrishna/miniforge3/envs/bat_msds
