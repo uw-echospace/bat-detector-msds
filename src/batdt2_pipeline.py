@@ -347,7 +347,7 @@ def construct_activity_arr(cfg, data_params):
     dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     activity_dets_arr = pd.DataFrame()
-    groups_in_site = FREQ_GROUPS[cfg['site']]
+    groups_in_site = FREQ_GROUPS[data_params["site"]]
 
     group = ''
     all_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
