@@ -13,6 +13,7 @@ from pathlib import Path
 from torch import multiprocessing
 
 import exiftool
+import suncalc
 
 # set python path to correctly use batdetect2 submodule
 import sys
@@ -23,6 +24,8 @@ from cfg import get_config
 from pipeline import pipeline
 from utils.utils import gen_empty_df, convert_df_ravenpro
 
+SEATTLE_LATITUDE = 47.655181
+SEATTLE_LONGITUDE = -122.293123
 
 
 FREQ_GROUPS = {
@@ -557,15 +560,32 @@ def plot_cumulative_activity(activity_df, data_params, group):
     plot_times = [''] * len(activity_times)
     plot_times[::3] = activity_times[::3]
 
+    activity_dates = pd.to_datetime(activity_df.columns.values)
+    activity_lat = [SEATTLE_LATITUDE]*len(activity_dates)
+    activity_lon = [SEATTLE_LONGITUDE]*len(activity_dates)
+    sunrise_time = pd.DatetimeIndex(suncalc.get_times(activity_dates, activity_lon, activity_lat)['sunrise_end'])
+    sunset_time = pd.DatetimeIndex(suncalc.get_times(activity_dates, activity_lon, activity_lat)['sunset_start'])
+    sunrise_seconds_from_midnight = sunrise_time.hour * 3600 + sunrise_time.minute*60 + sunrise_time.second
+    sunset_seconds_from_midnight = sunset_time.hour * 3600 + sunset_time.minute*60 + sunset_time.second
+
+    recent_sunrise = sunrise_time.tz_convert(tz="US/Pacific").strftime("%H:%M")[-1]
+    recent_sunset = sunset_time.tz_convert(tz="US/Pacific").strftime("%H:%M")[-1]
+
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
     plt.title(f"{plot_title}Activity (# of calls) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
+    plt.plot(np.arange(0, len(plot_dates)), ((len(plot_times)*sunset_seconds_from_midnight / (24*3600)) - 0.5) % len(plot_times), 
+            color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunset (Recent: {recent_sunset} PST)')
+    plt.axhline(y=16-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
+    plt.plot(np.arange(0, len(plot_dates)), ((len(plot_times)*sunrise_seconds_from_midnight / (24*3600)) - 0.5) % len(plot_times) , 
+            color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunrise (Recent: {recent_sunrise} PST)')
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
     plt.ylabel(f'{ylabel} Time (HH:MM)')
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
+    plt.legend(loc=3, fontsize=(3)*len(plot_dates)**0.5)
     plt.grid(which='both')
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
