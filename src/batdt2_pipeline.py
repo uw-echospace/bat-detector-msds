@@ -574,10 +574,10 @@ def plot_cumulative_activity(activity_df, data_params, group):
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
     plt.title(f"{plot_title}Activity (# of calls) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
-    plt.plot(np.arange(0, len(plot_dates)), ((len(plot_times)*sunset_seconds_from_midnight / (24*3600)) - 0.5) % len(plot_times), 
+    plt.plot(np.arange(0, len(plot_dates)), ((sunset_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunset (Recent: {recent_sunset} PST)')
     plt.axhline(y=16-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
-    plt.plot(np.arange(0, len(plot_dates)), ((len(plot_times)*sunrise_seconds_from_midnight / (24*3600)) - 0.5) % len(plot_times) , 
+    plt.plot(np.arange(0, len(plot_dates)), ((sunrise_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunrise (Recent: {recent_sunrise} PST)')
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
@@ -585,7 +585,7 @@ def plot_cumulative_activity(activity_df, data_params, group):
     plt.ylabel(f'{ylabel} Time (HH:MM)')
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
-    plt.legend(loc=3, fontsize=(3)*len(plot_dates)**0.5)
+    plt.legend(loc=3, fontsize=(3*len(plot_dates)**0.5))
     plt.grid(which='both')
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
