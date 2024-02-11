@@ -560,7 +560,7 @@ def plot_cumulative_activity(activity_df, data_params, group):
     plot_times = [''] * len(activity_times)
     plot_times[::3] = activity_times[::3]
 
-    activity_dates = pd.to_datetime(activity_df.columns.values)
+    activity_dates = pd.to_datetime(activity_df.columns.values, format='%m/%d/%y')
     activity_lat = [SEATTLE_LATITUDE]*len(activity_dates)
     activity_lon = [SEATTLE_LONGITUDE]*len(activity_dates)
     sunrise_time = pd.DatetimeIndex(suncalc.get_times(activity_dates, activity_lon, activity_lat)['sunrise_end'])
