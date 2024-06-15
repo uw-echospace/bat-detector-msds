@@ -372,7 +372,7 @@ def get_site_name(DATE, SD_CARD_NUM):
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
     if str(datetime_of_recovery.year) == "2024":
-        if (datetime_of_recovery.month) < 5:
+        if (datetime_of_recovery.month) <= 5:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
