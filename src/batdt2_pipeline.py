@@ -757,7 +757,7 @@ def get_params_relevant_to_data(cfg):
     data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
-    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_*_collected_audio_records.csv', dtype=str).compute()
+    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_04_collected_audio_records.csv', dtype=str).compute()
     if 'Unnamed: 0' in cur_data_records.columns:
         cur_data_records.drop(columns='Unnamed: 0', inplace=True)
     cur_data_records["datetime_UTC"] = pd.DatetimeIndex(cur_data_records["datetime_UTC"])
