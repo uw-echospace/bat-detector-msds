@@ -178,6 +178,41 @@ def generate_files_df(cfg):
 
     return files_df
 
+def get_related_field_records(recover_date):
+    """Gets the related field records that stores information of the provided recover-DATE folder
+
+    Parameters
+    ----------
+    recover_date : `str`
+        The date in the recover-DATE folder that corresponds to the date that the Audiomoth was recovered
+
+    Returns
+    ----------
+    df_fr : `pd.Dataframe`
+        The pandas Dataframe object that contains the field records information
+    """
+
+    datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
+    if str(datetime_of_recovery.year) == "2021":
+        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
+    if str(datetime_of_recovery.year) == "2022":
+        if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022a.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
+    if str(datetime_of_recovery.year) == "2023":
+        if (datetime_of_recovery.month) >= 5:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
+    if str(datetime_of_recovery.year) == "2024":
+        if (datetime_of_recovery.month) <= 5:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2024.csv"))
+
+    return df_fr
+
 def get_audiomoth_sd_card(DATE, SD_CARD_NUM):
     """Gets the location where an AudioMoth was deployed at a certain date using the deployment field records.
     Will be used to plot activity with the right location label so user can tell location of activity by plots.
@@ -199,23 +234,9 @@ def get_audiomoth_sd_card(DATE, SD_CARD_NUM):
 
 
     recover_date = DATE.split('_')[0]
-
     datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
-    if str(datetime_of_recovery.year) == "2021":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
-    if str(datetime_of_recovery.year) == "2022":
-        if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022a.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2023":
-        if (datetime_of_recovery.month) >= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2024":
-        if (datetime_of_recovery.month) <= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+
+    df_fr = get_related_field_records(recover_date)
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
@@ -250,23 +271,9 @@ def get_audiomoth_notes(DATE, SD_CARD_NUM):
 
 
     recover_date = DATE.split('_')[0]
-
     datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
-    if str(datetime_of_recovery.year) == "2021":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
-    if str(datetime_of_recovery.year) == "2022":
-        if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022a.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2023":
-        if (datetime_of_recovery.month) >= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2024":
-        if (datetime_of_recovery.month) <= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+
+    df_fr = get_related_field_records(recover_date)
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
@@ -303,23 +310,9 @@ def get_audiomoth_name(DATE, SD_CARD_NUM):
 
 
     recover_date = DATE.split('_')[0]
-
     datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
-    if str(datetime_of_recovery.year) == "2021":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
-    if str(datetime_of_recovery.year) == "2022":
-        if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022a.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2023":
-        if (datetime_of_recovery.month) >= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2024":
-        if (datetime_of_recovery.month) <= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+
+    df_fr = get_related_field_records(recover_date)
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
@@ -357,23 +350,9 @@ def get_site_name(DATE, SD_CARD_NUM):
 
 
     recover_date = DATE.split('_')[0]
-
     datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
-    if str(datetime_of_recovery.year) == "2021":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
-    if str(datetime_of_recovery.year) == "2022":
-        if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022a.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2023":
-        if (datetime_of_recovery.month) >= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
-        else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
-    if str(datetime_of_recovery.year) == "2024":
-        if (datetime_of_recovery.month) <= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+
+    df_fr = get_related_field_records(recover_date)
 
     cond1 = df_fr["Upload folder name"]==f"recover-{DATE}"
     if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
