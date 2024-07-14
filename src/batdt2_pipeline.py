@@ -506,7 +506,7 @@ def construct_cumulative_activity(data_params, cfg, group):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-202[3|4]*/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2024*/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
 
     resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
