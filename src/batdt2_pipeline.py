@@ -482,7 +482,7 @@ def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
     plt.tight_layout()
     plt.show()
 
-def construct_cumulative_activity(data_params, cfg, group):
+def construct_cumulative_activity(data_params, cfg, group, save=True):
     """
     Constructs a cumulative appended DataFrame grid using dask.dataframe.
     This DataFrame gathers all detected activity contained in output_dir for a given site.
@@ -506,7 +506,7 @@ def construct_cumulative_activity(data_params, cfg, group):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2024*/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
 
     resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
@@ -519,11 +519,12 @@ def construct_cumulative_activity(data_params, cfg, group):
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}num_of_detections')
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
-    activity_df.to_csv(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
+    if save:
+        activity_df.to_csv(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, data_params, group):
+def plot_cumulative_activity(activity_df, data_params, group, save=True):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
@@ -576,7 +577,7 @@ def plot_cumulative_activity(activity_df, data_params, group):
     plt.title(f"{plot_title}Activity (# of calls) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
     plt.plot(np.arange(0, len(plot_dates)), ((sunset_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunset (Recent: {recent_sunset} PST)')
-    plt.axhline(y=16-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
+    plt.axhline(y=14-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
     plt.plot(np.arange(0, len(plot_dates)), ((sunrise_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunrise (Recent: {recent_sunrise} PST)')
     plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
@@ -585,12 +586,13 @@ def plot_cumulative_activity(activity_df, data_params, group):
     plt.ylabel(f'{ylabel} Time (HH:MM)')
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
-    plt.legend(loc=3, fontsize=(3*len(plot_dates)**0.5))
+    plt.legend(loc=3, fontsize=(2*len(plot_dates)**0.5))
     plt.grid(which='both')
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
-    plt.savefig(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
-                bbox_inches='tight')
+    if save:
+        plt.savefig(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
+                    bbox_inches='tight')
     plt.show()
 
 def delete_segments(necessary_paths):
@@ -745,6 +747,7 @@ def run_pipeline_for_session_with_df(cfg):
             activity_df = shape_activity_array_into_grid(cfg, data_params, group)
             plot_activity_grid(activity_df, data_params, group, save=True)
             if data_params["site"] != "(Site not found in Field Records)":
+                data_params['selection_of_dates'] = 'recover-2024*'
                 cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
                 data_params['show_PST'] = False
                 plot_cumulative_activity(cumulative_activity_df, data_params, group)
