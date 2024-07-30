@@ -71,7 +71,7 @@ def get_file_comment(filepath):
 
 def generate_files_df(cfg):
 
-    raw_files = Path(cfg['input_dir']).glob(pattern='**/*.WAV')
+    raw_files = Path(cfg['input_dir']).glob(pattern='recover-*/**/*.WAV')
     clean_files = []
     for filepath in raw_files:
         if not('trash' in str(filepath).lower()):
