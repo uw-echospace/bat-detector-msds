@@ -14,6 +14,8 @@ from torch import multiprocessing
 
 import exiftool
 import suncalc
+from sklearn.cluster import KMeans
+import scipy
 
 # set python path to correctly use batdetect2 submodule
 import sys
@@ -54,6 +56,11 @@ FREQ_GROUPS = {
                           'HF2_': [42000, 96000]}
                 }
 
+
+LABEL_FOR_GROUPS = {
+                    0: 'LF', 
+                    1: 'HF'
+                    }
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
@@ -175,6 +182,124 @@ def initialize_mappings(necessary_paths, cfg):
 
     return l_for_mapping
 
+def get_section_of_call_in_file(detection, audio_file):
+    fs = audio_file.samplerate
+
+    call_dur = (detection['end_time'] - detection['start_time'])
+    pad = min(min(detection['start_time'] - call_dur, 1795 - detection['end_time']), 0.006) / 3
+    start = detection['start_time'] - call_dur - (3*pad)
+    duration = (2 * call_dur) + (4*pad)
+
+    audio_file.seek(int(fs*start))
+    audio_seg = audio_file.read(int(fs*duration))
+
+    length_of_section = call_dur + (2*pad)
+
+    return audio_seg, length_of_section
+
+def get_snr_from_band_limited_signal(snr_call_signal, snr_noise_signal): 
+    signal_power_rms = np.sqrt(np.square(snr_call_signal).mean())
+    noise_power_rms = np.sqrt(np.square(snr_noise_signal).mean())
+    snr = abs(20 * np.log10(signal_power_rms / noise_power_rms))
+    return snr
+
+
+def bandpass_audio_signal(audio_seg, fs, low_freq_cutoff, high_freq_cutoff):
+    nyq = fs // 2
+    low_cutoff = (low_freq_cutoff) / nyq
+    high_cutoff =  (high_freq_cutoff) / nyq
+    b, a = scipy.signal.butter(4, [low_cutoff, high_cutoff], btype='band', analog=False)
+    band_limited_audio_seg = scipy.signal.filtfilt(b, a, audio_seg)
+
+    return band_limited_audio_seg
+
+def compute_welch_psd_of_call(call, fs, audio_info):
+    freqs, welch = scipy.signal.welch(call, fs=fs, detrend=False, scaling='spectrum')
+    cropped_welch = welch[(freqs<=audio_info['max_freq_visible'])]
+    audio_spectrum_mag = np.abs(cropped_welch)
+    audio_spectrum_db =  10*np.log10(audio_spectrum_mag)
+    normalized_audio_spectrum_db = audio_spectrum_db - audio_spectrum_db.max()
+
+    thresh = -100
+    peak_db = np.zeros(len(normalized_audio_spectrum_db))+thresh
+    peak_db[normalized_audio_spectrum_db>=thresh] = normalized_audio_spectrum_db[normalized_audio_spectrum_db>=thresh]
+
+    original_freq_vector = np.arange(0, len(peak_db), 1).astype('int')
+    common_freq_vector = np.linspace(0, len(peak_db)-1, audio_info['num_points']).astype('int')
+    interp_kind = 'linear'
+    interpolated_points_from_welch = scipy.interpolate.interp1d(original_freq_vector, peak_db, kind=interp_kind)(common_freq_vector)
+
+    return interpolated_points_from_welch
+
+def gather_features_of_interest(dets, kmean_welch, audio_file):
+    fs = audio_file.samplerate
+    features_of_interest = dict()
+    features_of_interest['call_signals'] = []
+    features_of_interest['welch_signals'] = []
+    features_of_interest['snrs'] = []
+    features_of_interest['peak_freqs'] = []
+    features_of_interest['classes'] = []
+    nyquist = fs//2
+    for index, row in dets.iterrows():
+        audio_seg, length_of_section = get_section_of_call_in_file(row, audio_file)
+        
+        freq_pad = 2000
+        low_freq_cutoff = row['low_freq']-freq_pad
+        high_freq_cutoff = min(nyquist-1, row['high_freq']+freq_pad)
+        band_limited_audio_seg = bandpass_audio_signal(audio_seg, fs, low_freq_cutoff, high_freq_cutoff)
+
+        signal = band_limited_audio_seg.copy()
+        signal[:int(fs*(length_of_section))] = 0
+        noise = band_limited_audio_seg - signal
+        snr_call_signal = signal[-int(fs*length_of_section):]
+        snr_noise_signal = noise[:int(fs*length_of_section)]
+        features_of_interest['call_signals'].append(snr_call_signal)
+
+        snr = get_snr_from_band_limited_signal(snr_call_signal, snr_noise_signal)
+        features_of_interest['snrs'].append(snr)
+
+        welch_info = dict()
+        welch_info['num_points'] = 100
+        max_visible_frequency = 96000
+        welch_info['max_freq_visible'] = max_visible_frequency
+        welch_signal = compute_welch_psd_of_call(snr_call_signal, fs, welch_info)
+        features_of_interest['welch_signals'].append(welch_signal)
+
+        peaks = np.where(welch_signal==max(welch_signal))[0][0]
+        features_of_interest['peak_freqs'].append((max_visible_frequency/len(welch_signal))*peaks)
+        
+        welch_signal = (welch_signal).reshape(1, len(welch_signal))
+        features_of_interest['classes'].append(kmean_welch.predict(welch_signal)[0])
+
+    features_of_interest['call_signals'] = np.array(features_of_interest['call_signals'], dtype='object')
+
+    return features_of_interest
+
+def open_and_get_call_info(audio_file, dets):
+    welch_key = 'all_locations'
+    output_dir = Path(f'{Path(__file__).parent}/../../duty-cycle-investigation/data/generated_welch/{welch_key}')
+    output_file_type = 'top1_inbouts_welch_signals'
+    welch_data = pd.read_csv(output_dir / f'2022_{welch_key}_{output_file_type}.csv', index_col=0, low_memory=False)
+    k = 2
+    kmean_welch = KMeans(n_clusters=k, n_init=10, random_state=1).fit(welch_data.values)
+
+    features_of_interest = gather_features_of_interest(dets, kmean_welch, audio_file)
+
+    dets.reset_index(drop=True, inplace=True)
+
+    dets['sampling_rate'] = len(dets) * [audio_file.samplerate]
+    dets.insert(0, 'SNR', features_of_interest['snrs'])
+    dets.insert(0, 'peak_frequency', features_of_interest['peak_freqs'])
+    dets.insert(0, 'KMEANS_CLASSES', pd.Series(features_of_interest['classes']).map(LABEL_FOR_GROUPS))
+
+    return features_of_interest['call_signals'], dets
+
+def classify_calls_from_file(bd2_predictions, data_params):
+    file_path = Path(data_params['audio_file'])
+    audio_file = sf.SoundFile(file_path)
+    call_signals, dets = open_and_get_call_info(audio_file, bd2_predictions.copy())
+    return dets
+
 def run_models(file_mappings):
     """
     Runs the batdetect2 model to detect bat search-phase calls in the provided audio segments and saves detections into a .csv.
@@ -197,14 +322,26 @@ def run_models(file_mappings):
     for i in tqdm(range(len(file_mappings))):
         cur_seg = file_mappings[i]
         bd_annotations_df = cur_seg['model']._run_batdetect(cur_seg['audio_seg']['audio_file'])
-        bd_preds = pipeline._correct_annotation_offsets(
-                bd_annotations_df,
+        bd_preds_classed = classify_calls_from_file(bd_annotations_df, cur_seg['audio_seg'])
+        bd_offsetted = pipeline._correct_annotation_offsets(
+                bd_preds_classed,
                 cur_seg['original_file_name'],
                 cur_seg['audio_seg']['offset']
             )
-        bd_dets = pd.concat([bd_dets, bd_preds])
+        bd_dets = pd.concat([bd_dets, bd_offsetted])
 
-    return bd_dets
+    median_peak_HF_freq = bd_dets[bd_dets['KMEANS_CLASSES']=='HF']['peak_frequency'].median()
+    median_peak_LF_freq = bd_dets[bd_dets['KMEANS_CLASSES']=='LF']['peak_frequency'].median()
+    print(f'Median LF frequency in File: {median_peak_LF_freq}')
+    print(f'Median HF frequency in File: {median_peak_HF_freq}')
+    lf_inds = (bd_dets['peak_frequency']<median_peak_LF_freq+7000)&(bd_dets['peak_frequency']>median_peak_LF_freq-7000)
+    hf_inds = (bd_dets['peak_frequency']>median_peak_HF_freq-7000)
+
+    lf_dets = bd_dets[lf_inds&(bd_dets['KMEANS_CLASSES']=='LF')]
+    hf_dets = bd_dets[hf_inds&(bd_dets['KMEANS_CLASSES']=='HF')]
+
+    all_dets = pd.concat([hf_dets, lf_dets]).sort_index()
+    return all_dets
 
 def apply_models(file_path_mappings, cfg):
     """
@@ -350,58 +487,19 @@ def construct_activity_arr(cfg, data_params):
     dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     activity_dets_arr = pd.DataFrame()
-    groups_in_site = FREQ_GROUPS[data_params["site"]]
+    for group in ['', 'LF', 'HF']:
+        if group != '':
+            freq_group_df = dets.loc[dets['KMEANS_CLASSES']==group].copy()
+        else:
+            freq_group_df = dets.copy()
+        dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
+        activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
 
-    group = ''
-    all_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
-    freq_group_df = dets.loc[all_condition].copy()
-    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
-    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
-
-    if (cfg['cycle_length'] - cfg['duration']) > 5:
-        activity = activity *(cfg['cycle_length'] / cfg['duration'])
-    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
-    activity_arr = activity_arr.set_index("date_and_time_UTC")
-    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
-
-
-    group = 'HF2_'
-    hf2_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
-    freq_group_df = dets.loc[hf2_condition].copy()
-    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
-    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
-
-    if (cfg['cycle_length'] - cfg['duration']) > 5:
-        activity = activity *(cfg['cycle_length'] / cfg['duration'])
-    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
-    activity_arr = activity_arr.set_index("date_and_time_UTC")
-    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
-
-
-    group = 'HF1_'
-    hf1_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
-    freq_group_df = dets.loc[hf1_condition&(~hf2_condition)].copy()
-    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
-    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
-
-    if (cfg['cycle_length'] - cfg['duration']) > 5:
-        activity = activity *(cfg['cycle_length'] / cfg['duration'])
-    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
-    activity_arr = activity_arr.set_index("date_and_time_UTC")
-    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
-
-
-    group = 'LF1_'
-    lf1_condition = (dets['low_freq']>=groups_in_site[group][0])&(dets['high_freq']<=groups_in_site[group][1])
-    freq_group_df = dets.loc[lf1_condition&(~hf1_condition)&(~hf2_condition)].copy()
-    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
-    activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
-
-    if (cfg['cycle_length'] - cfg['duration']) > 5:
-        activity = activity *(cfg['cycle_length'] / cfg['duration'])
-    activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
-    activity_arr = activity_arr.set_index("date_and_time_UTC")
-    activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
+        if (cfg['cycle_length'] - cfg['duration']) > 5:
+            activity = activity *(cfg['cycle_length'] / cfg['duration'])
+        activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
+        activity_arr = activity_arr.set_index("date_and_time_UTC")
+        activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
 
     activity_dets_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
 
