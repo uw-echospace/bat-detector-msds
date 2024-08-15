@@ -841,7 +841,7 @@ def run_pipeline_for_session_with_df(cfg):
         data_params['resample_in_min'] = 30
         data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
         construct_activity_arr(cfg, data_params)
-        for group in FREQ_GROUPS[data_params['site']].keys():
+        for group in ['', 'LF', 'HF']:
             activity_df = shape_activity_array_into_grid(cfg, data_params, group)
             plot_activity_grid(activity_df, data_params, group, save=True)
             if data_params["site"] != "(Site not found in Field Records)":
