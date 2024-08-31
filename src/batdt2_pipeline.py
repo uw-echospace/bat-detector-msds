@@ -612,7 +612,16 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
-    data = list(zip(raw_dates, raw_times, resampled_df[f'{group}num_of_detections']))
+    mask = resampled_df.columns.str.contains(f'{group}.*')
+    if group!='':
+        mask = resampled_df.columns.str.contains(f'{group}.*')
+        selected_group = resampled_df.loc[:,mask]
+        if selected_group.shape[1]>2:
+            middle_col = selected_group.iloc[:,1]
+            middle_col.loc[middle_col<=1.0] = 0
+        data = list(zip(raw_dates, raw_times, selected_group.sum(axis=1)))
+    else:
+        data = list(zip(raw_dates, raw_times, resampled_df[f'{group}num_of_detections']))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", f'{group}num_of_detections'])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}num_of_detections')
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
@@ -642,7 +651,10 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
 
     plot_title = group
     if plot_title!='':
-        plot_title = group.upper().replace('_', ' ')
+        if len(plot_title)==2:
+            plot_title = group + ' '
+        else:
+            plot_title = group.upper().replace('_', ' ')
     masked_array_for_nodets = np.ma.masked_where(activity_df.values==0, activity_df.values)
 
     activity_times = pd.DatetimeIndex(activity_df.index).tz_localize('UTC')
