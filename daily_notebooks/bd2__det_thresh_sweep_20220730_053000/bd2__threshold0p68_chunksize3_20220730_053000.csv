@@ -1,0 +1,4 @@
+,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event
+0,254.1995,254.2083,40937,54390,Pipistrellus nathusii,0.663,0.699,-1,Echolocation
+1,262.6515,262.6595,39218,55231,Pipistrellus nathusii,0.61,0.684,-1,Echolocation
+2,869.0595,869.0692,40078,48745,Pipistrellus nathusii,0.617,0.685,-1,Echolocation
