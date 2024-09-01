@@ -182,13 +182,17 @@ def initialize_mappings(necessary_paths, cfg):
 
     return l_for_mapping
 
-def get_section_of_call_in_file(detection, audio_data, fs):
+def get_section_of_call_in_file(detection, audio_file):
+    fs = audio_file.samplerate
+
     call_dur = (detection['end_time'] - detection['start_time'])
     pad = min(min(detection['start_time'] - call_dur, 1795 - detection['end_time']), 0.006) / 3
     start = detection['start_time'] - call_dur - (3*pad)
     duration = (2 * call_dur) + (4*pad)
- 
-    audio_seg = audio_data[int(fs*start):int(fs*duration)]
+
+    audio_file.seek(int(fs*start))
+    audio_seg = audio_file.read(int(fs*duration))
+
     length_of_section = call_dur + (2*pad)
 
     return audio_seg, length_of_section
@@ -227,7 +231,8 @@ def compute_welch_psd_of_call(call, fs, audio_info):
 
     return interpolated_points_from_welch
 
-def gather_features_of_interest(dets, kmean_welch, audio_data, fs):
+def gather_features_of_interest(dets, kmean_welch, audio_file):
+    fs = audio_file.samplerate
     features_of_interest = dict()
     features_of_interest['call_signals'] = []
     features_of_interest['welch_signals'] = []
@@ -236,7 +241,7 @@ def gather_features_of_interest(dets, kmean_welch, audio_data, fs):
     features_of_interest['classes'] = []
     nyquist = fs//2
     for index, row in dets.iterrows():
-        audio_seg, length_of_section = get_section_of_call_in_file(row, audio_data, fs)
+        audio_seg, length_of_section = get_section_of_call_in_file(row, audio_file)
         
         freq_pad = 2000
         low_freq_cutoff = row['low_freq']-freq_pad
@@ -270,7 +275,7 @@ def gather_features_of_interest(dets, kmean_welch, audio_data, fs):
 
     return features_of_interest
 
-def open_and_get_call_info(audio_data, fs, dets):
+def open_and_get_call_info(audio_file, dets):
     welch_key = 'all_locations'
     output_dir = Path(f'{Path(__file__).parent}/../../duty-cycle-investigation/data/generated_welch/{welch_key}')
     output_file_type = 'top1_inbouts_welch_signals'
@@ -278,23 +283,21 @@ def open_and_get_call_info(audio_data, fs, dets):
     k = 2
     kmean_welch = KMeans(n_clusters=k, n_init=10, random_state=1).fit(welch_data.values)
 
-    features_of_interest = gather_features_of_interest(dets, kmean_welch, audio_data, fs)
+    features_of_interest = gather_features_of_interest(dets, kmean_welch, audio_file)
 
     dets.reset_index(drop=True, inplace=True)
 
-    dets['sampling_rate'] = len(dets) * [fs]
+    dets['sampling_rate'] = len(dets) * [audio_file.samplerate]
     dets.insert(0, 'SNR', features_of_interest['snrs'])
     dets.insert(0, 'peak_frequency', features_of_interest['peak_freqs'])
     dets.insert(0, 'KMEANS_CLASSES', pd.Series(features_of_interest['classes']).map(LABEL_FOR_GROUPS))
 
     return features_of_interest['call_signals'], dets
 
-def classify_calls_from_file(bd2_predictions, filepath):
-    file_path = Path(filepath)
+def classify_calls_from_file(bd2_predictions, data_params):
+    file_path = Path(data_params['audio_file'])
     audio_file = sf.SoundFile(file_path)
-    fs = audio_file.samplerate
-    audio_data = audio_file.read()
-    call_signals, dets = open_and_get_call_info(audio_data, fs, bd2_predictions.copy())
+    call_signals, dets = open_and_get_call_info(audio_file, bd2_predictions.copy())
     return dets
 
 def run_models(file_mappings):
@@ -319,8 +322,9 @@ def run_models(file_mappings):
     for i in tqdm(range(len(file_mappings))):
         cur_seg = file_mappings[i]
         bd_annotations_df = cur_seg['model']._run_batdetect(cur_seg['audio_seg']['audio_file'])
+        bd_preds_classed = classify_calls_from_file(bd_annotations_df, cur_seg['audio_seg'])
         bd_offsetted = pipeline._correct_annotation_offsets(
-                bd_annotations_df,
+                bd_preds_classed,
                 cur_seg['original_file_name'],
                 cur_seg['audio_seg']['offset']
             )
