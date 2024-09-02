@@ -375,7 +375,18 @@ def apply_models(file_path_mappings, cfg):
     bd_preds = gen_empty_df() 
     bd_preds = pd.concat(bd_dets, ignore_index=True)
 
-    return bd_preds
+    median_peak_HF_freq = bd_preds[bd_preds['KMEANS_CLASSES']=='HF']['peak_frequency'].median()
+    median_peak_LF_freq = bd_preds[bd_preds['KMEANS_CLASSES']=='LF']['peak_frequency'].median()
+    print(f'Median LF frequency in File: {median_peak_LF_freq}')
+    print(f'Median HF frequency in File: {median_peak_HF_freq}')
+    lf_inds = (bd_preds['peak_frequency']<median_peak_LF_freq+7000)&(bd_preds['peak_frequency']>median_peak_LF_freq-7000)
+    hf_inds = (bd_preds['peak_frequency']>median_peak_HF_freq-7000)
+
+    lf_dets = bd_preds[lf_inds&(bd_preds['KMEANS_CLASSES']=='LF')]
+    hf_dets = bd_preds[hf_inds&(bd_preds['KMEANS_CLASSES']=='HF')]
+
+    all_dets = pd.concat([hf_dets, lf_dets]).sort_index()
+    return all_dets
 
 def apply_model(file_mapping):
     """
@@ -396,8 +407,9 @@ def apply_model(file_mapping):
     """
 
     bd_dets = file_mapping['model']._run_batdetect(file_mapping['audio_seg']['audio_file'])
+    bd_preds_classed = classify_calls_from_file(bd_dets, file_mapping['audio_seg'])
     corrected_bd_dets = pipeline._correct_annotation_offsets(
-                                                            bd_dets,
+                                                            bd_preds_classed,
                                                             file_mapping['original_file_name'],
                                                             file_mapping['audio_seg']['offset']
                                                             )
