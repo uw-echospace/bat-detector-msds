@@ -186,7 +186,7 @@ def get_section_of_call_in_file(detection, audio_file):
     fs = audio_file.samplerate
 
     call_dur = (detection['end_time'] - detection['start_time'])
-    pad = min(min(detection['start_time'] - call_dur, 1795 - detection['end_time']), 0.006) / 3
+    pad = min(min(detection['start_time'] - call_dur, 1795 - detection['end_time']), 0.003) / 3
     start = detection['start_time'] - call_dur - (3*pad)
     duration = (2 * call_dur) + (4*pad)
 
@@ -243,14 +243,14 @@ def gather_features_of_interest(dets, kmean_welch, audio_file):
     for index, row in dets.iterrows():
         audio_seg, length_of_section = get_section_of_call_in_file(row, audio_file)
         
-        freq_pad = 2000
-        low_freq_cutoff = row['low_freq']-freq_pad
-        high_freq_cutoff = min(nyquist-1, row['high_freq']+freq_pad)
-        band_limited_audio_seg = bandpass_audio_signal(audio_seg, fs, low_freq_cutoff, high_freq_cutoff)
+        # freq_pad = 2000
+        # low_freq_cutoff = row['low_freq']-freq_pad
+        # high_freq_cutoff = min(nyquist-1, row['high_freq']+freq_pad)
+        # band_limited_audio_seg = bandpass_audio_signal(audio_seg, fs, low_freq_cutoff, high_freq_cutoff)
 
-        signal = band_limited_audio_seg.copy()
+        signal = audio_seg.copy()
         signal[:int(fs*(length_of_section))] = 0
-        noise = band_limited_audio_seg - signal
+        noise = audio_seg - signal
         snr_call_signal = signal[-int(fs*length_of_section):]
         snr_noise_signal = noise[:int(fs*length_of_section)]
         features_of_interest['call_signals'].append(snr_call_signal)
