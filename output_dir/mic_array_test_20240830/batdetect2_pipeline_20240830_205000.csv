@@ -1,0 +1,12 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+HF,53760.0,8.939073433634846,30.1425,30.1461,49531,69946,Myotis alcathoe,0.199,0.506,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+LF,26880.0,2.333979580956192,7.2335,7.251,23750,26962,Nyctalus leisleri,0.476,0.565,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,46080.0,21.636115440463776,12.2235,12.2299,44375,60735,Pipistrellus pipistrellus,0.457,0.507,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,52800.0,3.804607559041981,31.2795,31.2836,50390,61324,Pipistrellus pipistrellus,0.521,0.577,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,48960.0,6.499557170723186,28.3865,28.3903,45234,62637,Pipistrellus pipistrellus,0.439,0.542,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,50880.0,17.862478280185638,28.4745,28.4787,46093,68815,Pipistrellus pipistrellus,0.483,0.549,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,49920.0,13.29240087861824,28.6355,28.6392,48671,67112,Pipistrellus pipistrellus,0.533,0.596,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,49920.0,12.329550627190606,28.9115,28.9156,48671,70683,Pipistrellus pipistrellus,0.355,0.507,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,52800.0,7.6040761346477534,29.1935,29.1978,49531,64987,Pipistrellus pipistrellus,0.283,0.501,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,53760.0,11.46262701924031,29.3075,29.3114,49531,73683,Myotis alcathoe,0.295,0.531,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV
+HF,51840.0,17.89363464641037,29.3575,29.3618,47812,75010,Pipistrellus pipistrellus,0.252,0.537,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_205000.WAV

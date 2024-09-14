@@ -1,0 +1,13 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+LF,25920.0,9.75322813765559,28.5325,28.5491,24609,29703,Nyctalus leisleri,0.424,0.59,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24000.0,8.49567008300528,30.1735,30.1902,23750,27712,Nyctalus leisleri,0.555,0.65,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,25920.0,9.997842704936021,28.9065,28.923,24609,28892,Nyctalus leisleri,0.466,0.631,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24000.0,14.740766158791896,30.6775,30.6943,23750,27064,Nyctalus leisleri,0.723,0.765,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24960.0,10.42926806681242,29.2825,29.3002,23750,28101,Nyctalus leisleri,0.457,0.59,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,25920.0,19.849094618866854,30.9235,30.938,23750,31205,Nyctalus leisleri,0.33,0.619,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24000.0,9.505623265089273,29.6605,29.6773,23750,28164,Nyctalus leisleri,0.468,0.612,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24960.0,5.500410620307109,31.1755,31.1919,23750,28435,Nyctalus leisleri,0.549,0.634,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24960.0,8.329509474108326,31.5475,31.5619,23750,29207,Nyctalus leisleri,0.522,0.678,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24000.0,10.530132271528789,32.4315,32.4486,23750,28587,Nyctalus leisleri,0.409,0.603,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,24000.0,3.9649976470166948,33.6795,33.6958,23750,28609,Nyctalus leisleri,0.376,0.547,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV
+LF,23040.0,3.7562547831117614,34.8215,34.84,22890,26939,Nyctalus leisleri,0.507,0.574,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_223000.WAV

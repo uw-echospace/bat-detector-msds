@@ -1,0 +1,10 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+LF,24000.0,2.930138671283868,11.5135,11.5288,23750,28969,Nyctalus leisleri,0.378,0.543,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24000.0,3.179757466666408,34.6885,34.7068,23750,28405,Nyctalus leisleri,0.443,0.543,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24000.0,4.076559665001713,23.2345,23.2512,23750,27284,Nyctalus leisleri,0.486,0.55,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24000.0,2.6831090751788533,46.9225,46.936800000000005,23750,28203,Nyctalus leisleri,0.503,0.635,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24000.0,3.997204761668281,24.3455,24.3631,23750,28520,Nyctalus leisleri,0.388,0.529,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24960.0,2.6234521581011716,57.2945,57.3099,23750,29468,Nyctalus leisleri,0.294,0.546,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24960.0,6.04795459446891,57.9525,57.9675,24609,30100,Nyctalus leisleri,0.306,0.589,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24960.0,6.98384029430084,58.7685,58.784099999999995,23750,28929,Nyctalus leisleri,0.418,0.621,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
+LF,24960.0,3.7555243182272853,59.4465,59.4628,23750,28599,Nyctalus leisleri,0.338,0.549,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_220600.WAV
