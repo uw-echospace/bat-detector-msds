@@ -248,10 +248,6 @@ def gather_features_of_interest(dets, kmean_welch, audio_file):
         high_freq_cutoff = min(nyquist-1, row['high_freq']+freq_pad)
         band_limited_audio_seg = bandpass_audio_signal(audio_seg, fs, low_freq_cutoff, high_freq_cutoff)
 
-        # bp_signal = band_limited_audio_seg.copy()
-        # bp_signal[:int(fs*(length_of_section))] = 0
-        # snr_bp_call_signal = bp_signal[-int(fs*length_of_section):]
-
         signal = band_limited_audio_seg.copy()
         signal[:int(fs*(length_of_section))] = 0
         noise = band_limited_audio_seg - signal
