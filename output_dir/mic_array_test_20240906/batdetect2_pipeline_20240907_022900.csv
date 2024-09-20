@@ -1,0 +1,2 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+LF,26880.0,3.7550635605274256,10.9975,11.0054,28046.0,39229.0,Eptesicus serotinus,0.242,0.517,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_022900.WAV

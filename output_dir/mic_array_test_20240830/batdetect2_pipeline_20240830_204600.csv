@@ -1,0 +1,15 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+HF,54720.0,10.986372232779807,11.3545,11.3596,49531.0,69845.0,Pipistrellus pipistrellus,0.326,0.511,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,55680.0,13.120954831528008,11.4415,11.4471,50390.0,70692.0,Pipistrellus pipistrellus,0.313,0.506,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,55680.0,21.543296306720826,11.6265,11.6309,47812.0,71220.0,Pipistrellus pipistrellus,0.447,0.529,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,54720.0,23.39035880319404,11.7215,11.7275,46093.0,76862.0,Pipistrellus pipistrellus,0.325,0.53,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,48960.0,21.320231623375157,11.8125,11.818,46093.0,73517.0,Pipistrellus pipistrellus,0.486,0.591,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,56640.0,27.49896435530475,11.8975,11.9042,46953.0,75128.0,Pipistrellus pipistrellus,0.381,0.584,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,48960.0,19.79506929629382,11.9905,11.9958,47812.0,73641.0,Pipistrellus pipistrellus,0.512,0.594,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,56640.0,34.62815440089399,12.0795,12.0856,47812.0,76387.0,Pipistrellus pipistrellus,0.489,0.58,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,50880.0,29.03572881747714,12.1465,12.1531,47812.0,75548.0,Pipistrellus pipistrellus,0.607,0.706,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,48960.0,28.321207159569045,12.2555,12.2623,46953.0,74730.0,Pipistrellus pipistrellus,0.566,0.674,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,50880.0,23.094309634475625,12.3425,12.3491,47812.0,67892.0,Pipistrellus pipistrellus,0.379,0.553,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,50880.0,21.050320067896497,12.5255,12.5329,48671.0,66983.0,Pipistrellus pipistrellus,0.495,0.585,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,48960.0,12.202239022948085,12.7135,12.7233,47812.0,66202.0,Pipistrellus pipistrellus,0.417,0.517,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV
+HF,49920.0,11.931712591169223,12.9085,12.9174,46953.0,63006.0,Pipistrellus pipistrellus,0.462,0.521,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_204600.WAV

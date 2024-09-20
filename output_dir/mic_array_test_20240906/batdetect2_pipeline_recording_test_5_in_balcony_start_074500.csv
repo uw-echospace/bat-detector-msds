@@ -1,0 +1,2 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,sampling_rate,input_file
+HF,95040.0,5.786986781558295,156.1805,156.2178,93359.0,112193.0,Echolocation,Rhinolophus hipposideros,0.534,0.534,-1,200000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/mic_array/recording_test_5_in_balcony_start_074500.WAV
