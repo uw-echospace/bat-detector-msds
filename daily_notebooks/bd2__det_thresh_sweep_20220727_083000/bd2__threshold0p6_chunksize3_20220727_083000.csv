@@ -1,9 +1,0 @@
-,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event
-0,859.2105,859.2256,23750,28152,Nyctalus leisleri,0.542,0.636,-1,Echolocation
-1,1099.9604,1099.9744,23750,28938,Nyctalus leisleri,0.439,0.606,-1,Echolocation
-2,1361.0605,1361.0745,22890,28385,Nyctalus leisleri,0.409,0.605,-1,Echolocation
-3,1364.1685,1364.1825,22890,28198,Nyctalus leisleri,0.463,0.641,-1,Echolocation
-4,1645.4615,1645.4811,22890,26039,Nyctalus leisleri,0.582,0.626,-1,Echolocation
-5,1646.3545,1646.3734,22890,26353,Nyctalus leisleri,0.585,0.64,-1,Echolocation
-6,1646.7435,1646.7615,22890,25769,Nyctalus leisleri,0.671,0.697,-1,Echolocation
-7,1647.1335,1647.1533,22890,26001,Nyctalus leisleri,0.634,0.666,-1,Echolocation
