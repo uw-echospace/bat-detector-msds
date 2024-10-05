@@ -1,5 +1,0 @@
-,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event
-0,611.2805,611.2847,43515,84722,Myotis brandtii,0.321,0.627,-1,Echolocation
-1,852.3985,852.4043,45234,60927,Pipistrellus pipistrellus,0.536,0.667,-1,Echolocation
-2,852.4945,852.5009,46953,60790,Pipistrellus pipistrellus,0.553,0.646,-1,Echolocation
-3,852.8715,852.879,46953,64577,Pipistrellus pipistrellus,0.541,0.638,-1,Echolocation

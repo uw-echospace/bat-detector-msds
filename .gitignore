@@ -144,3 +144,5 @@ dmypy.json
 nohup.out
 
 ubna_data_*.csv
+
+daily_notebooks

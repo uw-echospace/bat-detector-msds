@@ -1,3 +1,0 @@
-,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event
-0,1646.7435,1646.7615,22890,25769,Nyctalus leisleri,0.671,0.697,-1,Echolocation
-1,1647.1335,1647.1533,22890,26001,Nyctalus leisleri,0.634,0.666,-1,Echolocation
