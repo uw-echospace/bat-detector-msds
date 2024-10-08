@@ -1,0 +1,4 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+HF,47040.0,3.4305365332354736,5.3675,5.3721,46093.0,62612.0,Pipistrellus pipistrellus,0.575,0.623,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_032000.WAV
+HF,48960.0,1.6264605233044445,5.4375,5.4414,46953.0,62097.0,Pipistrellus pipistrellus,0.56,0.601,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_032000.WAV
+HF,49920.0,1.3789119268404733,5.5785,5.5836,46953.0,56873.0,Pipistrellus pipistrellus,0.537,0.559,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_032000.WAV

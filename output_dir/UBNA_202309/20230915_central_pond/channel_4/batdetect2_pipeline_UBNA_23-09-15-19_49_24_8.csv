@@ -1,0 +1,21 @@
+start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,input_file
+10.7515,10.7675,22890,26741,Nyctalus leisleri,0.629,0.683,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+10.8855,10.9,23750,29642,Nyctalus leisleri,0.561,0.717,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+11.4095,11.4229,24609,29835,Nyctalus leisleri,0.468,0.618,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+12.3015,12.316,23750,29231,Nyctalus leisleri,0.491,0.616,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+12.7035,12.7168,23750,29174,Nyctalus leisleri,0.485,0.639,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+12.8725,12.8877,23750,27797,Nyctalus leisleri,0.63,0.688,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+13.1435,13.1593,22890,28456,Nyctalus leisleri,0.442,0.615,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+13.4005,13.4157,22890,27771,Nyctalus leisleri,0.64,0.728,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+13.6915,13.7074,22890,27193,Nyctalus leisleri,0.585,0.689,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+13.8765,13.8913,22890,27491,Nyctalus leisleri,0.493,0.587,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+14.1175,14.1337,22890,27430,Nyctalus leisleri,0.646,0.713,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+14.4025,14.4186,22031,26883,Nyctalus leisleri,0.611,0.696,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+14.9375,14.9526,22031,26523,Nyctalus leisleri,0.666,0.707,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+58.1475,58.158699999999996,24609,29933,Nyctalus leisleri,0.453,0.64,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+58.3395,58.351600000000005,23750,30261,Nyctalus leisleri,0.517,0.701,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+59.1025,59.1138,24609,30639,Nyctalus leisleri,0.362,0.616,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+59.2325,59.2432,24609,31607,Nyctalus leisleri,0.345,0.66,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+59.4015,59.4119,25468,33534,Nyctalus leisleri,0.365,0.707,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+59.7975,59.8097,24609,30744,Nyctalus leisleri,0.414,0.642,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav
+59.960499999999996,59.9738,23750,33434,Eptesicus serotinus,0.405,0.631,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_8.wav

@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file,Recover Folder,SD Card,Site name
+294.9105,294.9261,11718.0,20405.0,Echolocation,Eptesicus serotinus,0.279,0.535,-1,/mnt/ubna_data_03/recover-20240115/UBNA_008/20240105_204000.WAV,recover-20240115,UBNA_008,Telephone Field

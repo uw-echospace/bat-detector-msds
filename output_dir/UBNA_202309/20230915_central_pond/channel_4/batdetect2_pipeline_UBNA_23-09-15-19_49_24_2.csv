@@ -1,0 +1,2 @@
+start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,input_file
+0.0065,0.0115,46953.0,56900.0,Pipistrellus pipistrellus,0.534,0.562,-1,Echolocation,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-19_49_24_2.wav

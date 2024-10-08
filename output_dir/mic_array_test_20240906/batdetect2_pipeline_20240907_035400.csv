@@ -1,0 +1,6 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+HF,54720.0,1.101777754137005,21.1345,21.1378,45234.0,64819.0,Myotis mystacinus,0.397,0.503,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_035400.WAV
+HF,53760.0,1.0106248907458206,23.4265,23.43,46953.0,71704.0,Myotis alcathoe,0.308,0.502,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_035400.WAV
+HF,55680.0,0.6102482036378504,23.5695,23.5739,41796.0,78761.0,Myotis alcathoe,0.376,0.542,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_035400.WAV
+HF,59520.0,0.678702292602973,23.7545,23.7583,40937.0,77893.0,Myotis alcathoe,0.318,0.579,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_035400.WAV
+HF,52800.0,4.134497398996182,24.2995,24.3048,40937.0,80004.0,Myotis alcathoe,0.215,0.508,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_035400.WAV

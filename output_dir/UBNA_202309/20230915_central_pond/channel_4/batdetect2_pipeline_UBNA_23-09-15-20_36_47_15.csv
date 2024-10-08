@@ -1,0 +1,6 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file
+30.8775,30.8922,23750.0,27235.0,Echolocation,Nyctalus leisleri,0.573,0.653,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-20_36_47_15.wav
+31.4545,31.4681,23750.0,29128.0,Echolocation,Nyctalus leisleri,0.618,0.726,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-20_36_47_15.wav
+31.7395,31.7534,22890.0,27285.0,Echolocation,Nyctalus leisleri,0.47,0.564,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-20_36_47_15.wav
+32.408500000000004,32.4224,23750.0,28651.0,Echolocation,Nyctalus leisleri,0.501,0.629,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-20_36_47_15.wav
+32.8005,32.8115,24609.0,30089.0,Echolocation,Nyctalus leisleri,0.345,0.521,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-20_36_47_15.wav

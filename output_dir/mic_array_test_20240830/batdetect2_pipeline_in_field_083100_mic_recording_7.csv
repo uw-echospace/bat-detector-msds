@@ -1,0 +1,10 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+LF,38400.0,0.024780784820490242,20.1175,20.1278,38359.0,41764.0,Pipistrellus nathusii,0.486,0.504,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,37440.0,0.05953475126102602,31.5095,31.5204,37500.0,40746.0,Pipistrellus nathusii,0.496,0.509,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,30720.0,0.044857765901385405,103.2015,103.2127,31484.0,34930.0,Nyctalus leisleri,0.538,0.613,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,35520.0,0.002490501239740402,150.7185,150.7313,34062.0,39145.0,Pipistrellus nathusii,0.477,0.522,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,38400.0,0.010897317633451337,203.4645,203.4755,38359.0,41558.0,Pipistrellus nathusii,0.526,0.542,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,37440.0,0.07466544574422787,223.8875,223.8988,38359.0,41412.0,Pipistrellus nathusii,0.475,0.506,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,38400.0,0.060706300048192496,20.6015,20.6122,38359.0,41437.0,Pipistrellus nathusii,0.555,0.567,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,37440.0,0.0971976836268565,227.4955,227.5049,38359.0,41370.0,Pipistrellus nathusii,0.418,0.503,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV
+LF,38400.0,0.004376448753661611,20.9525,20.9607,38359.0,42295.0,Pipistrellus nathusii,0.495,0.507,-1,Echolocation,200000.0,../../Downloads/in_field_083100_mic_recording_7.tdms_sample.WAV

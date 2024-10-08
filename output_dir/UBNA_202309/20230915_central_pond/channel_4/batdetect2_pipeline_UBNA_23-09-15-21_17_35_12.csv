@@ -1,0 +1,18 @@
+start_time,end_time,low_freq,high_freq,event,class,class_prob,det_prob,individual,input_file
+41.6965,41.7102,25468.0,29831.0,Echolocation,Nyctalus leisleri,0.382,0.518,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+43.0215,43.0353,24609.0,28728.0,Echolocation,Nyctalus leisleri,0.475,0.583,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+43.1835,43.196799999999996,25468.0,30529.0,Echolocation,Nyctalus leisleri,0.447,0.626,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+43.6475,43.6614,24609.0,30362.0,Echolocation,Nyctalus leisleri,0.368,0.569,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+44.4165,44.4313,24609.0,29022.0,Echolocation,Nyctalus leisleri,0.423,0.554,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+45.0695,45.0831,24609.0,29823.0,Echolocation,Nyctalus leisleri,0.445,0.652,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+45.3365,45.3521,24609.0,28639.0,Echolocation,Nyctalus leisleri,0.407,0.515,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+45.7125,45.7236,25468.0,30490.0,Echolocation,Nyctalus leisleri,0.444,0.636,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+46.0045,46.0201,23750.0,27562.0,Echolocation,Nyctalus leisleri,0.493,0.54,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+46.2545,46.270700000000005,23750.0,29342.0,Echolocation,Nyctalus leisleri,0.457,0.631,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+46.5125,46.5286,23750.0,28006.0,Echolocation,Nyctalus leisleri,0.472,0.585,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+46.7775,46.7935,24609.0,28869.0,Echolocation,Nyctalus leisleri,0.478,0.611,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+47.054500000000004,47.0693,23750.0,28517.0,Echolocation,Nyctalus leisleri,0.464,0.586,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+47.4465,47.4624,23750.0,28779.0,Echolocation,Nyctalus leisleri,0.512,0.663,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+48.2535,48.268699999999995,24609.0,28666.0,Echolocation,Nyctalus leisleri,0.497,0.649,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+49.9185,49.932,22890.0,28774.0,Echolocation,Nyctalus leisleri,0.378,0.511,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
+50.1935,50.207499999999996,24609.0,28934.0,Echolocation,Nyctalus leisleri,0.449,0.582,-1,/mnt/ubna_data_03/UBNA_202309/20230915_central_pond_wav_files/UBNA_23-09-15-21_17_35_12.wav
