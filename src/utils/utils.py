@@ -11,8 +11,11 @@ def gen_empty_df():
             "end_time": [],
             "low_freq": [],
             "high_freq": [],
-            "detection_confidence":[],
             "event": [],
+            "class": [], 
+            "class_prob": [],
+            "det_prob": [],
+            "individual": []
         })
 
 def convert_df_ravenpro(df: pd.DataFrame):
@@ -30,8 +33,8 @@ def convert_df_ravenpro(df: pd.DataFrame):
         "event": "Annotation",
     }, inplace=True)
 
-    ravenpro_df["Selection"] = "Waveform 1"
-    ravenpro_df["View"] = "1"
+    ravenpro_df["Selection"] = pd.Series(range(1, df.shape[0]))
+    ravenpro_df["View"] = "Waveform 1"
     ravenpro_df["Channel"] = "1"
 
     return ravenpro_df

@@ -1,0 +1,2 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+LF,24000.0,7.593868583156244,18.2245,18.2427,23750.0,27297.0,Nyctalus leisleri,0.481,0.561,-1,Echolocation,192000.0,/Users/adityakrishna/Downloads/array_test_20240830/20240830_222100.WAV

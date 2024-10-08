@@ -1,0 +1,172 @@
+Date and Time deployed (local),Date and Time recovered (local),AudioMoth #,SD card #,Site,Latitude,Longitude,Sampling rate (Hz),Gain,Filter,Amplitude threshold,Battery start (V),Battery end (V),Deployer,Scribe,Uploader,Upload folder name,Notes
+2022-07-12T11:54:00,2022-07-15T14:55:00,A,008,Carp Pond,47° 39' 15.918'' N,122° 17' 41.910'' W,250000,Medium,None,None,(4.3),3.398,WL,JS,JS,recover-20220715,Ziploc Bag
+2022-07-12T12:12:00,2022-07-15T14:30:25,B,007,Foliage,47° 39' 18.588'' N,122° 17' 26.862'' W,250000,Medium,None,None,(4.3),3.391,AK,JS,JS,recover-20220715,Ziploc Bag
+2022-07-15T14:36:00,2022-07-17T12:08:00,C,005,Foliage,47° 39' 19.038'' N,122° 17' 26.610'' W,250000,Medium,None,None,4.146 (4.2),3.805 (3.9),AK,JS,JS,recover-20220717,Ziploc Bag
+2022-07-15T15:04:00,2022-07-17T12:28:00,D,006,Carp Pond,47° 39' 15.990'' N,122° 17' 41.988'' W,250000,Medium,None,None,4.138 (4.2),3.792 (3.9),JS,JS,JS,recover-20220717,Case
+2022-07-15T14:56:00,2022-07-17T12:28:00,E,011,Carp Pond,47° 39' 15.990'' N,122° 17' 41.988'' W,250000,Medium,None,None,4.142 (4.3),3.798 (3.9),JS,JS,JS,recover-20220717,Ziploc Bag
+2022-07-17T12:14:00,2022-07-19T14:57:00,A,003,Foliage,47° 39' 19.002'' N,122° 17' 26.310'' W,250000,Medium,None,None,4.199 (4.3),3.817 (3.9),AK,JS,AK,recover-20220719,Ziploc Bag
+2022-07-17T12:41:00,2022-07-19T15:16:00,F,004,Carp Pond,47° 39' 31.320'' N,122° 17' 46.200'' W,250000,Medium,None,None,4.168 (4.2),3.777 (3.8),JS,JS,AK,recover-20220719,Case
+2022-07-17T12:40:00,2022-07-19T15:15:00,B,002,Carp Pond,47° 39' 31.320'' N,122° 17' 46.200'' W,250000,Medium,None,None,4.133 (4.3),3.722 (3.8),JS,JS,AK,recover-20220719,Ziploc Bag
+2022-07-19T15:02:00,2022-07-22T14:28:00,C,012,Foliage,47° 39' 18.408'' N,122° 17' 27.192'' W,250000,Medium,None,None,4.114 (4.2),3.293 (<3.6),AK,JS,WL,recover-20220722,Ziploc Bag
+2022-07-19T15:24:00,2022-07-22T14:48:00,D,013,Carp Pond,47° 39' 15.948'' N,122° 17' 42.222'' W,250000,Medium,None,None,4.125 (4.2),3.276 (<3.6),JS,JS,WL,recover-20220722,Ziploc Bag
+2022-07-19T15:24:00,2022-07-22T14:49:00,E,014,Carp Pond,47° 39' 15.948'' N,122° 17' 42.222'' W,250000,Medium,None,None,4.147 (4.3),3.299 (<3.6),JS,JS,WL,recover-20220722,Case
+2022-07-22T14:14:00,2022-07-25T16:21:00,F,010,Telephone Field,47° 39' 24.342'' N,122° 17' 29.442'' W,250000,Medium,None,None,4.267 (4.3),3.888 (3.9),JS,JS,AK,recover-20220725,Double Battery Pack; Ziploc Bag; New Location
+2022-07-22T14:29:00,2022-07-25T16:30:00,B,009,Foliage,No Valid Info,No Valid Info,250000,Medium,None,None,4.260 (4.3),3.897 (4.0),AK,JS,AK,recover-20220725,Double Battery Pack; Ziploc Bag
+2022-07-22T14:46:00,2022-07-25T16:49:00,A,001,Carp Pond,47° 39' 15.060'' N,122° 17' 43.038'' W,250000,Medium,None,None,4.160 (4.3),3.875 (4.0),JS,JS,AK,recover-20220725,Double Battery Pack; Ziploc Bag
+2022-07-25T16:33:00,2022-07-28T18:15:00,E,011,Foliage,47° 39' 19.362'' N,122° 17' 26.862'' W,250000,Medium,None,None,4.184 (4.3),3.863 (4.0),AK,JS,JS,recover-20220728,Double Battery Pack; Ziploc Bag
+2022-07-25T16:51:00,2022-07-28T18:35:00,C,007,Carp Pond,47° 39' 15.762'' N,122° 17' 42.240'' W,250000,Medium,None,None,4.128 (4.2),3.853 (3.9),AK,JS,JS,recover-20220728,Double Battery Pack; Ziploc Bag
+2022-07-25T17:26:00,2022-07-28T18:55:00,D,008,Central Pond,47° 39' 17.022'' N,122° 17' 34.440'' W,250000,Medium,None,None,4.325 (4.3),3.872 (3.9),WL,JS,JS,recover-20220728,Double Battery Pack; Ziploc Bag; New Location
+2022-07-28T18:37:00,2022-08-01T10:34:00,A,004,Carp Pond,47° 39' 15.828'' N,122° 17' 42.078'' W,192000,Medium,None,None,4.103 (4.2),3.666 (3.8),JS,JS,AK,recover-20220801,Double Battery Pack; Ziploc Bag; Recording when recovered
+2022-07-28T18:56:00,2022-08-01T10:55:00,B,005,Central Pond,47° 39' 17.010'' N,122° 17' 34.632'' W,192000,Medium,None,None,4.189 (4.3),3.666 (3.8),JS,JS,AK,recover-20220801,Double Battery Pack; Ziploc Bag; Recording when recovered
+2022-07-28T18:16:00,2022-08-01T10:15:00,F,006,Foliage,47° 39' 18.630'' N,122° 17' 26.832'' W,192000,Medium,None,None,4.213 (4.2),3.692 (3.7),JS,JS,AK,recover-20220801,Double Battery Pack; Ziploc Bag; Recording when recovered
+2022-08-01T10:36:00,2022-08-04T16:22:00,C,001,Carp Pond,47° 39' 16.002'' N,122° 17' 42.048'' W,192000,Medium,None,None,4.081 (4.2),3.712 (3.8),JS,JS,JS,recover-20220804,Double Battery Pack; Ziploc Bag
+2022-08-01T10:18:00,2022-08-04T16:00:00,D,002,Foliage,47° 39' 18.732'' N,122° 17' 26.688'' W,192000,Medium,None,None,4.231 (4.3),3.737 (3.8),AK,JS,JS,recover-20220804,Double Battery Pack; Ziploc Bag
+2022-08-01T10:56:00,2022-08-04T16:50:00,E,003,Central Pond,47° 39' 16.902'' N,122° 17' 34.548'' W,192000,Medium,None,None,4.189 (4.3),3.736 (3.8),AK,JS,JS,recover-20220804,Double Battery Pack; Ziploc Bag
+2022-08-04T16:40:00,2022-08-08T10:44:00,A,012,Central Pond,47° 39' 15.708'' N,122° 17' 47.652'' W,192000,Medium,None,None,4.167 (4.3),3.169 (3.7),AK,JS,JS,recover-20220808,Double Battery Pack; Ziploc Bag; VOLT_END 3.169 could be error value
+2022-08-04T16:18:00,2022-08-08T10:30:00,B,013,Carp Pond,47° 39' 16.002'' N,122° 17' 41.862'' W,192000,Medium,None,None,4.122 (4.2),3.650 (3.7),JS,JS,JS,recover-20220808,Double Battery Pack; Ziploc Bag
+2022-08-04T16:02:00,2022-08-08T10:15:00,F,014,Foliage,47° 39' 18.732'' N,122° 17' 26.802'' W,192000,Medium,None,None,4.153 (4.2),3.777 (3.8),AK,JS,JS,recover-20220808,Double Battery Pack; Ziploc Bag
+2022-08-08T10:31:00,2022-08-11T16:59:00,C,007,Carp Pond,47° 39' 15.948'' N,122° 17' 42.018'' W,192000,Medium,None,None,4.112 (4.2),3.716 (3.8),JS,JS,JS,recover-20220811,Double Battery Pack; Ziploc Bag
+2022-08-08T10:16:00,2022-08-11T16:46:00,D,009,Foliage,47° 39' 18.828'' N,122° 17' 26.748'' W,192000,Medium,None,None,4.228 (4.3),3.815 (3.9),AK,JS,JS,recover-20220811,Double Battery Pack; Ziploc Bag
+2022-08-08T10:44:00,2022-08-11T17:09:00,E,010,Central Pond,47° 39' 17.088'' N,122° 17' 34.248'' W,192000,Medium,None,None,4.267 (4.4),3.722 (3.8),JS,JS,JS,recover-20220811,Double Battery Pack; Ziploc Bag
+2022-08-11T16:58:00,2022-08-15T10:02:00,A,005,Carp Pond,47° 39' 15.828'' N,122° 17' 42.028'' W,192000,Medium,None,None,4.200 (4.3),3.650,JS,JS,AK,recover-20220815,Double Battery Pack; Ziploc Bag; Pond is receding
+2022-08-11T17:10:00,2022-08-15T10:11:00,B,008,Central Pond,47° 39' 16.842'' N,122° 17' 34.470'' W,192000,Medium,None,None,4.205 (4.3),3.623,JS,JS,AK,recover-20220815,Double Battery Pack; Ziploc Bag; Pond is receding
+2022-08-11T16:48:00,2022-08-15T9:50:00,F,011,Foliage,47° 39' 19.230'' N,122° 17' 26.862'' W,192000,Medium,None,None,4.302 (4.3),3.672,AK,JS,AK,recover-20220815,Double Battery Pack; Ziploc Bag
+2022-08-15T10:01:00,2022-08-18T18:28:00,C,002,Carp Pond,47° 39' 15.810'' N,122° 17' 42.240'' W,192000,Medium,None,None,4.291,3.709,AK,AK,AK,recover-20220818,Double Battery Pack; Ziploc Bag; Pond is receding
+2022-08-15T9:51:00,2022-08-18T17:53:00,D,004,Foliage,47° 39' 18.888'' N,122° 17' 26.832'' W,192000,Medium,None,None,4.188,3.692,AK,JS,AK,recover-20220818,Double Battery Pack; Ziploc Bag
+2022-08-15T10:09:00,2022-08-18T18:12:00,E,006,Central Pond,47° 39' 16.968'' N,122° 17' 34.488'' W,192000,Medium,None,None,4.097,3.650,JS,AK,AK,recover-20220818,Double Battery Pack; Ziploc Bag; Pond is receding
+2022-08-18T17:39:00,2022-08-22T16:31:00,A,001,Telephone Field,47° 39' 24.288'' N,122° 17' 29.142'' W,192000,Medium,None,None,4.237,3.684,JS,AK,JS,recover-20220822,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Heat Advisory in effect 2022-08-18;
+2022-08-18T19:16:00,2022-08-22T18:01:00,B,003,Fallen Tree,47° 39' 22.992'' N,122° 17' 33.972'' W,192000,Medium,None,None,4.227,3.613,JS,AK,JS,recover-20220822,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime; Supposed to be middle of Shoveler's Pond; Walkable land currently.
+2022-08-18T18:57:00,2022-08-22T18:24:00,F,007,Opposite Central Pond,47° 39' 19.890'' N,122° 17' 35.808'' W,192000,Medium,None,None,4.322,Not collected,AK,JS,JS,recover-20220822,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Found Hawk feathers in location. SD Card was named 'UB NA_007'. VOLT_END measurement was forgotten.
+2022-08-18T18:34:00,2022-08-22T17:30:00,C,012,Carp Pond,47° 39' 15.978'' N,122° 17' 41.862'' W,192000,Medium,None,None,4.256,3.676,JS,AK,JS,recover-20220822,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime. Pond has receded more.
+2022-08-18T17:58:00,2022-08-22T16:47:00,D,013,Foliage,47° 39' 18.978'' N,122° 17' 26.778'' W,192000,Medium,None,None,4.242,3.633,AK,AK,JS,recover-20220822,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime.
+2022-08-18T18:17:00,2022-08-22T17:04:00,E,014,Central Pond,47° 39' 17.088'' N,122° 17' 34.302'' W,192000,Medium,None,None,4.248,3.678,JS,JS,JS,recover-20220822,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime.
+2022-08-22T16:38:00,2022-08-25T17:39:00,A,002,Telephone Field,47° 39' 24.600'' N,122° 17' 29.718'' W,192000,Medium,None,None,4.154,3.732,JS,AK,JS,recover-20220825,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime
+2022-08-22T18:10:00,2022-08-25T19:09:00,B,011,Fallen Tree,47° 39' 22.902'' N,122° 17' 33.888'' W,192000,Medium,None,None,4.212,3.777,JS,AK,JS,recover-20220825,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Walkable land currently
+2022-08-22T17:39:00,2022-08-25T18:38:00,C,004,Carp Pond,47° 39' 16.062'' N,122° 17' 41.910'' W,192000,Medium,None,None,4.153,3.718,JS,AK,JS,recover-20220825,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime; Pond continuing to recede
+2022-08-22T16:54:00,2022-08-25T17:56:00,D,006,Foliage,47° 39' 19.398'' N,122° 17' 26.832'' W,192000,Medium,None,None,4.146,3.721,AK,AK,JS,recover-20220825,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime
+2022-08-22T17:15:00,2022-08-25T18:19:00,E,008,Central Pond,47° 39' 17.058'' N,122° 17' 34.470'' W,192000,Medium,None,None,4.127,3.775,JS,AK,JS,recover-20220825,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Pond Continuing To Recede; Deployment Site Can Be Reached Without Waders
+2022-08-22T18:31:00,2022-08-25T19:38:00,F,005,Opposite Central Pond,47° 39' 19.782'' N,122° 17' 35.778'' W,192000,Medium,None,None,4.143,3.712,AK,AK,JS,recover-20220825,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime
+2022-08-25T17:44:00,2022-08-29T16:02:00,A,007,Telephone Field,47° 39' 24.702'' N,122° 17' 30.072'' W,192000,Medium,None,None,4.184,3.604,JS,JS,AK,recover-20220828,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime; Uploaded to 8TB drive
+2022-08-25T19:16:00,2022-08-29T16:20:00,B,013,Fallen Tree,47° 39' 22.818'' N,122° 17' 33.858'' W,192000,Medium,None,None,4.149,3.611,JS,JS,AK,recover-20220828,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Walkable land currently; Uploaded to 8TB drive
+2022-08-25T18:53:00,2022-08-29T17:43:00,C,012,Carp Pond,47° 39' 15.990'' N,122° 17' 42.318'' W,192000,Medium,None,None,4.231,3.626,JS,JS,AK,recover-20220828,Using 6 Panasonic AA Ni-MH batteries; Used Acoustic Chime; Pond continuing to recede; Uploaded to 5TB drive
+2022-08-25T18:03:00,2022-08-29T18:10:00,D,009,Foliage,47° 39' 18.612'' N,122° 17' 26.718'' W,192000,Medium,None,None,4.151,3.817,AK,JS,AK,recover-20220828,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Uploaded to 5TB drive
+2022-08-25T18:26:00,2022-08-29T17:24:00,E,010,Central Pond,47° 39' 16.758'' N,122° 17' 34.632'' W,192000,Medium,None,None,4.146,3.817,JS,JS,AK,recover-20220828,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Pond Continuing To Recede; Deployment Site Can Be Reached Without Waders; Uploaded to 8TB drive
+2022-08-25T19:48:00,2022-08-29T16:40:00,F,014,Opposite Central Pond,47° 39' 19.812'' N,122° 17' 35.652'' W,192000,Medium,None,None,4.142,3.589,AK,JS,AK,recover-20220828,Using 6 IKEA AA Ni-MH batteries; Used Acoustic Chime; Uploaded to 5TB drive
+2022-08-29T16:08:00,2022-09-01T17:06:00,A,001,Telephone Field,47° 39' 24.588'' N,122° 17' 29.658'' W,192000,Medium,None,None,4.137,3.734,JS,AK,AK,recover-20220901,Ikea Batteries
+2022-08-29T16:27:00,2022-09-01T18:16:00,B,002,Fallen Tree,47° 39' 22.938'' N,122° 17' 33.702'' W,192000,Medium,None,None,4.155,3.673,JS,AK,AK,recover-20220901,Panasonic Batteries
+2022-08-29T17:50:00,2022-09-01T17:55:00,C,005,Carp Pond,47° 39' 15.942'' N,122° 17' 41.910'' W,192000,Medium,None,None,4.202,3.721,JS,AK,AK,recover-20220901,Panasonic Batteries
+2022-08-29T18:33:00,2022-09-01T17:24:00,D,006,Foliage,47° 39' 19.062'' N,122° 17' 27.792'' W,192000,Medium,None,None,3.940,3.020,AK,JS,AK,recover-20220901,Ikea Batteries; Battery died early due to weakly charged batteries; Last full recording on 8/30 11pm PST
+2022-08-29T17:32:00,2022-09-01T17:42:00,E,004,Central Pond,47° 39' 16.968'' N,122° 17' 34.392'' W,192000,Medium,None,None,4.116,3.666,JS,JS,AK,recover-20220901,Panasonic Batteries
+2022-08-29T16:47:00,2022-09-01T18:33:00,F,003,Opposite Central Pond,47° 39' 19.962'' N,122° 17' 35.652'' W,192000,Medium,None,None,4.161,3.739,AK,JS,AK,recover-20220901,Ikea Batteries
+2022-09-01T17:13:00,2022-09-05T13:26:00,A,007,Telephone Field,No Valid Info,No Valid Info,192000,Medium,None,None,4.117,3.106,JS,AK,AK,recover-20220905,Panasonic; Heat is dying down; Rained during session; Lost battery early due to weak connection to 2nd battery pack; Last pre-error recording at 09-03-2022T20:30:00
+2022-09-01T18:23:00,2022-09-05T14:46:00,B,011,Fallen Tree,47° 39' 22.650'' N,122° 17' 34.110'' W,192000,Medium,None,None,4.144,3.428,JS,AK,AK,recover-20220905,Ikea; Heat is dying down; Rained during session; Lost battery early due to weak connection to 2nd battery pack; Last pre-error recording at 09-03-2022T10:00:00
+2022-09-01T18:02:00,2022-09-05T14:47:00,C,010,Carp Pond,47° 39' 15.972'' N,122° 17' 42.078'' W,192000,Medium,None,None,4.093,3.356,JS,AK,AK,recover-20220905,Ikea; Heat is dying down; Rained during session; Lost battery early due to weak connection to 2nd battery pack; Last pre-error recording at 09-02-2022T06:00:00
+2022-09-01T17:29:00,2022-09-05T13:45:00,D,008,Foliage,47° 39' 18.828'' N,122° 17' 26.478'' W,192000,Medium,None,None,4.113,3.024,AK,JS,AK,recover-20220905,Ikea; Heat is dying down; Rained during session; Last pre-error recording at 09-02-2022T21:30:00; Perhaps water interference due to rain.
+2022-09-01T17:47:00,2022-09-05T13:57:00,E,009,Central Pond,No Valid Info,No Valid Info,192000,Medium,None,None,4.168,3.411,JS,AK,AK,recover-20220905,Panasonic; Heat is dying down; Rained during session; Last pre-error recording at 09-04-2022T23:30:00; Location pictures did not have right metadata.
+2022-09-01T18:38:00,2022-09-05T14:33:00,F,012,Opposite Central Pond,47° 39' 19.692'' N,122° 17' 35.400'' W,192000,Medium,None,None,4.167,3.297,AK,JS,AK,recover-20220905,Ikea; Heat is dying down; Rained during session; Last pre-error recording at 09-02-2022T023:30:00
+NOT DEPLOYED AT LOCATION,-,A,-,Telephone Field,-,-,-,-,-,-,-,-,-,-,-,-,Brought back to lab because battery connection wires need to be re-soldered.
+NOT DEPLOYED AT LOCATION,-,B,-,Fallen Tree,-,-,-,-,-,-,-,-,-,-,-,-,Brought back to lab because battery connection wires need to be re-soldered.
+2022-09-05T14:52:00,2022-09-08T15:09:00,F,004,Carp Pond,47° 39' 15.942'' N,122° 17' 41.910'' W,192000,Medium,None,None,4.161,3.776,JS,AK,AK,recover-20220908,Ikea; Audiomoth C was taken to lab; Audiomoth F from OPC was moved here; No rain during session; Recordings were all full and complete.
+2022-09-05T13:49:00,2022-09-08T14:52:00,D,002,Foliage,47° 39' 18.600'' N,122° 17' 26.778'' W,192000,Medium,None,None,4.258,3.797,AK,JS,AK,recover-20220908,Ikea; No rain during session; Recordings were all full and complete.
+2022-09-05T14:01:00,2022-09-08T15:00:00,E,003,Central Pond,47° 39' 17.310'' N,122° 17' 34.062'' W,192000,Medium,None,None,4.107,3.699,JS,AK,AK,recover-20220908,Panasonic; No rain during session; Recordings were all full and complete.
+NOT DEPLOYED AT LOCATION,-,F,-,Fallen Tree,-,-,-,-,-,-,-,-,-,-,-,-,Moved to location "Carp Pond" because Audiomoth C's battery connection wires needed to be re-soldered.
+2022-09-08T17:29:00,2022-09-12T15:13:00,A,007,Telephone Field,47° 39' 24.318'' N,122° 17' 29.718'' W,192000,Medium,None,None,4.195,3.080,JS,AK,AK,recover-20220912,Ikea; Deployed during Bolt Creek wildfire on 2022-09-10
+2022-09-08T17:40:00,2022-09-12T15:36:00,B,008,Foliage,47° 39' 18.468'' N,122° 17' 27.078'' W,192000,Medium,None,None,4.155,3.544,AK,JS,AK,recover-20220912,Ikea; Deployed during Bolt Creek wildfire on 2022-09-10
+2022-09-08T17:48:00,2022-09-12T15:52:00,C,009,Central Pond,47° 39' 17.898'' N,122° 17' 34.062'' W,192000,Medium,None,None,4.194,3.756,JS,AK,AK,recover-20220912,Panasonic; Deployed during Bolt Creek wildfire on 2022-09-10
+2022-09-08T17:56:00,2022-09-12T16:06:00,D,010,Carp Pond,47° 39' 15.690'' N,122° 17' 42.462'' W,192000,Medium,None,None,4.143,3.785,JS,JS,AK,recover-20220912,Ikea; Deployed during Bolt Creek wildfire on 2022-09-10
+2022-09-08T18:09:00,2022-09-12T16:27:00,E,011,Fallen Tree,47° 39' 22.680'' N,122° 17' 34.332'' W,192000,Medium,None,None,4.100,3.471,JS,AK,AK,recover-20220912,Panasonic; Deployed during Bolt Creek wildfire on 2022-09-10
+2022-09-08T18:27:00,2022-09-12T16:56:00,F,012,Opposite Central Pond,47° 39' 19.662'' N,122° 17' 36.012'' W,192000,Medium,None,None,4.177,4.088,AK,JS,AK,recover-20220912,Ikea; Deployed during Bolt Creek wildfire on 2022-09-10; SD card had popped out sometime while deploying; No Data
+2022-09-12T15:26:00,2022-09-15T15:47:00,A,001,Telephone Field,47° 39' 24.438'' N,122° 17' 29.598'' W,192000,Medium,None,None,4.133,3.755,JS,AK,AK,recover-20220915,Ikea; Did not collect recovery lat/lon so using deployment lat/lon here.
+2022-09-12T15:42:00,2022-09-15T16:05:00,B,002,Foliage,47° 39' 18.312'' N,122° 17' 26.670'' W,192000,Medium,None,None,4.117,3.716,AK,JS,AK,recover-20220915,Ikea
+2022-09-12T15:56:00,2022-09-15T16:21:00,C,003,Central Pond,47° 39' 17.502'' N,122° 17' 34.470'' W,192000,Medium,None,None,4.086,3.696,JS,AK,AK,recover-20220915,Panasonic
+2022-09-12T16:14:00,2022-09-15T16:35:00,D,004,Carp Pond,47° 39' 15.702'' N,122° 17' 42.288'' W,192000,Medium,None,None,4.073,3.653,JS,JS,AK,recover-20220915,Ikea
+2022-09-12T16:42:00,2022-09-15T16:55:00,E,005,Fallen Tree,47° 39' 23.148'' N,122° 17' 33.972'' W,192000,Medium,None,None,4.074,3.384,JS,AK,AK,recover-20220915,Panasonic
+2022-09-12T16:57:00,2022-09-15T17:10:00,F,006,Opposite Central Pond,47° 39' 19.512'' N,122° 17' 35.448'' W,192000,Medium,None,None,4.088,3.438,AK,JS,AK,recover-20220915,Ikea; Only replaced SD card from last session because batteries were fully charged.
+2022-09-15T15:54:00,2022-09-19T16:55:00,A,007,Telephone Field,47° 39' 24.438'' N,122° 17' 29.598'' W,192000,Medium,None,None,4.220,3.617,JS,JS,AK,recover-20220919,Panasonic
+2022-09-15T16:12:00,2022-09-19T17:13:00,B,008,Foliage,47° 39' 18.648'' N,122° 17' 26.802'' W,192000,Medium,None,None,4.204,3.618,AK,JS,AK,recover-20220919,Ikea
+2022-09-15T16:27:00,2022-09-19T17:30:00,C,009,Central Pond,47° 39' 16.782'' N,122° 17' 34.362'' W,192000,Medium,None,None,4.169,3.756,JS,JS,AK,recover-20220919,Panasonic; Did not collect recovery lat/lon so using deployment lat/lon here.
+2022-09-15T16:41:00,2022-09-19T17:45:00,D,010,Carp Pond,47° 39' 16.068'' N,122° 17' 41.958'' W,192000,Medium,None,None,4.167,3.817,JS,JS,AK,recover-20220919,Ikea
+2022-09-15T17:00:00,2022-09-19T18:13:00,E,011,Fallen Tree,47° 39' 22.902'' N,122° 17' 34.002'' W,192000,Medium,None,None,4.245,3.655,AK,JS,AK,recover-20220919,Panasonic
+2022-09-15T17:15:00,2022-09-19T18:27:00,F,012,Opposite Central Pond,47° 39' 19.728'' N,122° 17' 35.430'' W,192000,Medium,None,None,4.161,3.576,AK,JS,AK,recover-20220919,Ikea
+2022-09-19T17:02:00,2022-09-22T15:21:00,A,001,Telephone Field,47° 39' 24.162'' N,122° 17' 29.862'' W,192000,Medium,None,None,4.138,3.762,AK,WJL,AK,recover-20220922,Ikea; Temperatures have begun dropping as we enter Fall season; Observed helicopter flying at relatively low altitude above this location minutes before deployment
+2022-09-19T17:19:00,2022-09-22T15:37:00,B,002,Foliage,47° 39' 18.402'' N,122° 17' 26.940'' W,192000,Medium,None,None,4.145,3.775,AK,WJL,AK,recover-20220922,Ikea; Temperatures have begun dropping as we enter Fall season
+2022-09-19T17:34:00,2022-09-22T15:56:00,C,003,Central Pond,47° 39' 16.782'' N,122° 17' 34.362'' W,192000,Medium,None,None,4.142,3.729,AK,WJL,AK,recover-20220922,Panasonic; Temperatures have begun dropping as we enter Fall season
+2022-09-19T17:49:00,2022-09-22T16:09:00,D,004,Carp Pond,47° 39' 15.870'' N,122° 17' 42.132'' W,192000,Medium,None,None,4.216,3.743,AK,WJL,AK,recover-20220922,Panasonic; Temperatures have begun dropping as we enter Fall season
+2022-09-19T18:18:00,2022-09-22T16:29:00,E,005,Fallen Tree,47° 39' 21.060'' N,122° 17' 34.092'' W,192000,Medium,None,None,4.140,3.793,AK,WJL,AK,recover-20220922,Ikea; Temperatures have begun dropping as we enter Fall season
+2022-09-19T18:31:00,2022-09-22T16:45:00,F,006,Opposite Central Pond,47° 39' 19.770'' N,122° 17' 35.952'' W,192000,Medium,None,None,4.143,3.744,AK,WJL,AK,recover-20220922,Ikea; Temperatures have begun dropping as we enter Fall season
+2022-09-22T15:26:00,2022-09-26T15:35:00,A,007,Telephone Field,47° 39' 24.348'' N,122° 17' 29.598'' W,192000,Medium,None,None,4.281,(3.7),AK,YJC,JS,recover-20220926,Panasonic
+2022-09-22T15:42:00,2022-09-26T15:54:00,B,008,Foliage,47° 39' 18.612'' N,122° 17' 26.832'' W,192000,Medium,None,None,4.180,(3.7),AK,YJC,JS,recover-20220926,Ikea
+2022-09-22T16:00:00,2022-09-26T16:00:00,C,009,Central Pond,47° 39' 16.908'' N,122° 17' 34.578'' W,192000,Medium,None,None,4.168,(3.9),AK,YJC,JS,recover-20220926,Ikea
+2022-09-22T16:13:00,2022-09-26T16:23:00,D,010,Carp Pond,47° 39' 15.762'' N,122° 17' 41.958'' W,192000,Medium,None,None,4.248,(4.2),AK,YJC,JS,recover-20220926,Panasonic; SD card popped out so nothing was recorded
+2022-09-22T16:35:00,2022-09-26T16:42:00,E,011,Fallen Tree,47° 39' 22.992'' N,122° 17' 33.858'' W,192000,Medium,None,None,4.206,(3.7),AK,YJC,JS,recover-20220926,Panasonic
+2022-09-22T16:52:00,2022-09-26T16:55:00,F,012,Opposite Central Pond,47° 39' 19.572'' N,122° 17' 35.682'' W,192000,Medium,None,None,4.173,(3.6),AK,YJC,JS,recover-20220926,Ikea
+2022-09-26T15:45:00,2022-09-29T16:37:00,A,001,Telephone Field,47° 39' 23.718'' N,122° 17' 28.842'' W,192000,Medium,None,None,(4.3),3.741,AK,YJC,JS,recover-20220929,IKEA; Rained less than an inch; Audiomoths held up well.
+2022-09-26T15:57:00,2022-09-29T17:01:00,B,002,Foliage,47° 39' 18.558'' N,122° 17' 26.562'' W,192000,Medium,None,None,(4.3),3.743,AK,YJC,JS,recover-20220929,IKEA; Rained less than an inch; Audiomoths held up well.
+2022-09-26T16:11:00,2022-09-29T17:19:00,C,003,Central Pond,47° 39' 16.758'' N,122° 17' 34.470'' W,192000,Medium,None,None,(4.3),3.693,AK,YJC,JS,recover-20220929,Panasonic; Rained less than an inch; Audiomoths held up well.
+2022-09-26T16:26:00,2022-09-29T17:35:00,D,004,Carp Pond,47° 39' 16.188'' N,122° 17' 42.078'' W,192000,Medium,None,None,(4.3),3.747,AK,YJC,JS,recover-20220929,IKEA; Rained less than an inch; Audiomoths held up well.
+2022-09-26T16:46:00,2022-09-29T17:52:00,E,005,Fallen Tree,47° 39' 22.968'' N,122° 17' 33.918'' W,192000,Medium,None,None,(4.3),3.706,AK,YJC,JS,recover-20220929,Panasonic; Rained less than an inch; Audiomoths held up well.
+2022-09-26T17:00:00,2022-09-29T18:09:00,F,006,Opposite Central Pond,47° 39' 19.380'' N,122° 17' 35.778'' W,192000,Medium,None,None,(4.2),3.744,AK,YJC,JS,recover-20220929,IKEA; Rained less than an inch; Audiomoths held up well.
+2022-09-29T16:49:00,2022-10-03T09:50:00,A,007,Telephone Field,47° 39' 24.492'' N,122° 17' 29.658'' W,192000,Medium,None,None,4.155,3.577,JS,JS,AK,recover-20221003,IKEA
+2022-09-29T17:07:00,2022-10-03T10:02:00,B,008,Foliage,47° 39' 18.780'' N,122° 17' 26.562'' W,192000,Medium,None,None,4.186,3.598,AK,JS,AK,recover-20221003,IKEA
+2022-09-29T17:23:00,2022-10-03T10:11:00,C,009,Central Pond,47° 39' 16.992'' N,122° 17' 34.392'' W,192000,Medium,None,None,4.238,3.710,JS,JS,AK,recover-20221003,Panasonic
+2022-09-29T17:40:00,2022-10-03T10:20:00,D,010,Carp Pond,47° 39' 15.870'' N,122° 17' 42.162'' W,192000,Medium,None,None,4.157,3.767,JS,JS,AK,recover-20221003,Panasonic
+2022-09-29T17:59:00,2022-10-03T10:36:00,E,011,Fallen Tree,47° 39' 22.842'' N,122° 17' 34.140'' W,192000,Medium,None,None,4.170,3.592,JS,JS,AK,recover-20221003,Panasonic
+2022-09-29T18:14:00,2022-10-03T10:46:00,F,012,Opposite Central Pond,47° 39' 19.482'' N,122° 17' 35.352'' W,192000,Medium,None,None,4.162,3.608,AK,JS,AK,recover-20221003,IKEA
+2022-10-03T09:55:00,2022-10-06T16:22:00,A,001,Telephone Field,47° 39' 24.642'' N,122° 17' 29.250'' W,192000,Medium,None,None,4.167,3.701,JS,JS,AK,recover-20221006,IKEA
+2022-10-03T10:05:00,2022-10-06T16:36:00,B,002,Foliage,47° 39' 18.552'' N,122° 17' 26.832'' W,192000,Medium,None,None,4.116,3.665,AK,JS,AK,recover-20221006,Panasonic
+2022-10-03T10:13:00,2022-10-06T16:48:00,C,003,Central Pond,No Valid Info,No Valid Info,192000,Medium,None,None,4.225,3.724,JS,JS,AK,recover-20221006,IKEA
+2022-10-03T10:25:00,2022-10-06T17:03:00,D,004,Carp Pond,47° 39' 15.948'' N,122° 17' 42.018'' W,192000,Medium,None,None,4.238,3.690,JS,JS,AK,recover-20221006,IKEA
+2022-10-03T10:40:00,2022-10-06T17:29:00,E,005,Fallen Tree,No Valid Info,No Valid Info,192000,Medium,None,None,4.117,3.634,JS,JS,AK,recover-20221006,Panasonic
+2022-10-03T10:50:00,2022-10-06T17:47:00,F,006,Opposite Central Pond,47° 39' 19.812'' N,122° 17' 35.652'' W,192000,Medium,None,None,4.122,3.648,AK,JS,AK,recover-20221006,Panasonic
+2022-10-06T16:27:00,2022-10-10T10:17:00,A,007,Telephone Field,No Valid Info,No Valid Info,192000,Medium,None,None,4.213,3.088,JS,JS,AK,recover-20221010,IKEA
+2022-10-06T16:41:00,2022-10-10T10:29:00,B,008,Foliage,47° 39' 18.600'' N,122° 17' 26.778'' W,192000,Medium,None,None,4.225,3.526,AK,JS,AK,recover-20221010,Panasonic
+2022-10-06T16:54:00,2022-10-10T10:44:00,C,009,Central Pond,No Valid Info,No Valid Info,192000,Medium,None,None,4.197,3.766,JS,JS,AK,recover-20221010,IKEA
+2022-10-06T17:10:00,2022-10-10T11:04:00,D,010,Carp Pond,47° 39' 15.732'' N,122° 17' 42.822'' W,192000,Medium,None,None,4.210,3.627,AK,JS,AK,recover-20221010,IKEA
+2022-10-06T17:36:00,2022-10-10T11:28:00,E,011,Fallen Tree,47° 39' 23.088'' N,122° 17' 33.588'' W,192000,Medium,None,None,4.157,3.558,JS,JS,AK,recover-20221010,Panasonic
+2022-10-06T17:50:00,2022-10-10T11:28:00,F,012,Opposite Central Pond,47° 39' 19.548'' N,122° 17' 35.592'' W,192000,Medium,None,None,4.125,3.592,AK,JS,AK,recover-20221010,IKEA
+2022-10-10T10:20:00,2022-10-13T16:43:00,A,001,Telephone Field,47° 39' 24.882'' N,122° 17' 26.718'' W,192000,Medium,None,None,4.132,3.669,JS,JS,AK,recover-20221013,IKEA
+2022-10-10T10:33:00,2022-10-13T17:00:00,B,002,Foliage,47° 39' 19.092'' N,122° 17' 26.592'' W,192000,Medium,None,None,4.178,3.658,AK,JS,AK,recover-20221013,Panasonic
+2022-10-10T10:49:00,2022-10-13T17:12:00,C,003,Central Pond,47° 39' 17.058'' N,122° 17' 34.218'' W,192000,Medium,None,None,4.201,3.690,JS,JS,AK,recover-20221013,Panasonic
+2022-10-10T11:10:00,2022-10-13T17:24:00,D,004,Carp Pond,47° 39' 15.918'' N,122° 17' 41.940'' W,192000,Medium,None,None,4.165,3.707,JS,JS,AK,recover-20221013,IKEA
+2022-10-10T11:34:00,2022-10-13T17:42:00,E,005,Fallen Tree,47° 39' 21.018'' N,122° 17' 33.618'' W,192000,Medium,None,None,4.149,3.684,JS,JS,AK,recover-20221013,Mixed Batteries (4 IKEA + 2 Panasonic)
+2022-10-10T11:51:00,2022-10-13T17:52:00,F,006,Opposite Central Pond,47° 39' 19.902'' N,122° 17' 35.760'' W,192000,Medium,None,None,4.790,3.818,AK,JS,AK,recover-20221013,6 Duracell non-rechargeable batteries
+2022-10-13T16:50:00,2022-10-17T10:03:00,A,007,Telephone Field,No Valid Info,No Valid Info,192000,Medium,None,None,4.198,3.568,JS,JS,AK,recover-20221017,IKEA
+2022-10-13T17:03:00,2022-10-17T10:20:00,B,008,Foliage,No Valid Info,No Valid Info,192000,Medium,None,None,4.152,3.498,AK,JS,AK,recover-20221017,Panasonic
+2022-10-13T17:15:00,2022-10-17T10:28:00,C,009,Central Pond,47° 39' 17.010'' N,122° 17' 34.302'' W,192000,Medium,None,None,4.174,3.741,JS,JS,AK,recover-20221017,IKEA
+2022-10-13T17:28:00,2022-10-17T10:37:00,D,010,Carp Pond,47° 39' 17.058'' N,122° 17' 42.162'' W,192000,Medium,None,None,4.166,3.790,JS,JS,AK,recover-20221017,IKEA
+2022-10-13T17:45:00,2022-10-17T10:49:00,E,011,Fallen Tree,47° 39' 23.082'' N,122° 17' 33.918'' W,192000,Medium,None,None,4.137,3.513,AK,JS,AK,recover-20221017,Panasonic
+2022-10-13T17:57:00,2022-10-17T10:58:00,F,012,Opposite Central Pond,47° 39' 19.740'' N,122° 17' 35.538'' W,192000,Medium,None,None,4.161,3.581,AK,JS,AK,recover-20221017,Panasonic
+2022-10-17T10:08:00,2022-10-27T12:20:00,A,001,Telephone Field,No Valid Info,No Valid Info,192000,Medium,None,None,4.134,3.870,JS,JS,AK,recover-20221027,IKEA
+2022-10-17T10:22:00,2022-10-27T12:30:00,B,002,Foliage,No Valid Info,No Valid Info,192000,Medium,None,None,4.202,3.862,AK,JS,AK,recover-20221027,IKEA
+2022-10-17T10:30:00,2022-10-27T12:41:00,C,003,Central Pond,No Valid Info,No Valid Info,192000,Medium,None,None,4.131,3.863,JS,JS,AK,recover-20221027,Panasonic
+2022-10-17T10:40:00,2022-10-27T12:52:00,D,004,Carp Pond,No Valid Info,No Valid Info,192000,Medium,None,None,4.145,3.867,JS,JS,AK,recover-20221027,Panasonic
+2022-10-17T10:51:00,2022-10-27T13:04:00,E,005,Fallen Tree,No Valid Info,No Valid Info,192000,Medium,None,None,4.122,3.880,JS,JS,AK,recover-20221027,IKEA
+2022-10-17T11:01:00,2022-10-27T13:13:00,F,006,Opposite Central Pond,No Valid Info,No Valid Info,192000,Medium,None,None,4.123,3.882,AK,JS,AK,recover-20221027,IKEA
+2022-10-27T12:24:00,2022-11-10T12:09:00,A,007,Telephone Field,47° 39' 24.132'' N,122° 17' 29.550'' W,192000,Medium,None,None,4.240,3.805,JS,JS,AK,recover-20221110,Panasonic
+2022-10-27T12:34:00,2022-11-10T12:20:00,B,008,Foliage,47° 39' 17.778'' N,122° 17' 27.192'' W,192000,Medium,None,None,4.175,3.820,AK,JS,AK,recover-20221110,IKEA
+2022-10-27T12:46:00,2022-11-10T12:31:00,C,009,Central Pond,47° 39' 16.950'' N,122° 17' 34.500'' W,192000,Medium,None,None,4.240,3.847,JS,JS,AK,recover-20221110,Panasonic
+2022-10-27T12:55:00,2022-11-10T12:43:00,D,010,Carp Pond,No Valid Info,No Valid Info,192000,Medium,None,None,4.127,3.861,JS,JS,AK,recover-20221110,IKEA
+2022-10-27T13:06:00,2022-11-10T12:58:00,E,011,Fallen Tree,47° 39' 22.878'' N,122° 17' 33.732'' W,192000,Medium,None,None,4.203,3.830,JS,JS,AK,recover-20221110,IKEA
+2022-10-27T13:16:00,2022-11-10T13:08:00,F,012,Opposite Central Pond,47° 39' 20.022'' N,122° 17' 35.982'' W,192000,Medium,None,None,4.238,3.829,AK,JS,AK,recover-20221110,Panasonic
+2022-11-10T12:13:00,2022-11-23T12:49:00,A,001,Telephone Field,47° 39' 31.002'' N,122° 17' 17.880'' W,192000,Medium,None,None,4.209,3.877,JS,AK,JS,recover-20221123,Panasonic
+2022-11-10T12:24:00,2022-11-23T13:45:00,B,002,Foliage,No Valid Info,No Valid Info,192000,Medium,None,None,4.225,3.828,AK,JS,JS,recover-20221123,IKEA
+2022-11-10T12:35:00,2022-11-23T14:03:00,C,003,Central Pond,47° 39' 16.650'' N,122° 17' 35.100'' W,192000,Medium,None,None,4.182,3.814,JS,AK,JS,recover-20221123,IKEA
+2022-11-10T12:47:00,2022-11-23T14:28:00,D,004,Carp Pond,47° 39' 15.912'' N,122° 17' 42.078'' W,192000,Medium,None,None,4.206,1.974,JS,AK,JS,recover-20221123,IKEA
+2022-11-10T13:02:00,2022-11-23T13:13:00,E,005,Fallen Tree,47° 39' 22.830'' N,122° 17' 33.288'' W,192000,Medium,None,None,4.226,3.819,JS,AK,JS,recover-20221123,IKEA
+2022-11-10T13:11:00,2022-11-23T13:23:00,F,006,Opposite Central Pond,47° 39' 19.632'' N,122° 17' 35.838'' W,192000,Medium,None,None,4.181,3.824,AK,JS,JS,recover-20221123,IKEA
+2022-11-23T12:58:00,2022-12-08T13:12:00,A,007,Telephone Field,No Valid Info,No Valid Info,192000,Medium,None,None,4.208,3.757,JS,AK,JS,recover-20221208,Panasonic
+2022-11-23T13:53:00,2022-12-08T13:58:00,B,008,Foliage,47° 39' 18.750'' N,122° 17' 26.778'' W,192000,Medium,None,None,4.195,3.771,AK,JS,JS,recover-20221208,IKEA
+2022-11-23T14:10:00,2022-12-08T13:44:00,C,009,Central Pond,No Valid Data,No Valid Data,192000,Medium,None,None,4.197,3.839,JS,AK,JS,recover-20221208,IKEA
+2022-11-23T14:38:00,2022-12-08T14:31:00,D,010,Carp Pond,47° 39' 15.942'' N,122° 17' 41.940'' W,192000,Medium,None,None,4.100,3.764,JS,AK,JS,recover-20221208,Panasonic
+NOT DEPLOYED AT LOCATION,-,E,-,Fallen Tree,-,-,-,-,-,-,-,-,-,-,-,-,No longer deploying at this location moving forward because water level required wading suit (diminishing returns)
+2022-11-23T13:29:00,2022-12-08T13:08:00,F,011,Opposite Central Pond,47° 39' 19.668'' N,122° 17' 35.682'' W,192000,Medium,None,None,4.158,3.747,AK,JS,JS,recover-20221208,Panasonic
+2022-12-08T12:16:00,2022-12-14T15:02:00,F,001,Opposite Central Pond,47° 39' 19.668'' N,122° 17' 35.262'' W,192000,Medium,None,None,4.192,3.879,AK,JS,JS,recover-20221214,IKEA
+2022-12-08T12:35:00,2022-12-14T15:27:00,D,002,Carp Pond,47° 39' 15.888'' N,122° 17' 41.880'' W,192000,Medium,None,None,4.132,3.834,JS,AK,JS,recover-20221214,IKEA
+2022-12-08T12:52:00,2022-12-14T15:47:00,C,003,Central Pond,No Valid Data,No Valid Data,192000,Medium,None,None,4.254,3.930,JS,AK,JS,recover-20221214,IKEA
+2022-12-08T13:04:00,2022-12-14T16:07:00,B,004,Foliage,No Valid Data,No Valid Data,192000,Medium,None,None,4.242,3.922,AK,JS,JS,recover-20221214,Panasonic
+2022-12-08T13:15:00,2022-12-14T16:36:00,A,005,Telephone Field,No Valid Data,No Valid Data,192000,Medium,None,None,4.275,3.926,JS,AK,JS,recover-20221214,Panasonic
+2022-12-14T15:09:00,2023-01-10T15:14:00,F,007,Opposite Central Pond,No Valid Data,No Valid Data,192000,Medium,None,None,4.374,3.599,AK,JS,AK,recover-20230110,Panasonic
+2022-12-14T15:32:00,2023-01-10T15:23:00,D,008,Carp Pond,47° 39' 15.942'' N,122° 17' 42.432'' W,192000,Medium,None,None,4.236,3.593,AK,JS,AK,recover-20230110,IKEA
+2022-12-14T15:54:00,2023-01-10T15:29:00,C,009,Central Pond,47° 39' 17.538'' N,122° 17' 34.110'' W,192000,Medium,None,None,4.242,3.742,JS,JS,AK,recover-20230110,IKEA
+2022-12-14T16:19:00,2023-01-10T14:30:00,B,010,Foliage,47° 39' 18.888'' N,122° 17' 26.670'' W,192000,Medium,None,None,4.288,3.754,AK,JS,AK,recover-20230110,Panasonic
+2022-12-14T16:44:00,2023-01-10T14:23:00,A,011,Telephone Field,47° 39' 24.642'' N,122° 17' 29.502'' W,192000,Medium,None,None,4.231,3.545,AK,JS,AK,recover-20230110,Panasonic

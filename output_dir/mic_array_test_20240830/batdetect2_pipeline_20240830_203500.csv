@@ -1,0 +1,6 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+HF,49920.0,22.162885192635823,7.7015,7.7077,45234,67847,Pipistrellus pipistrellus,0.492,0.538,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_203500.WAV
+LF,26880.0,1.777012883143041,50.7055,50.72,23750,28176,Nyctalus leisleri,0.379,0.58,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_203500.WAV
+HF,48000.0,15.635174953088924,8.5345,8.54,44375,53978,Pipistrellus pipistrellus,0.505,0.537,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_203500.WAV
+HF,56640.0,33.30508069273922,56.5085,56.5149,51250,67955,Pipistrellus pipistrellus,0.454,0.511,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_203500.WAV
+HF,48000.0,23.33224656285796,8.7315,8.737,44375,59647,Pipistrellus pipistrellus,0.506,0.518,-1,Echolocation,192000,/Users/adityakrishna/Downloads/array_test_20240830/20240830_203500.WAV

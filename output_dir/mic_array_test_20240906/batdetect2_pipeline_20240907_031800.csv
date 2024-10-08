@@ -1,0 +1,2 @@
+KMEANS_CLASSES,peak_frequency,SNR,start_time,end_time,low_freq,high_freq,class,class_prob,det_prob,individual,event,sampling_rate,input_file
+LF,24000.0,0.6196974536942563,10.4955,10.5129,22890.0,26307.0,Nyctalus leisleri,0.563,0.605,-1,Echolocation,192000.0,/Volumes/Elements/UBNA_array_tests/adityas-home/mic-array-test-20240906/audiomoth/recover-20240907/20240907_031800.WAV

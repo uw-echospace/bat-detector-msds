@@ -1,0 +1,13 @@
+name: bat_msds
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - ipykernel
+  - dask
+  - urllib3==2.0.3
+  - cffi
+  - altair-all
+  - python-sounddevice
+prefix: /Users/adityakrishna/miniforge3/envs/bat_msds

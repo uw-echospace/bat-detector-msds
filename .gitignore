@@ -139,3 +139,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Background pipeline files
+nohup.out
+
+ubna_data_*.csv
+
+daily_notebooks
