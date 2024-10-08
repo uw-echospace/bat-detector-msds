@@ -81,7 +81,12 @@ This usage assumed that there exists a `ubna_data_*_collected_audio_records.csv`
 1) `python3 src/batdt2_pipeline.py --input_audio='/mnt/ubna_data_04/recover-20240927/UBNA_008' --output_directory='output_dir' --run_model --csv`
    - `input_audio` can be directory or single-file (a directory is provided above). The detector will run on each file and save `batdetect2_pipeline_[FILENAME].csv` in the provided `output_directory`
    - No other arguments need to be provided. Intended for direct-use.
-  
+
+
+# Previous versions
+- See the [msds-2023](https://github.com/uw-echospace/bat-detector-msds/tree/msds-2023) branch for the first version built by students in the 2023 Masters in Data Science (MSDS) program.
+
+
 # Acknowledgements
 Corbin Charpentier -- University of Washington Masters in Data Science Program \
 Kirsteen Ng -- University of Washington Masters in Data Science Program \
