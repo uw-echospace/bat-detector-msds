@@ -11,24 +11,30 @@ import matplotlib.colors as colors
 import datetime as dt
 from pathlib import Path
 from torch import multiprocessing
+import torch
 
 import exiftool
 import suncalc
 from sklearn.cluster import KMeans
 import scipy
 
-# set python path to correctly use batdetect2 submodule
-import sys
-sys.path.append(str(Path.cwd()))
-sys.path.append(str(Path.cwd() / "src/models/bat_call_detector/batdetect2/"))
-
-from cfg import get_config
+from models.bat_call_detector.model_detector import BatCallDetector
 from pipeline import pipeline
 from utils.utils import gen_empty_df, convert_df_ravenpro
+
+import bout.assembly as bt
+import bout.clustering as clstr
 
 SEATTLE_LATITUDE = 47.655181
 SEATTLE_LONGITUDE = -122.293123
 
+SITE_NAMES = {
+            'Central' : "Central Pond",
+            'Foliage' : "Foliage",
+            'Carp' : "Carp Pond",
+            'Telephone' : "Telephone Field",
+            'E18' : "E18 Bridge"
+                }
 
 FREQ_GROUPS = {
                 'E18 Bridge' : {'': [0, 96000],
@@ -61,6 +67,76 @@ LABEL_FOR_GROUPS = {
                     0: 'LF', 
                     1: 'HF'
                     }
+
+METRIC_TAGS = {'CALLRATE':'CR',
+               'BOUTTIMEPERCENTAGE':'BTP',
+               'ACTIVITYINDEX':'AI'}
+COLNAME_TAGS = {'CALLRATE':'callrate',
+               'BOUTTIMEPERCENTAGE':'bout_time_percentage',
+               'ACTIVITYINDEX':'activity_index'}
+PLOT_UPPER_LIM = {'CALLRATE':1e3,
+               'BOUTTIMEPERCENTAGE':1e2,
+               'ACTIVITYINDEX':1e2}
+
+def generate_segments_parallel(package_to_chunk):
+    """
+    Segments audio file into clips of duration length and saves them to output/tmp folder.
+    Allows detection model to be run on segments instead of entire file as recommended.
+    These segments will be deleted from the output/tmp folder after detections have been generated.
+
+    Parameters
+    ------------
+    audio_file : `pathlib.Path`
+        - The path to an audio_file from the input directory provided in the command line
+    output_dir : `pathlib.Path`
+        - The path to the tmp folder that saves all of our segments.
+    start_time : `float`
+        - The time at which the segments will start being generated from within the audio file
+    duration : `float`
+        - The duration of all segments generated from the audio file.
+
+    Returns
+    ------------
+    output_files : `List`
+        - The path (a str) to each generated segment of the given audio file will be stored in this list.
+        - The offset of each generated segment of the given audio file will be stored in this list.
+        - Both items are stored in a dict{} for each generated segment.
+    """
+
+    output_files = []
+    ip_audio = sf.SoundFile(package_to_chunk['audio_file'])
+
+    sampling_rate = ip_audio.samplerate
+    # Convert to sampled units
+    ip_start = int(package_to_chunk['start_time'] * sampling_rate)
+    ip_duration = int(package_to_chunk['segment_duration'] * sampling_rate)
+    ip_end = ip_audio.frames
+
+    # for the length of the duration, process the audio into duration length clips
+    for sub_start in range(ip_start, ip_end, ip_duration):
+        sub_end = np.minimum(sub_start + ip_duration, ip_end)
+
+        # For file names, convert back to seconds 
+        op_file = package_to_chunk['audio_file'].name.replace(" ", "_")
+        start_seconds =  sub_start / sampling_rate
+        end_seconds =  sub_end / sampling_rate
+        op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
+        op_file = op_file[:-4] + op_file_en + ".wav"
+        
+        op_path = package_to_chunk['tmp_dir'] / op_file
+        output_files.append({
+            "input_filepath": package_to_chunk['audio_file'],
+            "audio_file": op_path, 
+            "offset":  package_to_chunk['start_time'] + (sub_start/sampling_rate),
+        })
+        
+        if (not(op_path.exists())):
+            sub_length = sub_end - sub_start
+            ip_audio.seek(sub_start)
+            op_audio = ip_audio.read(sub_length)
+            sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
+    
+    return output_files 
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
@@ -200,7 +276,7 @@ def get_section_of_call_in_file(detection, audio_file):
 def get_snr_from_band_limited_signal(snr_call_signal, snr_noise_signal): 
     signal_power_rms = np.sqrt(np.square(snr_call_signal).mean())
     noise_power_rms = np.sqrt(np.square(snr_noise_signal).mean())
-    snr = abs(20 * np.log10(signal_power_rms / noise_power_rms))
+    snr = (20 * np.log10(signal_power_rms / noise_power_rms))
     return snr
 
 
@@ -277,7 +353,7 @@ def gather_features_of_interest(dets, kmean_welch, audio_file):
 
 def open_and_get_call_info(audio_file, dets):
     welch_key = 'all_locations'
-    output_dir = Path(f'{Path(__file__).parent}/../../duty-cycle-investigation/data/generated_welch/{welch_key}')
+    output_dir = Path(f'{Path(__file__).parent}/../kmeans_training_set')
     output_file_type = 'top1_inbouts_welch_signals'
     welch_data = pd.read_csv(output_dir / f'2022_{welch_key}_{output_file_type}.csv', index_col=0, low_memory=False)
     k = 2
@@ -364,6 +440,7 @@ def apply_models(file_path_mappings, cfg):
         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
     """
 
+    torch.set_num_threads(1)
     process_pool = multiprocessing.Pool(cfg['num_processes'])
 
     bd_dets = tqdm(
@@ -456,7 +533,77 @@ def convert_df_ravenpro(df: pd.DataFrame):
 
     return ravenpro_df
 
-def construct_activity_arr(cfg, data_params):
+def get_bout_params_from_location(raw_bd2_df,  data_params):
+    raw_bd2_df = raw_bd2_df[(raw_bd2_df['det_prob']>=data_params['detection_threshold_for_activity'])&(raw_bd2_df['SNR']>=data_params['SNR_threshold_for_activity'])]
+    raw_bd2_df = raw_bd2_df.rename(columns={'KMEANS_CLASSES': 'freq_group'})
+    file_dts = pd.to_datetime(raw_bd2_df['input_file'], format='%Y%m%d_%H%M%S', exact=False)
+
+    anchor_start_times = file_dts + pd.to_timedelta(raw_bd2_df['start_time'].values.astype('float64'), unit='s')
+    anchor_end_times = file_dts + pd.to_timedelta(raw_bd2_df['end_time'].values.astype('float64'), unit='s') 
+
+    raw_bd2_df.insert(0, 'call_end_time', anchor_end_times)
+    raw_bd2_df.insert(0, 'call_start_time', anchor_start_times)
+    raw_bd2_df.insert(0, 'ref_time', anchor_start_times)
+
+    valid_df = raw_bd2_df[(raw_bd2_df['freq_group']=='LF')|(raw_bd2_df['freq_group']=='HF')]
+    valid_df = valid_df.sort_values('call_start_time')
+
+    bout_params = bt.get_bout_params_from_location(valid_df, data_params)
+    return bout_params
+
+def prepare_and_threshold_dets_for_activity(raw_bd2dets, data_params):
+    raw_bd2dets['freq_group'] = raw_bd2dets['KMEANS_CLASSES']
+    file_dets = raw_bd2dets[(raw_bd2dets['det_prob']>=data_params['detection_threshold_for_activity'])&(raw_bd2dets['SNR']>=data_params['SNR_threshold_for_activity'])].copy()
+    file_dets['freq_group'] = file_dets['KMEANS_CLASSES']
+    file_dts = pd.to_datetime(file_dets['input_file'], format='%Y%m%d_%H%M%S', exact=False)
+
+    anchor_start_times = file_dts + pd.to_timedelta(file_dets['start_time'].values.astype('float64'), unit='s')
+    anchor_end_times = file_dts + pd.to_timedelta(file_dets['end_time'].values.astype('float64'), unit='s') 
+
+    file_dets.insert(0, 'call_end_time', anchor_end_times)
+    file_dets.insert(0, 'call_start_time', anchor_start_times)
+    file_dets['ref_time'] = anchor_start_times
+    file_dets['cycle_ref_time'] = pd.DatetimeIndex(file_dets['call_start_time'])
+
+    resampled_cycle_length_df = file_dets.resample(f'30min', on='cycle_ref_time', origin='start_day')
+    file_dets['cycle_ref_time'] = pd.DatetimeIndex(resampled_cycle_length_df['cycle_ref_time'].transform(lambda x: x.name))
+    file_dets.insert(0, 'end_time_wrt_ref', (file_dets['call_end_time'] - file_dets['cycle_ref_time']).dt.total_seconds())
+    file_dets.insert(0, 'start_time_wrt_ref', (file_dets['call_start_time'] - file_dets['cycle_ref_time']).dt.total_seconds())
+
+    valid_df = file_dets[(file_dets['freq_group']=='LF')|(file_dets['freq_group']=='HF')]
+    valid_df = valid_df.sort_values('call_start_time')
+
+    return valid_df
+
+def get_callrate_per_file_from_freq_group_df(freq_group_df, cfg):
+    dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count() 
+    callrate_per_file = dets_per_file / (cfg['duration']/60)
+
+    return callrate_per_file
+
+def get_btp_per_file_from_freq_group_df(valid_df, data_params, cfg):
+    all_site_bd2_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2025*/{SITE_NAMES[data_params['site_tag']]}/bd2__*.csv").compute()
+    bout_params = get_bout_params_from_location(all_site_bd2_df, data_params)
+    batdetect2_preds_with_bouttags = bt.classify_bouts_in_detector_preds_for_freqgroups(valid_df, bout_params)
+    bout_metrics = bt.construct_bout_metrics_from_location_df_for_freqgroups(batdetect2_preds_with_bouttags)
+    bout_metrics['ref_time'] = pd.DatetimeIndex(bout_metrics['start_time_of_bout'])
+    bout_metrics['total_bout_duration_in_secs'] = bout_metrics['bout_duration_in_secs']
+    bout_metrics = bout_metrics.set_index('ref_time')
+    bout_duration_per_file = bout_metrics.resample(f"30min")['total_bout_duration_in_secs'].sum()
+    btp_per_file = 100 * (bout_duration_per_file / (cfg['duration']))
+
+    return btp_per_file
+
+def get_ai_per_file_from_freq_group_df(valid_df, data_params):
+    temp = valid_df.resample(f'{data_params["index_time_block_in_secs"]}s', on='ref_time')['ref_time'].count()
+    temp[temp>0] = 1
+    activity_indices = temp.resample(f"{data_params['cycle_length']}min").sum()
+    return activity_indices
+
+def get_activity_index_per_time_on_index(num_blocks_presence, data_params):
+    return 100*(num_blocks_presence / (data_params["time_on_in_secs"] / (data_params["index_time_block_in_secs"])))
+
+def construct_activity_arr(cfg, data_params, save=True):
     """
     Constructs DataFrames corresponding to different important ways of storing activity for a deployment session.
     plot_df is an activity grid with date headers and time indices and number of detections as values.
@@ -491,52 +638,69 @@ def construct_activity_arr(cfg, data_params):
     ref_datetimes = pd.to_datetime(data_params['ref_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
     activity_datetimes_for_file = ref_datetimes.tz_localize('UTC')
     good_datetimes = pd.to_datetime(data_params['good_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
-    if (cfg['cycle_length'] - cfg['duration']) <= 5:
-        nodets = 1
-    else:
-        nodets = (cfg['duration'])/((data_params['resample_in_min']*60))
+    nodets = 0
 
-    dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
+    rawdets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
+    dets = rawdets[(rawdets['det_prob']>=data_params['detection_threshold_for_activity'])&(rawdets['SNR']>=data_params['SNR_threshold_for_activity'])].copy()
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
-    activity_dets_arr = pd.DataFrame()
+    activity_callrate_arr = pd.DataFrame()
+    activity_btp_arr = pd.DataFrame()
+    activity_ai_arr = pd.DataFrame()
     for group in ['', 'LF', 'HF']:
         if group != '':
             freq_group_df = dets.loc[dets['KMEANS_CLASSES']==group].copy()
         else:
             freq_group_df = dets.copy()
-        dets_per_file = freq_group_df.groupby(['ref_time'])['ref_time'].count()
-        activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
+        callrate_per_file = get_callrate_per_file_from_freq_group_df(freq_group_df, cfg)
+        actvt_group_callrate = callrate_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=np.NaN)
+        actvt_group_callrate_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, actvt_group_callrate)), columns=["date_and_time_UTC", f"{group}callrate"])
+        actvt_group_callrate_arr = actvt_group_callrate_arr.set_index("date_and_time_UTC")
+        activity_callrate_arr = pd.concat([activity_callrate_arr, actvt_group_callrate_arr], axis=1)
 
-        if (cfg['cycle_length'] - cfg['duration']) > 5:
-            activity = activity *(cfg['cycle_length'] / cfg['duration'])
-        activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
-        activity_arr = activity_arr.set_index("date_and_time_UTC")
-        activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
+        valid_df = prepare_and_threshold_dets_for_activity(freq_group_df, data_params)
+        btp_per_file = get_btp_per_file_from_freq_group_df(valid_df, data_params, cfg)
+        actvt_group_btp = btp_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=np.NaN)
+        actvt_group_btp_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, actvt_group_btp)), columns=["date_and_time_UTC", f"{group}bout_time_percentage"])
+        actvt_group_btp_arr = actvt_group_btp_arr.set_index("date_and_time_UTC")
+        activity_btp_arr = pd.concat([activity_btp_arr, actvt_group_btp_arr], axis=1)
 
-    activity_dets_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
+        data_params['index_time_block_in_secs'] = 5
+        data_params['cycle_length'] = '30'
+        data_params["time_on_in_secs"] = cfg['duration']
+        num_blocks_presence = get_ai_per_file_from_freq_group_df(valid_df, data_params)
+        activity_index_per_interval = get_activity_index_per_time_on_index(num_blocks_presence, data_params)
+        actvt_group_ai = activity_index_per_interval.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=np.NaN)
+        actvt_group_ai_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, actvt_group_ai)), columns=["date_and_time_UTC", f"{group}activity_index"])
+        actvt_group_ai_arr = actvt_group_ai_arr.set_index("date_and_time_UTC")
+        activity_ai_arr = pd.concat([activity_ai_arr, actvt_group_ai_arr], axis=1)
 
-    return activity_dets_arr
+    if save:
+        activity_callrate_arr.to_csv(f"{data_params['output_dir']}/CALLRATE__{csv_tag}.csv")
+        activity_btp_arr.to_csv(f"{data_params['output_dir']}/BOUTTIMEPERCENTAGE__{csv_tag}.csv")
+        activity_ai_arr.to_csv(f"{data_params['output_dir']}/ACTIVITYINDEX__{csv_tag}.csv")
+
+    return activity_callrate_arr
 
 
 def shape_activity_array_into_grid(cfg, data_params, group):
 
     csv_tag = cfg['csv_filename'].split('__')[-1]
 
-    num_dets = pd.read_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv", index_col=0)
-    num_dets.index = pd.DatetimeIndex(num_dets.index)
+    activity_arr = pd.read_csv(f"{data_params['output_dir']}/{cfg['METRIC']}__{csv_tag}.csv", index_col=0)
+    activity_arr.index = pd.DatetimeIndex(activity_arr.index)
 
-    resampled_df = num_dets.resample(data_params["resample_tag"]).sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
+    resampled_df = activity_arr.resample(data_params["resample_tag"]).mean().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
 
-    col_name = f"{group}num_of_detections"
+    col_name = f"{group}{cfg['COL_TAG']}"
     data = list(zip(raw_dates, raw_times, resampled_df[col_name]))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", col_name])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=col_name)
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
-    activity_df.to_csv(f"{data_params['output_dir']}/activity_plot__{group}{csv_tag}.csv")
+    activity_df.to_csv(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{csv_tag}.csv")
 
     return activity_df
 
@@ -567,7 +731,8 @@ def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
     plot_title = group
     if plot_title!='':
         plot_title = group.upper().replace('_', ' ')
-    masked_array_for_nodets = np.ma.masked_where(plot_df.values==0, plot_df.values)
+    plot_df = plot_df.replace(0, 1e-6)
+    # masked_array_for_nodets = np.ma.masked_where(plot_df.values==np.NaN, plot_df.values)
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red', alpha=1.0)
     plot_dates = [''] * len(plot_df.columns)
@@ -577,8 +742,8 @@ def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
 
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
-    plt.title(f"{plot_title}Activity from {data_params['site']}", loc='left', y=1.05)
-    plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
+    plt.title(f"{plot_title}Activity ({cfg['METRIC_TAG']}) from {data_params['site']}", loc='left', y=1.05)
+    plt.imshow(plot_df, cmap=cmap, norm=colors.LogNorm(vmin=1e-1, vmax=cfg['UPPER_LIM']))
     plt.yticks(np.arange(0, len(plot_df.index))-0.5, plot_times, rotation=45)
     plt.xticks(np.arange(0, len(plot_df.columns))-0.5, plot_dates, rotation=45)
     plt.grid(which='both')
@@ -588,7 +753,7 @@ def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
     if save:
-        plt.savefig(f"{data_params['output_dir']}/activity_plot__{group}{data_params['recover_folder']}_{data_params['audiomoth_folder']}.png", bbox_inches='tight', pad_inches=0.5)
+        plt.savefig(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{data_params['recover_folder']}_{data_params['audiomoth_folder']}.png", bbox_inches='tight', pad_inches=0.5)
     plt.tight_layout()
     plt.show()
 
@@ -616,30 +781,29 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/activity__*.csv", assume_missing=True).compute()
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/{cfg['METRIC']}__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
+    new_df = new_df.set_index('date_and_time_UTC')
+    new_df = new_df[~new_df.index.duplicated(keep='first')]
+    
+    expected_dts = pd.date_range(new_df.iloc[0].name, new_df.iloc[-1].name, freq='10min')
+    valid_nan_df = new_df.reindex(expected_dts, fill_value=np.NaN).reset_index()
+    resampled_df = valid_nan_df.resample(data_params["resample_tag"], on="index").mean().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left').dropna()
+    expected_dts = pd.date_range(resampled_df.iloc[0].name, resampled_df.iloc[-1].name, freq='30min')
+    valid_resampled_nan_df = resampled_df.reindex(expected_dts, fill_value=np.NaN)
 
-    resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
-
-    activity_datetimes = pd.to_datetime(resampled_df.index.values)
+    activity_datetimes = pd.to_datetime(valid_resampled_nan_df.index.values)
     raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
-    mask = resampled_df.columns.str.contains(f'{group}.*')
-    if group!='':
-        mask = resampled_df.columns.str.contains(f'{group}.*')
-        selected_group = resampled_df.loc[:,mask]
-        if selected_group.shape[1]>2:
-            middle_col = selected_group.iloc[:,1]
-            middle_col.loc[middle_col<=1.0] = 0
-        data = list(zip(raw_dates, raw_times, selected_group.sum(axis=1)))
-    else:
-        data = list(zip(raw_dates, raw_times, resampled_df[f'{group}num_of_detections']))
-    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", f'{group}num_of_detections'])
-    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}num_of_detections')
+    mask = valid_resampled_nan_df.columns.str.contains(f'{group}.*')
+    data = list(zip(raw_dates, raw_times, valid_resampled_nan_df[f'{group}{cfg["COL_TAG"]}']))
+    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", f'{group}{cfg["COL_TAG"]}'])
+    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}{cfg["COL_TAG"]}')
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
     if save:
-        activity_df.to_csv(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
+        (Path(cum_plots_dir)/cfg["METRIC"]).mkdir(parents=True, exist_ok=True)
+        activity_df.to_csv(f'{cum_plots_dir}/{cfg["METRIC"]}/cumulative_{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
     return activity_df
 
@@ -667,9 +831,9 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
             plot_title = group + ' '
         else:
             plot_title = group.upper().replace('_', ' ')
-    masked_array_for_nodets = np.ma.masked_where(activity_df.values==0, activity_df.values)
 
-    activity_times = pd.DatetimeIndex(activity_df.index).tz_localize('UTC')
+    plot_df = activity_df.replace(0, 1e-6)
+    activity_times = pd.DatetimeIndex(plot_df.index).tz_localize('UTC')
     ylabel = 'UTC'
     if data_params["show_PST"]:
         activity_times = activity_times.tz_convert(tz='US/Pacific')
@@ -678,12 +842,12 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
 
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red')
-    plot_dates = [''] * len(activity_df.columns)
-    plot_dates[::7] = activity_df.columns[::7]
+    plot_dates = [''] * len(plot_df.columns)
+    plot_dates[::7] = plot_df.columns[::7]
     plot_times = [''] * len(activity_times)
     plot_times[::3] = activity_times[::3]
 
-    activity_dates = pd.to_datetime(activity_df.columns.values, format='%m/%d/%y')
+    activity_dates = pd.to_datetime(plot_df.columns.values, format='%m/%d/%y')
     activity_lat = [SEATTLE_LATITUDE]*len(activity_dates)
     activity_lon = [SEATTLE_LONGITUDE]*len(activity_dates)
     sunrise_time = pd.DatetimeIndex(suncalc.get_times(activity_dates, activity_lon, activity_lat)['sunrise_end'])
@@ -696,13 +860,16 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
 
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
-    plt.title(f"{plot_title}Activity (# of calls) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
+    plt.title(f"{plot_title}Activity ({data_params['METRIC_TAG']}) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
     plt.plot(np.arange(0, len(plot_dates)), ((sunset_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunset (Recent: {recent_sunset} PST)')
     plt.axhline(y=14-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
     plt.plot(np.arange(0, len(plot_dates)), ((sunrise_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunrise (Recent: {recent_sunrise} PST)')
-    plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
+    if data_params['METRIC_TAG']=='CR':
+        plt.imshow(plot_df, cmap=cmap, norm=colors.LogNorm(vmin=1e-1, vmax=data_params['UPPER_LIM']))
+    else:
+        plt.imshow(plot_df, cmap=cmap, vmin=0, vmax=1e2)
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
     plt.ylabel(f'{ylabel} Time (HH:MM)')
@@ -713,7 +880,8 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
     if save:
-        plt.savefig(f'{cum_plots_dir}/cumulative_activity__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
+        (Path(cum_plots_dir)/data_params["METRIC"]).mkdir(parents=True, exist_ok=True)
+        plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/cumulative_{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                     bbox_inches='tight')
     plt.show()
 
@@ -775,7 +943,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
                 print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
                 segmented_file_paths = generate_segmented_paths([file], cfg)
                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-                if (cfg["num_processes"] <= 6):
+                if (cfg["num_processes"] <= 1):
                     bd_preds = run_models(file_path_mappings)
                 else:
                     bd_preds = apply_models(file_path_mappings, cfg)
@@ -848,10 +1016,30 @@ def run_pipeline_for_session_with_df(cfg):
     if not cfg['tmp_dir'].is_dir():
         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
+    packages_to_chunk = []
+    for path in data_params['good_audio_files']:
+        chunk_instructions_and_files = dict()
+        chunk_instructions_and_files['audio_file'] = path
+        chunk_instructions_and_files['tmp_dir'] = cfg['tmp_dir']
+        chunk_instructions_and_files['start_time'] = cfg['start_time']
+        chunk_instructions_and_files['segment_duration'] = cfg['segment_duration']
+        packages_to_chunk+=[chunk_instructions_and_files]
+
     if (cfg['run_model']):
-        segmented_file_paths = generate_segmented_paths(data_params['good_audio_files'], cfg)
+        if (cfg["num_processes"] <= 1):
+            segmented_file_paths = []
+            for package in tqdm(packages_to_chunk, desc="Segmenting Files"):
+                segmented_file_paths+=[generate_segments_parallel(package)]
+            segmented_file_paths = np.concatenate(list(segmented_file_paths))
+        else:
+            torch.set_num_threads(1)
+            ctx = multiprocessing.get_context("spawn")
+            pool = ctx.Pool(processes=cfg["num_processes"])
+            segmented_file_paths = (tqdm(pool.imap(generate_segments_parallel, packages_to_chunk, chunksize=1), 
+                            desc=f"Segmenting Files", total=len(packages_to_chunk),))
+            segmented_file_paths = np.concatenate(list(segmented_file_paths))
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-        if (cfg["num_processes"] <= 6):
+        if (cfg["num_processes"] <= 1):
             bd_preds = run_models(file_path_mappings)
         else:
             bd_preds = apply_models(file_path_mappings, cfg)
@@ -863,16 +1051,25 @@ def run_pipeline_for_session_with_df(cfg):
 
     if (cfg['generate_fig']):
         data_params['resample_in_min'] = 30
-        data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
+        data_params['resample_tag'] = f"{data_params['resample_in_min']}min"
+        data_params['detection_threshold_for_activity'] = 0.35
+        data_params['SNR_threshold_for_activity'] = 3
         construct_activity_arr(cfg, data_params)
         for group in ['', 'LF', 'HF']:
-            activity_df = shape_activity_array_into_grid(cfg, data_params, group)
-            plot_activity_grid(activity_df, data_params, group, save=True)
-            if data_params["site"] != "(Site not found in Field Records)":
-                data_params['selection_of_dates'] = 'recover-2024*'
-                cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
-                data_params['show_PST'] = False
-                plot_cumulative_activity(cumulative_activity_df, data_params, group)
+            for cfg['METRIC'] in ['CALLRATE', 'BOUTTIMEPERCENTAGE', 'ACTIVITYINDEX']:
+                cfg['METRIC_TAG'] = METRIC_TAGS[cfg['METRIC']]
+                cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
+                cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
+                activity_df = shape_activity_array_into_grid(cfg, data_params, group)
+                plot_activity_grid(activity_df, data_params, group, save=True)
+                if data_params["site"] != "(Site not found in Field Records)":
+                    data_params['selection_of_dates'] = 'recover-2025*'
+                    cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                    data_params['show_PST'] = False
+                    data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                    data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                    data_params['METRIC'] = cfg['METRIC']
+                    plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
@@ -882,7 +1079,7 @@ def get_params_relevant_to_data(cfg):
     data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
-    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_04_collected_audio_records.csv', dtype=str).compute()
+    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_06_collected_audio_records.csv', dtype=str).compute()
     if 'Unnamed: 0' in cur_data_records.columns:
         cur_data_records.drop(columns='Unnamed: 0', inplace=True)
     cur_data_records["datetime_UTC"] = pd.DatetimeIndex(cur_data_records["datetime_UTC"])
@@ -891,6 +1088,7 @@ def get_params_relevant_to_data(cfg):
     files_from_deployment_session = filter_df_with_deployment_session(cur_data_records, data_params['recover_folder'], cfg)
     site_name = files_from_deployment_session["site_name"].values[0]
     data_params["site"] = site_name
+    data_params["site_tag"] = site_name.split()[0]
     if data_params["site"] != "(Site not found in Field Records)":
         data_params['output_dir'] = cfg["output_dir"] / data_params["site"]
     elif cfg['site']!='none':
@@ -902,7 +1100,7 @@ def get_params_relevant_to_data(cfg):
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_deployment_session["file_status"] == "Usable for detection"
-    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= (cfg['duration'])
+    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= (cfg['duration'] - 1)
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_deploy_session_df["file_path"].apply(lambda x : Path(x)).values))
 
@@ -1062,7 +1260,7 @@ def parse_args():
     parser.add_argument(
         "--num_processes",
         type=int,
-        default=4,
+        default=1,
     )
     return vars(parser.parse_args())
 
@@ -1070,7 +1268,23 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     
-    cfg = get_config()
+    detector_args = dict()
+    detector_args['detection_threshold'] = 0.30
+    detector_args['chunk_size'] = 2
+
+    cfg = dict()
+    cfg["time_expansion_factor"] = 1.0
+    # Offset (seconds) from the beginning of the audio file to start processing
+    cfg["start_time"] = 0.0
+    # Input audio is divided into segments of this duration (seconds), each processed individually
+    cfg["segment_duration"] = 30.0
+    cfg["models"] = [BatCallDetector(detection_threshold=detector_args['detection_threshold'],
+                                    spec_slices=False,
+                                    chunk_size=detector_args['chunk_size'],
+                                    time_expansion_factor=1.0,
+                                    quiet=False,
+                                    cnn_features=True)]
+    
     cfg["input_audio"] = args['input_audio']
     cfg["recover_folder"] = args["recover_folder"]
     cfg["sd_unit"] = args["sd_unit"]
